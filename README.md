@@ -61,6 +61,8 @@ The users can navigate to a page where new games can be joined or created.
 
 - Game modes with different levels of difficulty.
 
+- A fairness judge (i.e. distance / weighted "difficulty" distance measure) to ensure fair random placement.
+
 - In-game music.
 
 - The users can see the path of the other users if it overlaps with their path.
