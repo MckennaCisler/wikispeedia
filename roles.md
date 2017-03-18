@@ -1,7 +1,7 @@
-Jacob: HTML/CSS/Javascript (prettiness) Design
+Jacob: HTML/CSS/Javascript for general website, design
 
 McKenna: Interfacing with Wikipedia, data, routing
 
 Sean: Backend, specifically database management and concurrency
 
-Rohan: Javascript (prettiness and data) Design
+Rohan: Javascript canvas for special link depiction, design
