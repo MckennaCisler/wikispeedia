@@ -88,6 +88,21 @@ distance of the page.
 
 - How are winners determined?
 
+### Specifications Meeting
+
+## Basic functionality:
+ - Creating and joining a lobbby with friends
+ - One game type
+ - Basic Wikipedia text, links
+ - No advanced options
+ - Some depiction of winner
+
+## Great:
+ - All advanced features
+ - Full visualization, graphics
+ - Lobby with option to join random game
+ - Lobby chatting
+
 ## Project Specs and Mockup
 _A link to your specifications document and your mockup will go here!_
 
