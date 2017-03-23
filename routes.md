@@ -1,0 +1,4 @@
+- Lobby/Game: name, settings, state, list of players
+- Player: names, lobby, path
+- Path (List of nodes): some path through articles
+- Articles (Node): title, lists of articles

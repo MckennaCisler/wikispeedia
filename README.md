@@ -98,10 +98,10 @@ distance of the page.
  - Some depiction of winner
 
 ## Great:
- - All advanced features
+ - All advanced options
  - Full visualization, graphics
  - Lobby with option to join random game
- - Lobby chatting
+ - Lobby chatting?
 
 ## Project Specs and Mockup
 _A link to your specifications document and your mockup will go here!_
