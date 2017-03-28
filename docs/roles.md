@@ -1,7 +1,13 @@
-Jacob: HTML/CSS/Javascript for general website, design
+## Roles
 
-McKenna: Interfacing with Wikipedia, data, routing
+#### Jacob:
+HTML/CSS/Javascript for general website, design
 
-Sean: Backend, specifically database management and concurrency
+#### McKenna:
+Interfacing with Wikipedia, data, routing
 
-Rohan: Javascript canvas for special link depiction, design
+#### Sean:
+Backend, specifically database management and concurrency
+
+#### Rohan:
+Javascript canvas for special link depiction, design
