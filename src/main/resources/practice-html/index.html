@@ -1,0 +1,55 @@
+<!doctype html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<title>Wikispeedia!</title>
+	<link href="main.css" rel="stylesheet" type="text/css">
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.6/css/bootstrap.min.css" integrity="sha384-rwoIResjU2yc3z8GV/NPeZWAv56rSmLldC3R/AZzGRnGxQQKnKkoFVhFQhNUwEyJ" crossorigin="anonymous">
+	<script src="https://code.jquery.com/jquery-3.1.1.slim.min.js" integrity="sha384-A7FZj7v+d/sdmMqp/nOQwliLvUsJfDHW+k9Omg/a/EheAdgtzNs3hpfag6Ed950n" crossorigin="anonymous"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/tether/1.4.0/js/tether.min.js" integrity="sha384-DztdAPBWPRXSA/3eYEEUWrWCy7G5KFbe8fFjk5JAIxUYHKkDx6Qin1DkWx51bBrb" crossorigin="anonymous"></script>
+	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.6/js/bootstrap.min.js" integrity="sha384-vBWWzlZJ8ea9aCX4pEW3rVHjgjt7zpkNpZk+02D9phzyeVkE+jo0ieGizqPLForn" crossorigin="anonymous"></script>
+	<script src="drop_advanced.js"></script>
+</head>
+<body>
+	<div class="top">
+		<h1 style="margin-left: 5px;">Wikispeedia!</h1>
+	</div>
+	<div class="left">
+		<div class="awrap"><a class="side_link" href="index.html">Create Lobby</a></div>
+		<div class="awrap"><a class="side_link" href="join.html">Join Lobby</a></div>
+	</div>
+	<div class="main">
+		<div id="main_buttons">
+			<button class="btn btn-lg btn-outline-secondary" href="#"><img src="clock.png" height="20"> Time Trial</button>
+			<button class="btn btn-lg btn-outline-secondary" href="#"><img src="mouse-cursor.png" height="20"> Least Clicks</button>
+			<button class="btn btn-lg btn-outline-secondary" href="#"><img src="explore-icon.png" height="20"> Explore</button>
+		</div>
+		<br>
+		<!-- These don't look great on large screens, I'll have to figure out how to bound it-->
+		<div id="difficulty_radio">
+			Difficulty:
+			<form style="display: inline;">
+				<input type="radio" name="difficulty" value="1" checked> Easy
+				<input type="radio" name="difficulty" value="2"> Medium
+				<input type="radio" name="difficulty" value="3"> Hard
+				<input type="radio" name="difficulty" value="4"> Extreme
+			</form>
+		</div>
+		<br>
+		<p id="advanced"><b>Advanced <img src="side-triangle.png" id="advanced_im" height="10"></b></p>
+		<!--So this is gonna have to be animated using jQuery-->
+		<div id="advanced_ops">
+			<p>Music <select>
+				<option value="0">No sound</option>
+				<option value="1">McKenna's tunessss</option>
+			</select>
+			</p>
+			<p>Oponent progress visible <input type="checkbox" name="opprogress"></p>
+			<p><b>Allowed Links: </b>Images <input type="checkbox" name="im_links"> Disambiguation pages <input type="checkbox" name="disam_pages" checked></p>
+		</div>
+		
+		<!--end what's animated-->
+		<button type="submit" class="btn btn-success">Start your game!</button>
+	</div>
+</body>
+</html>

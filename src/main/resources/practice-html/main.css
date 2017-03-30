@@ -1,0 +1,37 @@
+@charset "utf-8";
+/* CSS Document */
+
+.top {
+	float: top;
+	height: auto;
+	border-bottom: thin solid black;
+}
+.left {
+	float: left;
+	width: 10em;
+	min-height: 100vh;
+	border-right: thin solid black;
+}
+.main {
+	margin-top: 5px;
+}
+.side_link {
+	color: #2B2B2B;
+	font-size: 1.2em;
+	margin-left: 7px;
+}
+.awrap {
+	border-bottom: thin solid black;
+}
+#main_buttons {
+	margin-top: 15px;
+	display: flex;
+	justify-content: space-around;
+}
+#difficulty_radio {
+	display: flex;
+	justify-content: space-around;
+}
+
+.top { background: #B7B5B5; }
+.left { background: #B7B5B5; }
