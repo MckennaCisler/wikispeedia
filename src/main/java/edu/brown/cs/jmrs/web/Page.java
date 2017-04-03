@@ -4,8 +4,8 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -13,6 +13,7 @@ import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
 import com.google.common.base.Charsets;
+import com.google.common.base.Objects;
 import com.google.common.base.Predicate;
 
 /**
@@ -22,22 +23,30 @@ import com.google.common.base.Predicate;
  *
  */
 public class Page {
-  private final String url;
+  // Useful regexs
+  public static final String HTTP_REGEX = "^https?:\\/\\/";
+
+  private String url;
   private Document parsed;
 
   /**
    * @param url
-   *          The url of the page to be constructed.
+   *          The url of the page to be constructed. May change internally if
+   *          this url redirects.
    */
   public Page(String url) {
-    this.url = url;
+    this.url = cleanUrl(url);
     this.parsed = null;
   }
 
   /**
-   * @return The URL of this page.
+   * @return The URL this page was instantiated with, or the final url of the
+   *         page after it was accessed (and potentially redirected).
    */
   public String url() {
+    if (parsed != null) {
+      url = cleanUrl(parsed.location());
+    }
     return url;
   }
 
@@ -86,8 +95,19 @@ public class Page {
    * @throws IOException
    *           If the page could not be reached.
    */
-  public List<Page> links() throws IOException {
-    return links("", u -> true);
+  public Set<Page> links() throws IOException {
+    return links("a[href]", u -> true);
+  }
+
+  /**
+   * @param pred
+   *          The predicate to filter links by, using their strings.
+   * @return All pages linked to by this page that satisfy the given predicate.
+   * @throws IOException
+   *           If the page could not be reached.
+   */
+  public Set<Page> links(Predicate<String> pred) throws IOException {
+    return links("a[href]", pred);
   }
 
   /**
@@ -98,36 +118,26 @@ public class Page {
    * @throws IOException
    *           If the page could not be reached.
    */
-  public List<Page> links(String selector) throws IOException {
+  protected Set<Page> links(String selector) throws IOException {
     return links(selector, u -> true);
   }
 
   /**
-   * @param pred
-   *          The predicate to filter links by.
-   * @return All pages linked to by this page that satisfy the given predicate.
-   * @throws IOException
-   *           If the page could not be reached.
-   */
-  public List<Page> links(Predicate<String> pred) throws IOException {
-    return links("", pred);
-  }
-
-  /**
    * @param selector
-   *          A CSS selector to add onto normal link selection.
+   *          A CSS selector to use to select links (elements must have href
+   *          attribute).
    * @param pred
-   *          The predicate to filter links by.
+   *          The predicate to filter links by, using their strings.
    * @return All pages linked to by this page whose elements match the given
    *         selector and satisfy the given predicate.
    * @throws IOException
    *           If the page could not be reached.
    */
-  public List<Page> links(String selector, Predicate<String> pred)
+  protected Set<Page> links(String selector, Predicate<String> pred)
       throws IOException {
-    Elements links = parsedContent().select("a[href]" + selector);
+    Elements links = parsedContent().select(selector);
 
-    List<Page> pages = new ArrayList<>(links.size());
+    Set<Page> pages = new HashSet<>(links.size());
     for (Element el : links) {
       String link = el.attr("abs:href");
       if (pred.apply(link)) {
@@ -135,5 +145,41 @@ public class Page {
       }
     }
     return pages;
+  }
+
+  /**
+   * Cleans the given url of irrelevant or non-supported aspects. Note that
+   * query strings are not considered to be independent urls.
+   *
+   * Based loosely on notes here:
+   * http://www.searchtools.com/robots/robot-checklist.html
+   * https://www.talisman.org/~erlkonig/misc/
+   * lunatech^what-every-webdev-must-know-about-url-encoding
+   */
+  protected String cleanUrl(String u) {
+    return u.replaceAll("\\#.*$", "") // remove anchor tags
+        .replaceAll("\\?.*$", "") // remove query strings (after tags)
+        .replaceAll("'|\"", ""); // remove quotes
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hashCode(url);
+  }
+
+  @Override
+  public boolean equals(Object obj) {
+    if (this == obj) {
+      return true;
+    }
+    if (obj == null) {
+      return false;
+    }
+    if (getClass() != obj.getClass()) {
+      return false;
+    }
+
+    Page other = (Page) obj;
+    return url.equals(other.url);
   }
 }
