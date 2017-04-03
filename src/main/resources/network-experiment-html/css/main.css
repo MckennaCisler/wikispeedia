@@ -1,0 +1,47 @@
+input[type="number"] {
+  width: 3em;
+}
+
+body {
+  margin: 5%;
+  text-align: center;
+}
+
+.explainedInput {
+  display: inline-block;
+  margin-top: 10px;
+}
+
+.explainedInput > p {
+  float: left;
+  margin: 2px;
+  margin-right: 15px;
+}
+
+.explainedInput > input {
+  float: right;
+}
+
+.explainedInput > div {
+  float: right;
+}
+
+.hidden {
+  display: none;
+}
+
+.suggest {
+  margin: 0px;
+  text-overflow: ellipsis;
+  border: 1px solid black;
+}
+
+.suggest:hover {
+  background: lightblue;
+  cursor: pointer;
+}
+
+ul {
+  text-align: left;
+  display: inline-block;
+}
