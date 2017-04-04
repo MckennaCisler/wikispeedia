@@ -14,9 +14,13 @@ public class LobbyCommand implements Callable<String> {
 
   @Override
   public String call() {
-    int port = server.generatePort();
-    new Lobby(server, port);
-    return port + "";
+    if (details.equals("start lobby")) {
+      int port = server.generatePort();
+      new Lobby(server, port).start();
+      return "lobby started on port " + port;
+    } else {
+      return "message 'start lobby' to start a lobby");
+    }
   }
 
 }

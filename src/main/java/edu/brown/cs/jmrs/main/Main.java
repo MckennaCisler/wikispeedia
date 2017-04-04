@@ -16,6 +16,7 @@ public class Main {
     OptionSet options = parser.parse(args);
 
     ServerRunner runner = new ServerRunner((int) options.valueOf("port"));
+    runner.start();
 
     /*
      * Now open src/main/resources/network-experiment-html/html.html in a

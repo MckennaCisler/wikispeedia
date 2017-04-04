@@ -22,9 +22,11 @@ public class ServerRunner extends WebSocketServer {
 
   public ServerRunner(int port) {
     super(new InetSocketAddress(port));
+
     int maxDaemons = Runtime.getRuntime().availableProcessors() - 1;
     daemonManager = Executors.newFixedThreadPool(maxDaemons);
 
+    currentPort = port;
     availablePorts = new ConcurrentLinkedQueue<>();
   }
 
@@ -81,8 +83,6 @@ public class ServerRunner extends WebSocketServer {
         | ExecutionException e) {
       e.printStackTrace();
     }
-    System.out.println(
-        "currently less than " + currentPort + 1 + " lobbies running.");
   }
 
   @Override
