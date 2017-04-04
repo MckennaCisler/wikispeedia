@@ -1,7 +1,7 @@
 package edu.brown.cs.jmrs.networkexperiment;
 
+import java.io.IOException;
 import java.net.InetSocketAddress;
-import java.net.UnknownHostException;
 import java.util.Collection;
 
 import org.java_websocket.WebSocket;
@@ -11,14 +11,13 @@ import org.java_websocket.server.WebSocketServer;
 /**
  * A simple WebSocketServer implementation. Keeps track of a "chatroom".
  */
-public class Server extends WebSocketServer {
+public class Lobby extends WebSocketServer {
 
-  public Server(int port) throws UnknownHostException {
+  ServerRunner server;
+
+  public Lobby(ServerRunner server, int port) {
     super(new InetSocketAddress(port));
-  }
-
-  public Server(InetSocketAddress address) {
-    super(address);
+    this.server = server;
   }
 
   @Override
@@ -31,10 +30,16 @@ public class Server extends WebSocketServer {
   public void onClose(WebSocket conn, int code, String reason, boolean remote) {
     System.out
         .println("Currently " + connections().size() + " people in this chat.");
+    if (connections().size() == 0) {
+      closeLobby();
+    }
   }
 
   @Override
   public void onMessage(WebSocket conn, String message) {
+
+    // all the meat of the game happens here?
+
     this.sendToAll(message);
     System.out.println(conn + ": " + message);
   }
@@ -46,6 +51,17 @@ public class Server extends WebSocketServer {
       // some errors like port binding failed may not be assignable to a
       // specific websocket
     }
+  }
+
+  private void closeLobby() {
+    try {
+      stop();
+    } catch (IOException | InterruptedException e) {
+      e.printStackTrace();
+    }
+    server.submit(() -> {
+      server.freePort(getPort());
+    });
   }
 
   /**

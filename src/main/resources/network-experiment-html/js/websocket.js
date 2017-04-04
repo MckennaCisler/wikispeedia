@@ -2,8 +2,8 @@ var ws;
 var name = "anon";
 
 function setName(newName) {
+  ws.send(name + " has renamed themselves " + newName)
   name = newName;
-  ws.send(name + " has joined")
 }
 
 function message(text) {
