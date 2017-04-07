@@ -80,7 +80,7 @@ The users can navigate to a page where new games can be joined or created.
 - A change in the graphical representation of a webpage based on the subject and/or length and/or
 distance of the page.
 
-## Still left to define
+### Still left to define
 
 - What's the lobby system?
 
@@ -88,26 +88,27 @@ distance of the page.
 
 - How are winners determined?
 
-### Specifications Meeting
+## Project Specs and Mockup
 
-## Basic functionality:
+### Basic functionality:
  - Creating and joining a lobbby with friends
  - One game type
  - Basic Wikipedia text, links
  - No advanced options
  - Some depiction of winner
 
-## Great:
+### Great:
  - All advanced options
  - Full visualization, graphics
  - Lobby with option to join random game
  - Lobby chatting?
 
-## Project Specs and Mockup
-_A link to your specifications document and your mockup will go here!_
-
 ## Project Design Presentation
-_A link to your design presentation/document will go here!_
+The following files are relevant (all in the docs subfolder):
+- roles-and-deadlines.md
+- routes.md
+- flow.md
+
 
 ## How to Build and Run
 _A necessary part of any README!_
