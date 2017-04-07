@@ -109,6 +109,11 @@ The following files are relevant (all in the docs subfolder):
 - routes.md
 - flow.md
 
+TODO:
+- Package design: packages, classes, methods
+- Testing plan
+- Timelines
+- Expected problems
 
 ## How to Build and Run
 _A necessary part of any README!_
