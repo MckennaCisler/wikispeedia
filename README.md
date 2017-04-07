@@ -10,7 +10,7 @@ click on links to navigate from a _starting page_ to an _ending page_ on Wikiped
 **Mentor TA:** _Put your mentor TA's name and email here once you're assigned one!_
 
 ## Project Requirements
-### Pre-game
+### Pre-game:
 
 The users can quickly create and join games.
 <br>_Rationale_: We previously had the idea of a dining hall recommender, and for that project, we conducted a survey with one question that asked about the setup process. More than half of the forty-nine respondents answered that they'd only be willing to tolerate a minute or less of setup. And in one interview we conducted, the interviewee said that all he wanted from the game creation page was an easy and clear way to get started.
@@ -24,7 +24,7 @@ The interface does not necessarily have the text of the pages themselves, but
 it does have visible links that are ordered somehow.
 <br>_Rationale_: The user should know their goal at all times. Further, an interviewee said that if page had hundreds of links it would be overwhelming for them to be scattered across the page.
 
-### In-game
+### In-game:
 
 A user-interface that graphically represents a Wikipedia page and its outgoing
 links. The interface does not necessarily have the text of the page itself, but
