@@ -1,83 +1,46 @@
 package edu.brown.cs.jmrs.networkexperiment;
 
-import java.io.IOException;
-import java.net.InetSocketAddress;
-import java.util.Collection;
-
-import org.java_websocket.WebSocket;
-import org.java_websocket.handshake.ClientHandshake;
-import org.java_websocket.server.WebSocketServer;
+import org.eclipse.jetty.util.ConcurrentHashSet;
 
 /**
  * A simple WebSocketServer implementation. Keeps track of a "chatroom".
  */
-public class Lobby extends WebSocketServer {
+public class Lobby extends ConcurrentHashSet<Player> {
 
-  ServerRunner server;
-
-  public Lobby(ServerRunner server, int port) {
-    super(new InetSocketAddress(port));
-    this.server = server;
+  public Lobby(Player host) {
+    add(host);
   }
 
-  @Override
-  public void onOpen(WebSocket conn, ClientHandshake handshake) {
-    System.out
-        .println("Currently " + connections().size() + " people in this chat.");
+  public void close() {
+    for (Player player : this) {
+      player.messageClient("lobby closed");
+    }
+
+    ServerRunner.getInstance().getLobbies().closeLobby(this);
   }
 
-  @Override
-  public void onClose(WebSocket conn, int code, String reason, boolean remote) {
-    System.out
-        .println("Currently " + connections().size() + " people in this chat.");
-    if (connections().size() == 0) {
-      closeLobby();
+  public void sendToPlayers(String message) {
+    for (Player client : this) {
+      client.messageClient(message);
     }
   }
 
   @Override
-  public void onMessage(WebSocket conn, String message) {
+  public boolean add(Player e) {
+    sendToPlayers(e.getName() + "has joined the lobby");
 
-    // all the meat of the game happens here?
-
-    this.sendToAll(message);
-    System.out.println(conn + ": " + message);
+    return super.add(e);
   }
 
   @Override
-  public void onError(WebSocket conn, Exception ex) {
-    ex.printStackTrace();
-    if (conn != null) {
-      // some errors like port binding failed may not be assignable to a
-      // specific websocket
-    }
-  }
+  public boolean remove(Object o) {
+    boolean removed = super.remove(o);
+    sendToPlayers(((Player) o).getName() + "has left the lobby");
 
-  private void closeLobby() {
-    try {
-      stop();
-    } catch (IOException | InterruptedException e) {
-      e.printStackTrace();
+    if (isEmpty()) {
+      close();
     }
-    server.submit(() -> {
-      server.freePort(getPort());
-    });
-  }
 
-  /**
-   * Sends <var>text</var> to all currently connected WebSocket clients.
-   * 
-   * @param text
-   *          The String to send across the network.
-   * @throws InterruptedException
-   *           When socket related I/O errors occur.
-   */
-  public void sendToAll(String text) {
-    Collection<WebSocket> con = connections();
-    synchronized (con) {
-      for (WebSocket c : con) {
-        c.send(text);
-      }
-    }
+    return removed;
   }
 }

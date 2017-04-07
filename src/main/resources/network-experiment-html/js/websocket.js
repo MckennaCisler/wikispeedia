@@ -2,12 +2,24 @@ var ws;
 var name = "anon";
 
 function setName(newName) {
-  ws.send(name + " has renamed themselves " + newName)
+  ws.send("setname" + "newName")
   name = newName;
 }
 
+function joinLobby(text) {
+  ws.send("join" + text);
+}
+
+function closeLobby() {
+  ws.send("close lobby");
+}
+
+function startLobby(text) {
+  ws.send("start" + text);
+}
+
 function message(text) {
-  ws.send(name + ": " + text);
+  ws.send("message" + text);
 }
 
 $(document).ready(() => {
@@ -20,7 +32,6 @@ $(document).ready(() => {
 
     ws.onopen = function()
     {
-      ws.send("anon has joined")
     };
 
     ws.onmessage = function (evt)
@@ -31,7 +42,6 @@ $(document).ready(() => {
 
     ws.onclose = function()
     {
-      ws.send("a person has left")
     };
   }
 

@@ -1,13 +1,8 @@
 package edu.brown.cs.jmrs.networkexperiment;
 
 import java.net.InetSocketAddress;
-import java.nio.channels.NotYetConnectedException;
-import java.util.Queue;
-import java.util.concurrent.ConcurrentLinkedQueue;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
 
 import org.java_websocket.WebSocket;
 import org.java_websocket.handshake.ClientHandshake;
@@ -15,10 +10,12 @@ import org.java_websocket.server.WebSocketServer;
 
 public class ServerRunner extends WebSocketServer {
 
-  private Queue<Integer>  availablePorts;
-  private ExecutorService daemonManager;
+  private static ServerRunner instance;
+  private static final int    DEFAULT_PORT = 4567;
 
-  private int             currentPort;
+  private ExecutorService     daemonManager;
+  private LobbyManager        lobbies;
+  private PlayerManager       players;
 
   public ServerRunner(int port) {
     super(new InetSocketAddress(port));
@@ -26,14 +23,29 @@ public class ServerRunner extends WebSocketServer {
     int maxDaemons = Runtime.getRuntime().availableProcessors() - 1;
     daemonManager = Executors.newFixedThreadPool(maxDaemons);
 
-    currentPort = port;
-    availablePorts = new ConcurrentLinkedQueue<>();
+    lobbies = new LobbyManager();
+
+    instance = this;
+  }
+
+  public static ServerRunner getInstance() {
+    if (instance == null) {
+      instance = new ServerRunner(DEFAULT_PORT);
+    }
+    return instance;
+  }
+
+  public LobbyManager getLobbies() {
+    return lobbies;
+  }
+
+  public PlayerManager getPlayers() {
+    return players;
   }
 
   @Override
   public void onClose(WebSocket conn, int code, String reason, boolean remote) {
-    System.out.println(
-        "Currently " + connections().size() + " people not in lobbies.");
+    daemonManager.submit(new PlayerDisconnectedHandler(conn));
   }
 
   @Override
@@ -41,53 +53,13 @@ public class ServerRunner extends WebSocketServer {
     ex.printStackTrace();
   }
 
-  public Future<?> submit(Runnable task) {
-    return daemonManager.submit(task);
-  }
-
-  public synchronized int generatePort() {
-    if (availablePorts.isEmpty()) {
-      return ++currentPort;
-    } else {
-      return availablePorts.poll();
-    }
-  }
-
-  public synchronized void freePort(int port) {
-    boolean notCurrentPort = false;
-
-    while (currentPort > port) {
-      if (availablePorts.contains(currentPort)) {
-        currentPort--;
-      } else {
-        notCurrentPort = true;
-        break;
-      }
-    }
-
-    if (notCurrentPort) {
-      availablePorts.add(port);
-    }
-  }
-
   @Override
   public void onMessage(WebSocket conn, String message) {
-    Future<?> operationResult = daemonManager
-        .submit(new LobbyCommand(this, message));
-    try {
-      String retMessage = (String) operationResult.get();
-      conn.send(retMessage);
-    } catch (
-        NotYetConnectedException
-        | InterruptedException
-        | ExecutionException e) {
-      e.printStackTrace();
-    }
+    daemonManager.submit(new LobbyCommand(conn, message));
   }
 
   @Override
   public void onOpen(WebSocket conn, ClientHandshake handshake) {
-    System.out.println(
-        "Currently " + connections().size() + " people not in lobbies.");
+    daemonManager.submit(new PlayerConnectedHandler(conn));
   }
 }
