@@ -41,7 +41,7 @@ The users can track their progress and the progress of their opponents.
 The users can end the game midway.
 <br>_Rationale_: If the user is stuck or bored, they should be able to start another game without having to leave the site.
 
-### Post-game
+### Post-game:
 
 A page where the players' results are presented. This includes the players'
 histories and a clear indication of the winner.
@@ -69,7 +69,7 @@ The users can navigate to a page where new games can be joined or created.
 - A statistical analysis of a player's saved games to analyze their decision-making and word/concept associations.
 - A change in the graphical representation of a webpage based on the subject and/or length and/or distance of the page.
 
-### Still left to define
+### Still left to define:
 
 - What's the lobby system?
 - When does the game end?
