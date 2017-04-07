@@ -3,6 +3,11 @@ package edu.brown.cs.jmrs.web;
 import java.io.IOException;
 import java.util.Set;
 
+import org.jsoup.select.Elements;
+
+import com.google.common.collect.ImmutableMap;
+
+import edu.brown.cs.jmrs.io.JsonSerializable;
 import edu.brown.cs.jmrs.ui.JavaUtils;
 
 /**
@@ -12,7 +17,7 @@ import edu.brown.cs.jmrs.ui.JavaUtils;
  * @author mcisler
  *
  */
-public class WikiPage extends Page {
+public class WikiPage extends Page implements JsonSerializable {
 
   // TODO: Optimize with Pattern.compile() among others :
   // http://www.javaworld.com/article/2077757/core-java/optimizing-regular-expressions-in-java.html?page=2
@@ -33,6 +38,26 @@ public class WikiPage extends Page {
   }
 
   /**
+   * Constructs a Wikipage from the given page string.
+   *
+   * @param name
+   *          The String page to convert to a Wikipedia URL. If there are
+   *          spaces, they will be replaced with underscores.
+   *
+   * @return A new Wikipage constructed with the url using the given page.
+   */
+  public static WikiPage fromName(String name) {
+    return new WikiPage(WIKIPEDIA_ARTICLE_PREFIX + name.replaceAll("\\s", "_"));
+  }
+
+  /**
+   * @return The name of this Wikipedia page as indicated by it's url.
+   */
+  public String getName() {
+    return url().substring(url().lastIndexOf('/'));
+  }
+
+  /**
    * @return The title of this Wikipedia page.
    * @throws IOException
    *           If the page could not be reached or loaded.
@@ -49,6 +74,32 @@ public class WikiPage extends Page {
   public String getBlurb() throws IOException {
     return parsedContent().select("#mw-content-text > p").first().text()
         .replaceAll("\\[\\d+\\]", "");
+  }
+
+  /**
+   * @return The article-specific content in the Wikipedia page.
+   * @throws IOException
+   *           If the page could not be reached or loaded.
+   */
+  public String getInnerContent() throws IOException {
+    // TODO : More efficent?
+    Elements content = parsedContent().select("#content").clone();
+
+    // remove everything before the title
+    content.select("#content > #firstHeading").prevAll().remove();
+
+    // remove everything after mw-content-text
+    content.select("#content > #bodyContent > #mw-content-text").nextAll()
+        .remove();
+
+    // remove everything after "See Also" (inclusive)
+    Elements seeAlso =
+        content.select(
+            "#content > #bodyContent > #mw-content-text  > *:has(#See_also)");
+    seeAlso.nextAll().remove();
+    seeAlso.remove();
+
+    return content.outerHtml();
   }
 
   /***************************************************************************/
@@ -110,13 +161,34 @@ public class WikiPage extends Page {
         this::isChildWikipediaArticle), p -> new WikiPage(p.url()));
   }
 
+  @Override
+  public String toJson() {
+    return toJson(ImmutableMap.of("url", url(), "name", getName()));
+  }
+
+  /**
+   * @return A more complete Json of this Wikipedia page which requests data
+   *         about the page.
+   * @throws IOException
+   *           If the article could not be read.
+   */
+  public String toJsonFull() throws IOException {
+    return toJson(ImmutableMap.of("url", url(), "name", getName(), "title",
+        getTitle(), "blurb", getBlurb()));
+  }
+
+  /**
+   * Main for general testing.
+   */
   public static void main(String[] args) {
     WikiPage start = new WikiPage(WIKIPEDIA_ARTICLE_PREFIX + "Cat");
     try {
       System.out.println(start.getTitle());
       System.out.println(start.getBlurb());
+      start.getInnerContent();
+      // System.out.println(start.getInnerContent());
     } catch (IOException e) {
-      e.printStackTrace();
+      System.out.println(e.getMessage());
     }
 
     printLinks(start, 1);
@@ -131,7 +203,7 @@ public class WikiPage extends Page {
       Set<WikiPage> links = start.wikiBodyLinks();
 
       for (WikiPage page : links) {
-        System.out.println(start.url() + " -> " + page.url());
+        // System.out.println(start.url() + " -> " + page.url());
         // System.out.println(page.getTitle());
         // System.out.println(page.getBlurb());
         printLinks(page, depth - 1);

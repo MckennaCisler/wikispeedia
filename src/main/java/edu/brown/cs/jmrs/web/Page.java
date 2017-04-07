@@ -40,14 +40,20 @@ public class Page {
   }
 
   /**
-   * @return The URL this page was instantiated with, or the final url of the
-   *         page after it was accessed (and potentially redirected).
+   * @return The URL this page was instantiated with.
    */
   public String url() {
-    if (parsed != null) {
-      url = cleanUrl(parsed.location());
-    }
     return url;
+  }
+
+  /**
+   * @return Rhe final url of the page after it was accessed (and potentially
+   *         redirected). May not equal url().
+   * @throws IOException
+   *           If the page could not be reached or loaded.
+   */
+  public String finalUrl() throws IOException {
+    return cleanUrl(parsedContent().location());
   }
 
   /**
