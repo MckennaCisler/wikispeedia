@@ -54,7 +54,7 @@ _ending_ page.
 The users can navigate to a page where new games can be joined or created.
 <br>_Rationale_: Users should be able to play again.
 
-### Extra features?
+### Extra features:
 
 - Single-player and multiplayer modes.
 - Exclusion of certain articles.
