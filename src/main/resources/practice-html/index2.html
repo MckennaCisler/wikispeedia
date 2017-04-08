@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<!-- saved from url=(0064)file://files.brown.edu/Home/jleiken/Desktop/term-proj/index.html -->
+<html><head>
+	<meta charset="utf-8">
+	<title>Wikispeedia!</title>
+	<link href="main2.css" rel="stylesheet" type="text/css">
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.6/css/bootstrap.min.css" integrity="sha384-rwoIResjU2yc3z8GV/NPeZWAv56rSmLldC3R/AZzGRnGxQQKnKkoFVhFQhNUwEyJ" crossorigin="anonymous">
+	<script src="https://code.jquery.com/jquery-3.1.1.slim.min.js" integrity="sha384-A7FZj7v+d/sdmMqp/nOQwliLvUsJfDHW+k9Omg/a/EheAdgtzNs3hpfag6Ed950n" crossorigin="anonymous"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/tether/1.4.0/js/tether.min.js" integrity="sha384-DztdAPBWPRXSA/3eYEEUWrWCy7G5KFbe8fFjk5JAIxUYHKkDx6Qin1DkWx51bBrb" crossorigin="anonymous"></script>
+	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.6/js/bootstrap.min.js" integrity="sha384-vBWWzlZJ8ea9aCX4pEW3rVHjgjt7zpkNpZk+02D9phzyeVkE+jo0ieGizqPLForn" crossorigin="anonymous"></script>
+	<script src="drop_advanced.js"></script>
+</head>
+<body>
+	<div class="top">
+		<h1 style="margin-left: 5px;" title="Wikispeedia!"><a class="title-a" href="index2.html">Wikispeedia!</a></h1>
+	</div>
+	
+	<div class="main container text-center">
+		<div class="row">
+			<div class="col">
+				<div class="card card-default">
+					<h3 class="card-header">Start a game</h3>
+					<div class="card-block">
+						<div id="main_buttons" class="btn-group" data-toggle="buttons">
+							<label class="btn btn-lg btn-outline-secondary active">
+								<input type="radio" name="gametypes" id="time" href="#" checked><img src="clock.png" height="20"> Time Trial
+							</label>
+							<label class="btn btn-lg btn-outline-secondary">
+								<input type="radio" name="gametypes" id="clicks" class="btn btn-lg btn-outline-secondary" href="#"><img src="mouse-cursor.png" height="20"> Least Clicks
+							</label>
+							<label class="btn btn-lg btn-outline-secondary">
+								<input type="radio" name="gametypes" id="explore" class="btn btn-lg btn-outline-secondary" href="#"><img src="explore-icon.png" height="20"> Explore
+							</label>
+						</div>
+						<br>
+
+						<div id="difficulty_radio">
+							<b>Difficulty: </b>
+							<form style="display: inline; padding-left: .5em;">
+								<input type="radio" name="difficulty" value="1" checked=""> Easy
+								<input type="radio" name="difficulty" value="2"> Medium
+								<input type="radio" name="difficulty" value="3"> Hard
+								<input type="radio" name="difficulty" value="4"> Extreme
+							</form>
+						</div>
+						<br>
+						<p id="advanced"><b>Advanced <img src="side-triangle.png" id="advanced_im" height="10"></b></p>
+						<div id="advanced_ops" style="display: none;">
+							<p>Music <select>
+								<option value="0">No sound</option>
+								<option value="1">McKenna's tunessss</option>
+							</select>
+							</p>
+							<p>Oponent progress visible <input type="checkbox" name="opprogress"></p>
+							<p><b>Allowed Links: </b>Images <input type="checkbox" name="im_links"> Disambiguation pages <input type="checkbox" name="disam_pages" checked=""></p>
+						</div>
+
+						<a href="waiting.html"><button type="submit" class="btn btn-success">Start your game!</button></a>
+					</div>
+				</div>
+			</div>
+			<div class="col">
+				<div class="card card-default">
+					<h3 class="card-header">Join a lobby</h3>
+					<div class="card-block">
+						<ul>
+							<li><a href="waiting.html">Cool game</a></li>
+							<li><a href="waiting.html">Better game</a></li>
+							<li><a href="waiting.html">Troll game</a></li>
+						</ul>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</body>
+</html>

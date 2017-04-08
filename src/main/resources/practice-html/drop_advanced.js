@@ -1,4 +1,5 @@
 $(document).ready(function() {
+	"use strict";
 	$("#advanced_ops").hide();
 	$("#advanced").on('click', function() {
 		if ($("#advanced_ops").is(":hidden")) {
