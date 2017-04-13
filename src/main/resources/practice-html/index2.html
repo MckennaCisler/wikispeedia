@@ -5,7 +5,7 @@
 	<title>Wikispeedia!</title>
 	<link href="main2.css" rel="stylesheet" type="text/css">
 	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.6/css/bootstrap.min.css" integrity="sha384-rwoIResjU2yc3z8GV/NPeZWAv56rSmLldC3R/AZzGRnGxQQKnKkoFVhFQhNUwEyJ" crossorigin="anonymous">
-	<script src="https://code.jquery.com/jquery-3.1.1.slim.min.js" integrity="sha384-A7FZj7v+d/sdmMqp/nOQwliLvUsJfDHW+k9Omg/a/EheAdgtzNs3hpfag6Ed950n" crossorigin="anonymous"></script>
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.0/jquery.min.js"></script>
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/tether/1.4.0/js/tether.min.js" integrity="sha384-DztdAPBWPRXSA/3eYEEUWrWCy7G5KFbe8fFjk5JAIxUYHKkDx6Qin1DkWx51bBrb" crossorigin="anonymous"></script>
 	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.6/js/bootstrap.min.js" integrity="sha384-vBWWzlZJ8ea9aCX4pEW3rVHjgjt7zpkNpZk+02D9phzyeVkE+jo0ieGizqPLForn" crossorigin="anonymous"></script>
 	<script src="drop_advanced.js"></script>
@@ -17,7 +17,7 @@
 		<h1 style="margin-left: 5px;" title="Wikispeedia!"><a class="title-a" href="index2.html">Wikispeedia!</a></h1>
 	</div>
 	
-	<div class="main container text-center">
+	<div class="container text-center main_content" id="main">
 		<div class="row">
 			<div class="col">
 				<div class="card card-default">
@@ -34,7 +34,7 @@
 								<input type="radio" name="gametypes" id="explore" class="btn btn-lg btn-outline-secondary" href="#"><img src="explore-icon.png" height="20"> Explore
 							</label>
 						</div>
-						<br>
+						<br><br>
 
 						<div id="difficulty_radio">
 							<b>Difficulty: </b>
@@ -46,6 +46,14 @@
 							</form>
 						</div>
 						<br>
+						
+						<div class="form-group row">
+							<label for="example-text-input" class="col-3 col-form-label">Game name</label>
+						  		<div class="col-9">
+									<input class="form-control" type="text" placeholder="Playin' 2: Electric Boogaloo" id="game_name">
+						  		</div>
+						</div>
+						
 						<p id="advanced"><b>Advanced <img src="side-triangle.png" id="advanced_im" height="10"></b></p>
 						<div id="advanced_ops" style="display: none;">
 							<p>Music <select>
@@ -57,7 +65,7 @@
 							<p><b>Allowed Links: </b>Images <input type="checkbox" name="im_links"> Disambiguation pages <input type="checkbox" name="disam_pages" checked=""></p>
 						</div>
 
-						<a href="waiting.html"><button type="submit" class="btn btn-success">Start your game!</button></a>
+						<button class="btn btn-success" id="start_game">Start your game!</button>
 					</div>
 				</div>
 			</div>
@@ -65,14 +73,36 @@
 				<div class="card card-default">
 					<h3 class="card-header">Join a lobby</h3>
 					<div class="card-block">
-						<ul>
-							<li><a href="waiting.html">Cool game</a></li>
-							<li><a href="waiting.html">Better game</a></li>
-							<li><a href="waiting.html">Troll game</a></li>
+						<ul id="open_games">
+							<li class="alobby" id="game1">Cool game</li>
+							<li class="alobby" id="game2">Better game</li>
+							<li class="alobby" id="game3">Troll game</li>
 						</ul>
 					</div>
 				</div>
 			</div>
+		</div>
+	</div>
+	
+	<div id="uname_picker" class="container text-center main_content" style="display: none;">
+		<div class="row">
+			<div class="col-4"></div>
+			<div class="col-4">
+				<div class="card card-default">
+					<h3 class="card-header">Pick your username</h3>
+					<div class="card-block">
+						<div class="form-group row">
+							<div class="col">
+								<input class="form-control" type="text" placeholder="BOSS" id="uname">
+							</div>
+						</div>
+						
+						<button class="btn btn-danger" id="back_main">Go Back</button>
+						<button class="btn btn-success">Go!</button>
+					</div>
+				</div>
+			</div>
+			<div class="col-4"></div>
 		</div>
 	</div>
 </body>
