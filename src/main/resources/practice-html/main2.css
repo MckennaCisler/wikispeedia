@@ -9,22 +9,13 @@
 .title-a {
 	color: black;
 }
-.main {
+.main_content {
 	margin-top: 1em;
 }
 #main_buttons {
 	margin-top: 15px;
 	align-self: center;
 }
-#difficulty_radio {
-	
-}
-/*.panel {
-	background: #F3F3F3;
-	border-radius: 0.5em;
-	padding-top: 1em;
-	padding-bottom: 1em;
-}*/
 #main_buttons .btn-outline-secondary {
 	color: black;
 }
