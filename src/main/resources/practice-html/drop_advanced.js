@@ -1,6 +1,8 @@
 $(document).ready(function() {
-	let isMaking;
 	"use strict";
+	let isMaking;
+	let lobbyName;
+	
 	$("#advanced_ops").hide();
 	$("#advanced").on('click', () => {
 		if ($("#advanced_ops").is(":hidden")) {
@@ -14,23 +16,36 @@ $(document).ready(function() {
 	
 	$("#start_game").on('click', () => {
 		if ($("#game_name").val() === "") {
-			$("#game_name").animate({color:'red'}, 400).fadeIn(200).fadeOut(200).fadeIn(200).fadeOut(200).fadeIn(200);
-			$("#game_name").animate({color:'white'}, 100);
-			return;
+			$("#game_name").effect("highlight", {"color": "red"}, 1000);
+		} else {
+			isMaking = true;
+			lobbyName = $("#game_name").val();
+			$("#main").hide();
+			$("#uname_picker").show();
+			$("#u_header").html(lobbyName);
+			console.log(lobbyName);
 		}
-		isMaking = true;
-		$("#main").hide();
-		$("#uname_picker").show();
 	});
 	
-	$("#open_games").on('click', () => {
+	$("#open_games").on('click', (event) => {
 		isMaking = false;
+		lobbyName = $(event.target).html();
 		$("#main").hide();
 		$("#uname_picker").show();
+		$("#u_header").html(lobbyName);
 	});
 	
 	$("#back_main").on('click', () => {
 		$("#uname_picker").hide();
 		$("#main").show();
+	});
+	
+	$("#launch").on('click', () => {
+		if ($("#uname").val() === "") {
+			$("#uname").effect("highlight", {"color": "red"}, 1000);
+		} else {
+			// BE SURE TO ACTUALLY DO SOMETHING WITH THE ID
+			window.location.href = "waiting.html";
+		}
 	});
 });
