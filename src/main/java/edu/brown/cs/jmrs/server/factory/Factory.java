@@ -1,4 +1,4 @@
-package edu.brown.cs.jmrs.factory;
+package edu.brown.cs.jmrs.server.factory;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;

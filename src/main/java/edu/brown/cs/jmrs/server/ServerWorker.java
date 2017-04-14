@@ -7,8 +7,11 @@ import org.java_websocket.WebSocket;
 import org.java_websocket.handshake.ClientHandshake;
 import org.java_websocket.server.WebSocketServer;
 
-import edu.brown.cs.jmrs.factory.Factory;
-import edu.brown.cs.jmrs.threading.GlobalThreadManager;
+import edu.brown.cs.jmrs.server.customizable.core.CommandInterpreter;
+import edu.brown.cs.jmrs.server.customizable.core.Lobby;
+import edu.brown.cs.jmrs.server.customizable.optional.CommandReformatter;
+import edu.brown.cs.jmrs.server.factory.Factory;
+import edu.brown.cs.jmrs.server.threading.GlobalThreadManager;
 
 class ServerWorker extends WebSocketServer {
 
@@ -16,11 +19,13 @@ class ServerWorker extends WebSocketServer {
   protected ConcurrentHashMap<WebSocket, Player> players;
   private Factory<? extends Lobby>               lobbyFactory;
   private Factory<? extends CommandInterpreter>  interpreterFactory;
+  private CommandReformatter                     commandReformatter;
 
   public ServerWorker(
       int port,
       Factory<? extends Lobby> lobbyFactory,
-      Factory<? extends CommandInterpreter> interpreterFactory) {
+      Factory<? extends CommandInterpreter> interpreterFactory,
+      Factory<? extends CommandReformatter> reformatterFactory) {
     super(new InetSocketAddress(port));
 
     this.lobbyFactory = lobbyFactory;
@@ -36,6 +41,14 @@ class ServerWorker extends WebSocketServer {
       players.put(conn, newPlayer);
       return true;
     }
+  }
+
+  public void setCommandReformatter(CommandReformatter commandReformatter) {
+    this.commandReformatter = commandReformatter;
+  }
+
+  public CommandReformatter getCommandReformatter() {
+    return commandReformatter;
   }
 
   public Player getPlayer(WebSocket conn) {

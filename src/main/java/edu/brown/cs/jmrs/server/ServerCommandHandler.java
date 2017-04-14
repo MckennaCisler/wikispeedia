@@ -2,14 +2,14 @@ package edu.brown.cs.jmrs.server;
 
 import org.java_websocket.WebSocket;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
+import edu.brown.cs.jmrs.server.customizable.core.Lobby;
+import edu.brown.cs.jmrs.server.customizable.optional.CommandReformatter;
 
 class ServerCommandHandler implements Runnable {
 
   ServerWorker server;
   WebSocket    conn;
-  String       commandJson;
+  String       unformattedCommand;
 
   public ServerCommandHandler(
       ServerWorker server,
@@ -17,14 +17,14 @@ class ServerCommandHandler implements Runnable {
       String command) {
     this.server = server;
     this.conn = conn;
-    this.commandJson = command;
+    this.unformattedCommand = command;
   }
 
   @Override
   public void run() {
 
-    Gson gson = new GsonBuilder().create();
-    ClientCommand command = gson.fromJson(commandJson, ClientCommand.class);
+    CommandReformatter command = server.getCommandReformatter();
+    command.parse(unformattedCommand);
 
     Player player = server.getPlayer(conn);
 

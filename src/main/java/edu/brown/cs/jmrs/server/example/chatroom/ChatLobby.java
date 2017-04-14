@@ -1,6 +1,6 @@
-package edu.brown.cs.jmrs.chatroom;
+package edu.brown.cs.jmrs.server.example.chatroom;
 
-import edu.brown.cs.jmrs.server.Lobby;
+import edu.brown.cs.jmrs.server.customizable.core.Lobby;
 
 public class ChatLobby implements Lobby {
 

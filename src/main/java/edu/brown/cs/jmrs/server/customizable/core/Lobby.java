@@ -1,4 +1,4 @@
-package edu.brown.cs.jmrs.server;
+package edu.brown.cs.jmrs.server.customizable.core;
 
 public interface Lobby {
 

@@ -2,9 +2,9 @@ package edu.brown.cs.jmrs.main;
 
 import com.google.common.collect.ImmutableList;
 
-import edu.brown.cs.jmrs.chatroom.ChatInterpreter;
-import edu.brown.cs.jmrs.chatroom.ChatLobby;
 import edu.brown.cs.jmrs.server.Server;
+import edu.brown.cs.jmrs.server.example.chatroom.ChatInterpreter;
+import edu.brown.cs.jmrs.server.example.chatroom.ChatLobby;
 import edu.brown.cs.jmrs.web.WikiHandlers;
 import joptsimple.OptionParser;
 import joptsimple.OptionSet;

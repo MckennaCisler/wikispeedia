@@ -1,5 +1,7 @@
 package edu.brown.cs.jmrs.server;
 
+import edu.brown.cs.jmrs.server.customizable.core.Lobby;
+
 class Player {
 
   private String id;

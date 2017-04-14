@@ -1,8 +1,8 @@
-package edu.brown.cs.jmrs.chatroom;
+package edu.brown.cs.jmrs.server.example.chatroom;
 
 import java.util.List;
 
-import edu.brown.cs.jmrs.server.CommandInterpreter;
+import edu.brown.cs.jmrs.server.customizable.core.CommandInterpreter;
 
 public class ChatInterpreter implements CommandInterpreter {
 
