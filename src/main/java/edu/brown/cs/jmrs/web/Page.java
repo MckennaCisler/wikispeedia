@@ -4,17 +4,13 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.URL;
-import java.util.HashSet;
 import java.util.Set;
 
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
-import org.jsoup.nodes.Element;
-import org.jsoup.select.Elements;
 
 import com.google.common.base.Charsets;
 import com.google.common.base.Objects;
-import com.google.common.base.Predicate;
 
 /**
  * A class representing a webpage and the required functions of a web page.
@@ -27,15 +23,32 @@ public class Page {
   public static final String HTTP_REGEX = "^https?:\\/\\/";
 
   private String url;
+  private LinkFinder<Page> linkFinder;
   private Document parsed;
 
   /**
+   * Creates a page with the default (all links) page finder.
+   *
    * @param url
    *          The url of the page to be constructed. May change internally if
    *          this url redirects.
    */
   public Page(String url) {
     this.url = cleanUrl(url);
+    this.linkFinder = new AllLinkFinder();
+    this.parsed = null;
+  }
+
+  /**
+   * @param url
+   *          The url of the page to be constructed. May change internally if
+   *          this url redirects.
+   * @param linkFinder
+   *          The method to find outgoing links.
+   */
+  public Page(String url, LinkFinder<Page> linkFinder) {
+    this.url = cleanUrl(url);
+    this.linkFinder = linkFinder;
     this.parsed = null;
   }
 
@@ -97,60 +110,25 @@ public class Page {
   }
 
   /**
-   * @return All pages linked to by this page.
+   * Finds all outgoing urls from this page.
+   *
+   * @return All outgoing links from this page.
    * @throws IOException
    *           If the page could not be reached.
    */
-  public Set<Page> links() throws IOException {
-    return links("a[href]", u -> true);
+  public Set<String> links() throws IOException {
+    return linkFinder.links(this);
   }
 
   /**
-   * @param pred
-   *          The predicate to filter links by, using their strings.
-   * @return All pages linked to by this page that satisfy the given predicate.
+   * Finds all outgoing pages from this page.
+   *
+   * @return All pages representing outgoing links from this page.
    * @throws IOException
    *           If the page could not be reached.
    */
-  public Set<Page> links(Predicate<String> pred) throws IOException {
-    return links("a[href]", pred);
-  }
-
-  /**
-   * @param selector
-   *          A CSS selector to add onto normal link selection.
-   * @return All pages linked to by this page whose elements match the given
-   *         selector.
-   * @throws IOException
-   *           If the page could not be reached.
-   */
-  protected Set<Page> links(String selector) throws IOException {
-    return links(selector, u -> true);
-  }
-
-  /**
-   * @param selector
-   *          A CSS selector to use to select links (elements must have href
-   *          attribute).
-   * @param pred
-   *          The predicate to filter links by, using their strings.
-   * @return All pages linked to by this page whose elements match the given
-   *         selector and satisfy the given predicate.
-   * @throws IOException
-   *           If the page could not be reached.
-   */
-  protected Set<Page> links(String selector, Predicate<String> pred)
-      throws IOException {
-    Elements links = parsedContent().select(selector);
-
-    Set<Page> pages = new HashSet<>(links.size());
-    for (Element el : links) {
-      String link = el.attr("abs:href");
-      if (pred.apply(link)) {
-        pages.add(new Page(link));
-      }
-    }
-    return pages;
+  public Set<Page> linkedPages() throws IOException {
+    return linkFinder.linkedPages(this);
   }
 
   /**
@@ -162,7 +140,7 @@ public class Page {
    * https://www.talisman.org/~erlkonig/misc/
    * lunatech^what-every-webdev-must-know-about-url-encoding
    */
-  protected String cleanUrl(String u) {
+  protected static String cleanUrl(String u) {
     return u.replaceAll("\\#.*$", "") // remove anchor tags
         .replaceAll("\\?.*$", "") // remove query strings (after tags)
         .replaceAll("'|\"", ""); // remove quotes
