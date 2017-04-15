@@ -5,6 +5,7 @@
 	float: top;
 	height: auto;
 	border-bottom: thin solid black;
+	background: #CCC;
 }
 .title-a {
 	color: black;
@@ -19,6 +20,14 @@
 #main_buttons .btn-outline-secondary {
 	color: black;
 }
-
-.top { background: #B7B5B5; }
-.left { background: #B7B5B5; }
+#counter {
+	float: right; 
+	display: none; 
+	padding-bottom: .2em;
+	padding-right: 1em; 
+	padding-left: 1em; 
+	border-left: thin solid black; 
+}
+body {
+	background-image: url("assets/shattered.png");
+}
