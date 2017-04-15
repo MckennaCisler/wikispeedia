@@ -4,7 +4,6 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.URL;
-import java.util.Set;
 
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -23,7 +22,6 @@ public class Page {
   public static final String HTTP_REGEX = "^https?:\\/\\/";
 
   private String url;
-  private LinkFinder<Page> linkFinder;
   private Document parsed;
 
   /**
@@ -35,20 +33,6 @@ public class Page {
    */
   public Page(String url) {
     this.url = cleanUrl(url);
-    this.linkFinder = new AllLinkFinder();
-    this.parsed = null;
-  }
-
-  /**
-   * @param url
-   *          The url of the page to be constructed. May change internally if
-   *          this url redirects.
-   * @param linkFinder
-   *          The method to find outgoing links.
-   */
-  public Page(String url, LinkFinder<Page> linkFinder) {
-    this.url = cleanUrl(url);
-    this.linkFinder = linkFinder;
     this.parsed = null;
   }
 
@@ -107,28 +91,6 @@ public class Page {
       parsed = Jsoup.connect(url).get();
     }
     return parsed;
-  }
-
-  /**
-   * Finds all outgoing urls from this page.
-   *
-   * @return All outgoing links from this page.
-   * @throws IOException
-   *           If the page could not be reached.
-   */
-  public Set<String> links() throws IOException {
-    return linkFinder.links(this);
-  }
-
-  /**
-   * Finds all outgoing pages from this page.
-   *
-   * @return All pages representing outgoing links from this page.
-   * @throws IOException
-   *           If the page could not be reached.
-   */
-  public Set<Page> linkedPages() throws IOException {
-    return linkFinder.linkedPages(this);
   }
 
   /**

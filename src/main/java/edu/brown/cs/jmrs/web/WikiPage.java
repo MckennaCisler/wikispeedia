@@ -32,17 +32,7 @@ public class WikiPage extends Page implements JsonSerializable {
    *          The url of the wikipedia page to be constructed.
    */
   public WikiPage(String url) {
-    this(url, new WikiPageLinkFinder());
-  }
-
-  /**
-   * @param url
-   *          The url of the wikipedia page to be constructed.
-   * @param linkFinder
-   *          The linkFinder to be used to find outgoing links from this page.
-   */
-  public WikiPage(String url, LinkFinder<WikiPage> linkFinder) {
-    super(url, linkFinder);
+    super(url);
     assert isWikipediaArticle(url);
   }
 
@@ -116,17 +106,6 @@ public class WikiPage extends Page implements JsonSerializable {
   /***************************************************************************/
 
   /**
-   * Alias for linkedPages but returns the wikiPages linked.
-   *
-   * @return A list of linked to WikiPages.
-   * @throws IOException
-   *           If the article could not be read.
-   */
-  public Set<WikiPage> linkedWikiPages() throws IOException {
-    return linkFinder.linkedPages(this);
-  }
-
-  /**
    * @param url
    *          The url to test.
    * @return Whether url is under the Wikipedia.org domain.
@@ -146,7 +125,12 @@ public class WikiPage extends Page implements JsonSerializable {
         && url.indexOf(':', 6) == -1; // 5 = length of 'https:"
   }
 
-  private boolean isChildWikipediaArticle(String url) {
+  /**
+   * @param url
+   *          The url of this page.
+   * @return Whether url is a Wikipedia article page other than this one.
+   */
+  public boolean isChildWikipediaArticle(String url) {
     return isWikipediaArticle(url) && url != super.url();
   }
 
@@ -189,7 +173,7 @@ public class WikiPage extends Page implements JsonSerializable {
     }
 
     try {
-      Set<WikiPage> links = start.linkedWikiPages();
+      Set<WikiPage> links = new WikiPageLinkFinder().linkedPages(start);
 
       for (WikiPage page : links) {
         // System.out.println(start.url() + " -> " + page.url());

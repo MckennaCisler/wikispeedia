@@ -10,24 +10,25 @@ import java.util.Set;
  *
  */
 public class WikiPageLinkFinder implements LinkFinder<WikiPage> {
-  private final LinkFinderMethod<WikiPage> linkFinder;
+  private final LinkFinderMethod<WikiPage> linkFinderMethod;
 
   /**
    * Constucts a WikiPageLinkFinder.
    */
   public WikiPageLinkFinder() {
-    this.linkFinder =
+    this.linkFinderMethod =
         new LinkFinderMethod<WikiPage>().select("#mw-content-text a[href]")
-            .factory(url -> new WikiPage(url, this));
+            .factory(url -> new WikiPage(url));
   }
 
   @Override
   public Set<String> links(WikiPage page) throws IOException {
-    return linkFinder.filter(page::isChildWikipediaArticle).links(page);
+    return linkFinderMethod.filter(page::isChildWikipediaArticle).links(page);
   }
 
   @Override
   public Set<WikiPage> linkedPages(WikiPage page) throws IOException {
-    return linkFinder.filter(page::isChildWikipediaArticle).linkedPages(page);
+    return linkFinderMethod.filter(page::isChildWikipediaArticle)
+        .linkedPages(page);
   }
 }
