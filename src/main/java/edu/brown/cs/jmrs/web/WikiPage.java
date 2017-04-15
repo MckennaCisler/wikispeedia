@@ -8,7 +8,6 @@ import org.jsoup.select.Elements;
 import com.google.common.collect.ImmutableMap;
 
 import edu.brown.cs.jmrs.io.JsonSerializable;
-import edu.brown.cs.jmrs.ui.JavaUtils;
 
 /**
  * An extension of a page that is designed to handle a wikipedia page in
@@ -19,7 +18,7 @@ import edu.brown.cs.jmrs.ui.JavaUtils;
  */
 public class WikiPage extends Page implements JsonSerializable {
 
-  // TODO: Optimize with Pattern.compile() among others :
+  // TODO Optimize with Pattern.compile() among others :
   // http://www.javaworld.com/article/2077757/core-java/optimizing-regular-expressions-in-java.html?page=2
   public static final String WIKIPEDIA_ARTICLE_PREFIX =
       "https://en.wikipedia.org/wiki/";
@@ -111,7 +110,7 @@ public class WikiPage extends Page implements JsonSerializable {
    *          The url to test.
    * @return Whether url is under the Wikipedia.org domain.
    */
-  public boolean isWikipediaUrl(String url) {
+  public static boolean isWikipediaUrl(String url) {
     return cleanUrl(url).matches(WIKIPEDIA_DOMAIN_REGEX);
   }
 
@@ -120,45 +119,19 @@ public class WikiPage extends Page implements JsonSerializable {
    *          The url to test.
    * @return Whether url is a Wikipedia article page.
    */
-  public boolean isWikipediaArticle(String url) {
+  public static boolean isWikipediaArticle(String url) {
     return url.matches(WIKIPEDIA_DOMAIN_REGEX + "\\/wiki\\/.*")
         // ensure there aren't things of the type "Wikipedia:*" or "File:*"
         && url.indexOf(':', 6) == -1; // 5 = length of 'https:"
   }
 
-  private boolean isChildWikipediaArticle(String url) {
+  /**
+   * @param url
+   *          The url of this page.
+   * @return Whether url is a Wikipedia article page other than this one.
+   */
+  public boolean isChildWikipediaArticle(String url) {
     return isWikipediaArticle(url) && url != super.url();
-  }
-
-  /**
-   * @return All Wikipedia articles linked to in this article.
-   * @throws IOException
-   *           If the article could not be read.
-   */
-  public Set<WikiPage> wikiPageLinks() throws IOException {
-    return wikiLinks("#bodyContent");
-  }
-
-  /**
-   * @return All Wikipedia articles linked to in this article.
-   * @throws IOException
-   *           If the article could not be read.
-   */
-  public Set<WikiPage> wikiBodyLinks() throws IOException {
-    return wikiLinks("#mw-content-text"); // TODO:
-  }
-
-  /**
-   * @param parentId
-   *          The id of the Wikipedia parent element to find child article links
-   *          of.
-   * @return All Wikipedia articles linked to in this article.
-   * @throws IOException
-   *           If the article could not be read.
-   */
-  private Set<WikiPage> wikiLinks(String parentId) throws IOException {
-    return JavaUtils.map(links(String.format("%s a[href]", parentId),
-        this::isChildWikipediaArticle), p -> new WikiPage(p.url()));
   }
 
   @Override
@@ -200,7 +173,7 @@ public class WikiPage extends Page implements JsonSerializable {
     }
 
     try {
-      Set<WikiPage> links = start.wikiBodyLinks();
+      Set<WikiPage> links = new WikiPageLinkFinder().linkedPages(start);
 
       for (WikiPage page : links) {
         // System.out.println(start.url() + " -> " + page.url());

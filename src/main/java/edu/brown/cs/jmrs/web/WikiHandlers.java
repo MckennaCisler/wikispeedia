@@ -18,6 +18,7 @@ import spark.template.freemarker.FreeMarkerEngine;
  *
  */
 public class WikiHandlers implements SparkHandlers {
+  private static LinkFinder<WikiPage> linkFinder = new WikiPageLinkFinder();
 
   @Override
   public void registerHandlers(FreeMarkerEngine freeMarker) {
@@ -55,7 +56,8 @@ public class WikiHandlers implements SparkHandlers {
     public String handle(Request req, Response res) {
       try {
         return JsonSerializable.toJson(
-            WikiPage.fromName(req.params(":name")).wikiPageLinks(), (wp) -> {
+            linkFinder.linkedPages(WikiPage.fromName(req.params(":name"))),
+            (wp) -> {
               try {
                 return wp.toJsonFull();
               } catch (IOException e) {
