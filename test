@@ -1,0 +1,35 @@
+#!/bin/sh
+
+state=0
+
+# reports failed commands syntax: log_state <command name> <last return code>
+log_state() {
+#	$state = expr $state + $2
+	if [ "$2" -eq "0" ]; then
+		printf "\n\n$1\t=>\tSUCCEEDED\n\n" 
+	else
+		printf "\n\n$1\t=>\tFAILED\n\n"
+	fi
+}
+
+echo "\nRunning mvn package...\n"
+mvn package -D maven.test.skip=true
+log_state "mvn package" $?
+
+echo "\nRunning mvn test...\n"
+mvn test
+log_state "mvn test" $?
+
+echo "\nRunning mvn site...\n"
+mvn site
+log_state "mvn site" $?
+
+echo "\nRunning run file...\n"
+./run
+log_state "./run" $?
+
+if [ "$state" -eq "0" ]; then
+	printf "\n\n********** ALL TESTS PASSED **********\n"
+else
+	printf "\n\n!!!!!!!!!! SOME TESTS FAILED !!!!!!!!!!\n"
+fi
