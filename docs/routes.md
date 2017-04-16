@@ -2,17 +2,24 @@
 
 #### Lobby:
 
-- -> List of available games
+- List of available games (just names)
+- -> list ${games}
+
+###### Waiting:
 - Settings and players in a game -> Start and end articles
+- -> list ${players}
+- -> ${startArticle}
+- -> ${endArticle}
+- -> -> See practiceHtml for desired formatting of the articles
 
 #### Game:
 
 ###### Phase 1 (Time-based):
 
-- Article name -> HTML to render the article
-- Article name -> List of links
-- Player ID -> History of the player (list of articles)
-- -> Current time
+- articleBody -> HTML to render the article
+- articleLinks -> List of links
+- Player ID -> History of the player (list of articles and times spent on each one) ${player}
+- -> Current time ${time}
 
 ###### Phase 2 (Shortest path):
 
@@ -23,6 +30,7 @@
 - Player ID -> Time it took to finish (time-based)
 - Player ID -> Length of path (shortest path)
 - -> Shortest path
+- -> These are all needed for all players: list ${players}
 
 ------
 #### Central objects:
