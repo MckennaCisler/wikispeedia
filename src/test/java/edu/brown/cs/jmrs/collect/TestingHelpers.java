@@ -1,10 +1,10 @@
-package edu.brown.cs.jmrs.collect
-
-import com.google.common.collect.ImmutableList;
+package edu.brown.cs.jmrs.collect;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+
+import com.google.common.collect.ImmutableList;
 
 /**
  * Static class to contain testing helpers common to recommender and autocorrect

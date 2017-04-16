@@ -41,7 +41,8 @@ public abstract class AbstractEdge<N extends Node<N, E>, E extends Edge<N, E>>
    */
   @Override
   public int hashCode() {
-    return Objects.hash(isDirected(), getFirst(), getSecond(), getValue());
+    return Objects.hash(isDirected(), getFirst(), getSecond(),
+        (Object) getValue()); // just in case
   }
 
   /**

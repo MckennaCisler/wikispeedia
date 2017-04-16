@@ -29,7 +29,7 @@ public abstract class AbstractNode<N extends Node<N, E>, E extends Edge<N, E>>
    */
   @Override
   public int hashCode() {
-    return Objects.hash(getValue());
+    return Objects.hash((Object) getValue()); // have to do this for some reason
   }
 
   /**
