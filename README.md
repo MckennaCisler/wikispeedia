@@ -7,7 +7,7 @@ Rohan Jha, Jacob Leiken, Sean Hastings, McKenna Cisler
 A multiplayer, graphical implementation of the _Wikipedia game_ where the players
 click on links to navigate from a _starting page_ to an _ending page_ on Wikipedia.
 
-**Mentor TA:** _Put your mentor TA's name and email here once you're assigned one!_
+**Mentor TA:** Erica Oh (erica_oh@brown.edu)
 
 ## Project Requirements
 ### Pre-game:
