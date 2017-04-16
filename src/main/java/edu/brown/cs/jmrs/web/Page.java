@@ -108,6 +108,10 @@ public class Page implements Node<Page, Link> {
    * http://www.searchtools.com/robots/robot-checklist.html
    * https://www.talisman.org/~erlkonig/misc/
    * lunatech^what-every-webdev-must-know-about-url-encoding
+   *
+   * @param u
+   *          The URL to clean
+   * @return The cleaned URL.
    */
   protected static String cleanUrl(String u) {
     return u.replaceAll("\\#.*$", "") // remove anchor tags

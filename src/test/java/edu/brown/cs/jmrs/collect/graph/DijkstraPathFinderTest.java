@@ -8,11 +8,6 @@ import org.junit.Test;
 import com.google.common.collect.ImmutableList;
 
 import edu.brown.cs.jmrs.collect.TestingHelpers;
-import edu.brown.cs.jmrs.collect.graph.BasicEdge;
-import edu.brown.cs.jmrs.collect.graph.BasicEdgeFinder;
-import edu.brown.cs.jmrs.collect.graph.BasicNode;
-import edu.brown.cs.jmrs.collect.graph.DirectedDijkstraPathFinder;
-import edu.brown.cs.jmrs.collect.graph.EdgeFinder;
 import edu.brown.cs.jmrs.collect.graph.Graph.PathFinder;
 
 /**

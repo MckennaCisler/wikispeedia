@@ -1,4 +1,4 @@
-package edu.brown.cs.jmrs.web;
+package edu.brown.cs.jmrs.web.wikipedia;
 
 import java.io.IOException;
 import java.util.Set;
@@ -8,6 +8,7 @@ import org.jsoup.select.Elements;
 import com.google.common.collect.ImmutableMap;
 
 import edu.brown.cs.jmrs.io.JsonSerializable;
+import edu.brown.cs.jmrs.web.Page;
 
 /**
  * An extension of a page that is designed to handle a wikipedia page in
@@ -152,6 +153,10 @@ public class WikiPage extends Page implements JsonSerializable {
 
   /**
    * Main for general testing.
+   *
+   * @param args
+   *          The arguments of main, not used. (I'm really only doing this to
+   *          appease checkstyle. This comment has no point otherwise).
    */
   public static void main(String[] args) {
     WikiPage start = new WikiPage(WIKIPEDIA_ARTICLE_PREFIX + "Cat");

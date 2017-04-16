@@ -1,13 +1,13 @@
 #!/bin/sh
 
-state=0
+count=0
 
 # reports failed commands syntax: log_state <command name> <last return code>
 log_state() {
-#	$state = expr $state + $2
 	if [ "$2" -eq "0" ]; then
 		printf "\n\n$1\t=>\tSUCCEEDED\n\n" 
 	else
+		count=`expr $count + 1`
 		printf "\n\n$1\t=>\tFAILED\n\n"
 	fi
 }
@@ -28,8 +28,8 @@ echo "\nRunning run file...\n"
 ./run
 log_state "./run" $?
 
-if [ "$state" -eq "0" ]; then
-	printf "\n\n********** ALL TESTS PASSED **********\n"
+if [ "$count" -eq "0" ]; then
+	printf "\n\n********** ALL BUILD TESTS PASSED **********\n"
 else
-	printf "\n\n!!!!!!!!!! SOME TESTS FAILED !!!!!!!!!!\n"
+	printf "\n\n!!!!!!!!!! $count BUILD TEST(S) FAILED !!!!!!!!!!\n"
 fi

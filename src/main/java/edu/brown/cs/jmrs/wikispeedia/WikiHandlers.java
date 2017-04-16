@@ -1,10 +1,13 @@
-package edu.brown.cs.jmrs.web;
+package edu.brown.cs.jmrs.wikispeedia;
 
 import java.io.IOException;
 
 import edu.brown.cs.jmrs.io.JsonSerializable;
 import edu.brown.cs.jmrs.ui.SparkHandlers;
 import edu.brown.cs.jmrs.ui.SparkServer;
+import edu.brown.cs.jmrs.web.LinkFinder;
+import edu.brown.cs.jmrs.web.wikipedia.WikiPage;
+import edu.brown.cs.jmrs.web.wikipedia.WikiPageLinkFinder;
 import spark.Request;
 import spark.Response;
 import spark.Route;

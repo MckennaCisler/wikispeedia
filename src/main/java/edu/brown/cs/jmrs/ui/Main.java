@@ -5,7 +5,7 @@ import com.google.common.collect.ImmutableList;
 import edu.brown.cs.jmrs.server.Server;
 import edu.brown.cs.jmrs.server.example.chatroom.ChatInterpreter;
 import edu.brown.cs.jmrs.server.example.chatroom.ChatLobby;
-import edu.brown.cs.jmrs.web.WikiHandlers;
+import edu.brown.cs.jmrs.wikispeedia.WikiHandlers;
 import joptsimple.OptionParser;
 import joptsimple.OptionSet;
 

@@ -10,10 +10,6 @@ import org.junit.Test;
 import com.google.common.collect.ImmutableList;
 
 import edu.brown.cs.jmrs.collect.TestingHelpers;
-import edu.brown.cs.jmrs.collect.graph.BasicEdge;
-import edu.brown.cs.jmrs.collect.graph.BasicEdgeFinder;
-import edu.brown.cs.jmrs.collect.graph.BasicNode;
-import edu.brown.cs.jmrs.collect.graph.EdgeFinder;
 
 /**
  * A class to test the functions of a BasicNode, and indirectly an BasicNode's
@@ -60,7 +56,8 @@ public class BasicNodeTest {
   }
 
   /**
-   * Test method for {@link edu.brown.cs.jmrs.collect.graph.BasicNode#getEdges()}.
+   * Test method for
+   * {@link edu.brown.cs.jmrs.collect.graph.BasicNode#getEdges()}.
    */
   @Test
   public void testGetEdges() {
@@ -97,7 +94,8 @@ public class BasicNodeTest {
   }
 
   /**
-   * Test method for {@link edu.brown.cs.jmrs.collect.graph.BasicNode#getEdges()}.
+   * Test method for
+   * {@link edu.brown.cs.jmrs.collect.graph.BasicNode#getEdges()}.
    */
   @Test
   public void testGetEdgesDirected() {
