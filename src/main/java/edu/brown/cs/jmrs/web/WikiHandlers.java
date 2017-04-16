@@ -3,8 +3,8 @@ package edu.brown.cs.jmrs.web;
 import java.io.IOException;
 
 import edu.brown.cs.jmrs.io.JsonSerializable;
-import edu.brown.cs.jmrs.main.SparkHandlers;
-import edu.brown.cs.jmrs.main.SparkServer;
+import edu.brown.cs.jmrs.ui.SparkHandlers;
+import edu.brown.cs.jmrs.ui.SparkServer;
 import spark.Request;
 import spark.Response;
 import spark.Route;

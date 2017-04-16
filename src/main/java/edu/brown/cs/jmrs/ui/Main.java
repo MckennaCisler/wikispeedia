@@ -1,4 +1,4 @@
-package edu.brown.cs.jmrs.main;
+package edu.brown.cs.jmrs.ui;
 
 import com.google.common.collect.ImmutableList;
 

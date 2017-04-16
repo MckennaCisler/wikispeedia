@@ -1,4 +1,4 @@
-package edu.brown.cs.jmrs.ui;
+package edu.brown.cs.jmrs.collect;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -14,9 +14,9 @@ import com.google.common.base.Function;
  * @author mcisler
  *
  */
-public final class JavaUtils {
+public final class Functional {
 
-  private JavaUtils() {
+  private Functional() {
     // override default constructor
   }
 
