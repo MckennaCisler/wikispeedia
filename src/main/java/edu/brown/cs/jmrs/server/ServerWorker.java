@@ -15,15 +15,13 @@ import edu.brown.cs.jmrs.server.threading.GlobalThreadManager;
 
 class ServerWorker extends WebSocketServer {
 
-  private ConcurrentHashMap<String, Lobby>       lobbies;
+  private ConcurrentHashMap<String, Lobby> lobbies;
   protected ConcurrentHashMap<WebSocket, Player> players;
-  private Factory<? extends Lobby>               lobbyFactory;
-  private Factory<? extends CommandInterpreter>  interpreterFactory;
-  private CommandReformatter                     commandReformatter;
+  private Factory<? extends Lobby> lobbyFactory;
+  private Factory<? extends CommandInterpreter> interpreterFactory;
+  private CommandReformatter commandReformatter;
 
-  public ServerWorker(
-      int port,
-      Factory<? extends Lobby> lobbyFactory,
+  public ServerWorker(int port, Factory<? extends Lobby> lobbyFactory,
       Factory<? extends CommandInterpreter> interpreterFactory,
       Factory<? extends CommandReformatter> reformatterFactory) {
     super(new InetSocketAddress(port));

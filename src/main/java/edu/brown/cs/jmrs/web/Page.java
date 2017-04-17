@@ -11,13 +11,15 @@ import org.jsoup.nodes.Document;
 import com.google.common.base.Charsets;
 import com.google.common.base.Objects;
 
+import edu.brown.cs.jmrs.collect.graph.Graph.Node;
+
 /**
  * A class representing a webpage and the required functions of a web page.
  *
  * @author mcisler
  *
  */
-public class Page {
+public class Page implements Node<Page, Link> {
   // Useful regexs
   public static final String HTTP_REGEX = "^https?:\\/\\/";
 
@@ -40,6 +42,11 @@ public class Page {
    * @return The URL this page was instantiated with.
    */
   public String url() {
+    return url;
+  }
+
+  @Override
+  public String getValue() {
     return url;
   }
 
@@ -101,6 +108,10 @@ public class Page {
    * http://www.searchtools.com/robots/robot-checklist.html
    * https://www.talisman.org/~erlkonig/misc/
    * lunatech^what-every-webdev-must-know-about-url-encoding
+   *
+   * @param u
+   *          The URL to clean
+   * @return The cleaned URL.
    */
   protected static String cleanUrl(String u) {
     return u.replaceAll("\\#.*$", "") // remove anchor tags

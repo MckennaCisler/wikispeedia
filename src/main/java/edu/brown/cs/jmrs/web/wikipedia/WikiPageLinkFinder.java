@@ -1,7 +1,10 @@
-package edu.brown.cs.jmrs.web;
+package edu.brown.cs.jmrs.web.wikipedia;
 
 import java.io.IOException;
 import java.util.Set;
+
+import edu.brown.cs.jmrs.web.LinkFinder;
+import edu.brown.cs.jmrs.web.LinkFinderMethod;
 
 /**
  * A link finder which finds only interal wikipedia links on a page.

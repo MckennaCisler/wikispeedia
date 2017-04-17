@@ -1,17 +1,17 @@
-package edu.brown.cs.jmrs.main;
+package edu.brown.cs.jmrs.ui;
 
 import com.google.common.collect.ImmutableList;
 
 import edu.brown.cs.jmrs.server.Server;
 import edu.brown.cs.jmrs.server.example.chatroom.ChatInterpreter;
 import edu.brown.cs.jmrs.server.example.chatroom.ChatLobby;
-import edu.brown.cs.jmrs.web.WikiHandlers;
+import edu.brown.cs.jmrs.wikispeedia.WikiHandlers;
 import joptsimple.OptionParser;
 import joptsimple.OptionSet;
 
 public class Main {
 
-  public static final int DEFAULT_SPARK_PORT  = 4567;
+  public static final int DEFAULT_SPARK_PORT = 4567;
   public static final int DEFAULT_SOCKET_PORT = 4568;
 
   public static void main(String[] args) {
@@ -24,15 +24,13 @@ public class Main {
     OptionSet options = parser.parse(args);
 
     if (options.has("gui")) {
-      Server server = new Server(
-          (int) options.valueOf("socket-port"),
-          ChatLobby.class,
-          ChatInterpreter.class);
+      Server server =
+          new Server((int) options.valueOf("socket-port"), ChatLobby.class,
+              ChatInterpreter.class);
       try {
         server.start();
 
-        SparkServer.runSparkServer(
-            (int) options.valueOf("spark-port"),
+        SparkServer.runSparkServer((int) options.valueOf("spark-port"),
             ImmutableList.of(new WikiHandlers()));
       } finally {
         SparkServer.stop();

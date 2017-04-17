@@ -11,4 +11,6 @@ public interface Lobby {
   boolean hasPlayer(String playerId);
 
   void addPlayer(String playerId);
+
+  // remove player ??
 }
