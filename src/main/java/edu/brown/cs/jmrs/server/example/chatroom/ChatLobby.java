@@ -1,37 +1,57 @@
 package edu.brown.cs.jmrs.server.example.chatroom;
 
-import edu.brown.cs.jmrs.server.customizable.core.Lobby;
+import java.util.ArrayList;
+import java.util.List;
+
+import com.google.gson.Gson;
+import com.google.gson.JsonObject;
+
+import edu.brown.cs.jmrs.server.Server;
+import edu.brown.cs.jmrs.server.customizable.Lobby;
 
 public class ChatLobby implements Lobby {
 
-  @Override
-  public String getId() {
-    // TODO Auto-generated method stub
-    return null;
+  private String       id;
+  private List<String> playerIds;
+  private Server       server;
+  private boolean      closed;
+
+  public ChatLobby(Server server, String id) {
+    this.server = server;
+    this.id = id;
+    this.playerIds = new ArrayList<>();
+    this.closed = false;
   }
 
-  @Override
   public void close() {
-    // TODO Auto-generated method stub
-
+    closed = true;
+    id = null;
+    playerIds = null;
+    server = null;
   }
 
   @Override
   public boolean isClosed() {
-    // TODO Auto-generated method stub
-    return false;
-  }
-
-  @Override
-  public boolean hasPlayer(String playerId) {
-    // TODO Auto-generated method stub
-    return false;
+    return closed;
   }
 
   @Override
   public void addPlayer(String playerId) {
-    // TODO Auto-generated method stub
-
+    playerIds.add(playerId);
   }
 
+  public void sendMessage(String fromId, String message) {
+    for (String playerId : playerIds) {
+      if (!playerId.equals(fromId)) {
+        Gson gson = new Gson();
+        JsonObject jsonObject = new JsonObject();
+        jsonObject.addProperty("command", "message");
+        jsonObject.addProperty("sender", fromId);
+        jsonObject.addProperty("message", message);
+
+        String toClient = gson.toJson(jsonObject);
+        server.sendToClient(playerId, toClient);
+      }
+    }
+  }
 }

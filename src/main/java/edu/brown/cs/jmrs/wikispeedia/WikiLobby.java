@@ -9,7 +9,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import edu.brown.cs.jmrs.server.customizable.core.Lobby;
+import edu.brown.cs.jmrs.server.customizable.Lobby;
 import edu.brown.cs.jmrs.web.LinkFinder;
 import edu.brown.cs.jmrs.web.wikipedia.WikiPage;
 
@@ -24,18 +24,21 @@ public class WikiLobby implements Lobby {
    * Global id available for next lobby. Each newly constructed lobby gets and
    * increments this.
    */
-  private static AtomicInteger nextLobbyId = new AtomicInteger(0);
+  private static AtomicInteger          nextLobbyId = new AtomicInteger(0);
 
-  private final Integer id;
-  private final Map<String, WikiPlayer> players; // from id to player
-  private final LinkFinder<WikiPage> linkFinder;
-  private Instant startTime = null;
-  private Instant endTime = null;
+  private final Integer                 id;
+  private final Map<String, WikiPlayer> players;                           // from
+                                                                           // id
+                                                                           // to
+                                                                           // player
+  private final LinkFinder<WikiPage>    linkFinder;
+  private Instant                       startTime   = null;
+  private Instant                       endTime     = null;
 
-  private WikiPage startPage;
-  private WikiPage goalPage;
+  private WikiPage                      startPage;
+  private WikiPage                      goalPage;
 
-  private WikiPlayer winner;
+  private WikiPlayer                    winner;
 
   /**
    * Constructs a new lobby, getting a new ID from the next available one
@@ -49,7 +52,9 @@ public class WikiLobby implements Lobby {
    * @param goalPage
    *          The page players in this lobby are trying to get to.
    */
-  public WikiLobby(LinkFinder<WikiPage> linkFinder, WikiPage startPage,
+  public WikiLobby(
+      LinkFinder<WikiPage> linkFinder,
+      WikiPage startPage,
       WikiPage goalPage) {
     id = nextLobbyId.getAndIncrement();
     players = new HashMap<>();
@@ -63,25 +68,9 @@ public class WikiLobby implements Lobby {
   /****************************************/
 
   @Override
-  public String getId() {
-    return id.toString();
-  }
-
-  @Override
-  public void close() {
-    // TODO Auto-generated method stub
-
-  }
-
-  @Override
   public boolean isClosed() {
     // TODO Auto-generated method stub
     return false;
-  }
-
-  @Override
-  public boolean hasPlayer(String playerId) {
-    return players.containsKey(playerId);
   }
 
   @Override
@@ -90,7 +79,8 @@ public class WikiLobby implements Lobby {
       throw new IllegalStateException(
           "Game has already started, cannot add player.");
     }
-    this.players.put(playerId,
+    this.players.put(
+        playerId,
         new WikiPlayer(playerId, "TODO", this, startPage, goalPage)); // TODO:
   }
 

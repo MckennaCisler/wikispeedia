@@ -7,28 +7,31 @@ import org.java_websocket.WebSocket;
 import org.java_websocket.handshake.ClientHandshake;
 import org.java_websocket.server.WebSocketServer;
 
-import edu.brown.cs.jmrs.server.customizable.core.CommandInterpreter;
-import edu.brown.cs.jmrs.server.customizable.core.Lobby;
-import edu.brown.cs.jmrs.server.customizable.optional.CommandReformatter;
+import edu.brown.cs.jmrs.server.collections.ConcurrentBiMap;
+import edu.brown.cs.jmrs.server.customizable.CommandInterpreter;
+import edu.brown.cs.jmrs.server.customizable.Lobby;
 import edu.brown.cs.jmrs.server.factory.Factory;
 import edu.brown.cs.jmrs.server.threading.GlobalThreadManager;
 
 class ServerWorker extends WebSocketServer {
 
-  private ConcurrentHashMap<String, Lobby> lobbies;
-  protected ConcurrentHashMap<WebSocket, Player> players;
-  private Factory<? extends Lobby> lobbyFactory;
+  private Server                                server;
+  private ConcurrentHashMap<String, Lobby>      lobbies;
+  protected ConcurrentBiMap<WebSocket, Player>  players;
+  private Factory<? extends Lobby>              lobbyFactory;
   private Factory<? extends CommandInterpreter> interpreterFactory;
-  private CommandReformatter commandReformatter;
 
-  public ServerWorker(int port, Factory<? extends Lobby> lobbyFactory,
-      Factory<? extends CommandInterpreter> interpreterFactory,
-      Factory<? extends CommandReformatter> reformatterFactory) {
+  public ServerWorker(
+      Server server,
+      int port,
+      Factory<? extends Lobby> lobbyFactory,
+      Factory<? extends CommandInterpreter> interpreterFactory) {
     super(new InetSocketAddress(port));
 
+    this.server = server;
     this.lobbyFactory = lobbyFactory;
     this.interpreterFactory = interpreterFactory;
-    players = new ConcurrentHashMap<>();
+    players = new ConcurrentBiMap<>();
   }
 
   public boolean setPlayerId(WebSocket conn, String playerId) {
@@ -41,16 +44,12 @@ class ServerWorker extends WebSocketServer {
     }
   }
 
-  public void setCommandReformatter(CommandReformatter commandReformatter) {
-    this.commandReformatter = commandReformatter;
-  }
-
-  public CommandReformatter getCommandReformatter() {
-    return commandReformatter;
-  }
-
   public Player getPlayer(WebSocket conn) {
     return players.get(conn);
+  }
+
+  public WebSocket getPlayer(String playerId) {
+    return players.getReversed(new Player(playerId));
   }
 
   public synchronized Lobby createLobby(String lobbyId) {
@@ -62,13 +61,15 @@ class ServerWorker extends WebSocketServer {
         return null;
       }
     }
-    Lobby lobby = lobbyFactory.getWithAdditionalArgs(lobbyId);
+    Lobby lobby = lobbyFactory.getWithAdditionalArgs(server, lobbyId);
     lobbies.put(lobbyId, lobby);
     return lobby;
   }
 
   public CommandInterpreter bundleMessageForLobby(WebSocket conn) {
-    return interpreterFactory.getWithAdditionalArgs(players.get(conn));
+    Player player = players.get(conn);
+    return interpreterFactory
+        .getWithAdditionalArgs(player.getId(), player.getLobby());
   }
 
   public void playerDisconnected(WebSocket conn) {

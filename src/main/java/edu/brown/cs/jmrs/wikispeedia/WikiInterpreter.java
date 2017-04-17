@@ -1,8 +1,8 @@
 package edu.brown.cs.jmrs.wikispeedia;
 
-import java.util.List;
+import java.util.Map;
 
-import edu.brown.cs.jmrs.server.customizable.core.CommandInterpreter;
+import edu.brown.cs.jmrs.server.customizable.CommandInterpreter;
 
 /**
  * Interprets commands over a Wiki lobby.
@@ -23,7 +23,7 @@ public class WikiInterpreter implements CommandInterpreter {
   }
 
   @Override
-  public void interpret(String command, List<String> args) {
+  public void interpret(Map<String, ?> command) {
     // TODO Auto-generated method stub
 
   }

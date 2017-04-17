@@ -1,9 +1,7 @@
 package edu.brown.cs.jmrs.server;
 
-import edu.brown.cs.jmrs.server.customizable.core.CommandInterpreter;
-import edu.brown.cs.jmrs.server.customizable.core.Lobby;
-import edu.brown.cs.jmrs.server.customizable.optional.CommandReformatter;
-import edu.brown.cs.jmrs.server.example.chatroom.SimpleJsonReformatter;
+import edu.brown.cs.jmrs.server.customizable.CommandInterpreter;
+import edu.brown.cs.jmrs.server.customizable.Lobby;
 import edu.brown.cs.jmrs.server.factory.Factory;
 
 /**
@@ -21,48 +19,24 @@ public class Server {
       Class<? extends Lobby> lobbyClass,
       Class<? extends CommandInterpreter> interpreterClass) {
     server = new ServerWorker(
+        this,
         port,
         new Factory<Lobby>(lobbyClass),
-        new Factory<CommandInterpreter>(interpreterClass),
-        new Factory<CommandReformatter>(SimpleJsonReformatter.class));
-  }
-
-  public Server(
-      int port,
-      Class<? extends Lobby> lobbyClass,
-      Class<? extends CommandInterpreter> interpreterClass,
-      Class<? extends CommandReformatter> reformatterClass) {
-    server = new ServerWorker(
-        port,
-        new Factory<Lobby>(lobbyClass),
-        new Factory<CommandInterpreter>(interpreterClass),
-        new Factory<CommandReformatter>(reformatterClass));
+        new Factory<CommandInterpreter>(interpreterClass));
   }
 
   public Server(
       int port,
       Factory<? extends Lobby> lobbyFactory,
       Factory<? extends CommandInterpreter> interpreterFactory) {
-    server = new ServerWorker(
-        port,
-        lobbyFactory,
-        interpreterFactory,
-        new Factory<CommandReformatter>(SimpleJsonReformatter.class));
-  }
-
-  public Server(
-      int port,
-      Factory<? extends Lobby> lobbyFactory,
-      Factory<? extends CommandInterpreter> interpreterFactory,
-      Factory<? extends CommandReformatter> reformatterFactory) {
-    server = new ServerWorker(
-        port,
-        lobbyFactory,
-        interpreterFactory,
-        reformatterFactory);
+    server = new ServerWorker(this, port, lobbyFactory, interpreterFactory);
   }
 
   public void start() {
     server.start();
+  }
+
+  public void sendToClient(String playerId, String message) {
+    server.getPlayer(playerId).send(message);
   }
 }
