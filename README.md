@@ -116,15 +116,15 @@ Responses and messages to the client from the built-ins are also JSON, and each 
 All built-in commands send a response to the client with a field "error" which is an empty string if the operation succeeded and a short description of the error if not. None of these commands are case sensitive, meaning that commands only differing from these in case cannot be used as one's own commands.
 
 ##### Command List
-- set\_player\_id: sets the id of the client which sent the message
+- **set\_player\_id:** sets the id of the client which sent the message
     - \{ "command":"set\_player\_id", "player_id": *put ID here* \}
-- start\_lobby: starts up a new lobby and automatically adds the client that sent the command. If an arguments field is inlcuded with the command json then the arguments will be passed to lobby.init().
+- **start\_lobby:** starts up a new lobby and automatically adds the client that sent the command. If an arguments field is inlcuded with the command json then the arguments will be passed to lobby.init().
     - \{ "command":"start\_lobby", "lobby_id": *put ID here* , (optional) "arguments": *json object of arguments* \}
-- leave\_lobby: removes the client from it's current lobby if it is in one
+- **leave\_lobby:** removes the client from it's current lobby if it is in one
     - \{ "command":"leave\_lobby" \}
-- join\_lobby: adds the client to specified lobby
+- **join\_lobby:** adds the client to specified lobby
     - \{ "command":"join\_lobby", "lobby_id": *put ID here* \}
-- get\_lobbies: retrieves a list of the ids of all open lobbies. Will eventually return json of lobby rather than just id.
+- **get\_lobbies:** retrieves a list of the ids of all open lobbies. Will eventually return json of lobby rather than just id.
     - \{ "command":"get\_lobbies" \}
     - response: \{ "error":"", "lobbies": *json array of lobby ids* \}
 

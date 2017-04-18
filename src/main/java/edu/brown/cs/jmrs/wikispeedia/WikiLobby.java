@@ -7,8 +7,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.concurrent.atomic.AtomicInteger;
 
+import com.google.common.collect.ImmutableList;
+
+import edu.brown.cs.jmrs.server.Server;
 import edu.brown.cs.jmrs.server.customizable.Lobby;
 import edu.brown.cs.jmrs.web.LinkFinder;
 import edu.brown.cs.jmrs.web.wikipedia.WikiPage;
@@ -24,26 +26,31 @@ public class WikiLobby implements Lobby {
    * Global id available for next lobby. Each newly constructed lobby gets and
    * increments this.
    */
-  private static AtomicInteger          nextLobbyId = new AtomicInteger(0);
+  // private static AtomicInteger nextLobbyId = new AtomicInteger(0);
 
-  private final Integer                 id;
-  private final Map<String, WikiPlayer> players;                           // from
-                                                                           // id
-                                                                           // to
-                                                                           // player
-  private final LinkFinder<WikiPage>    linkFinder;
-  private Instant                       startTime   = null;
-  private Instant                       endTime     = null;
+  private final Server server;
+  private final String id;
+  private final Map<String, WikiPlayer> players; // from
+                                                 // id
+                                                 // to
+                                                 // player
+  private final LinkFinder<WikiPage> linkFinder;
+  private Instant startTime = null;
+  private Instant endTime = null;
 
-  private WikiPage                      startPage;
-  private WikiPage                      goalPage;
+  private WikiPage startPage;
+  private WikiPage goalPage;
 
-  private WikiPlayer                    winner;
+  private WikiPlayer winner;
 
   /**
-   * Constructs a new lobby, getting a new ID from the next available one
-   * (atomically).
+   * Constructs a new WikiLobby (likely through a Factory in
+   * {@link edu.brown.cs.jmrs.server.Server}.
    *
+   * @param server
+   *          The server it was called from.
+   * @param id
+   *          The id of this lobby.
    * @param linkFinder
    *          The linkFinder to use when showing / letting players move through
    *          pages.
@@ -52,11 +59,10 @@ public class WikiLobby implements Lobby {
    * @param goalPage
    *          The page players in this lobby are trying to get to.
    */
-  public WikiLobby(
-      LinkFinder<WikiPage> linkFinder,
-      WikiPage startPage,
-      WikiPage goalPage) {
-    id = nextLobbyId.getAndIncrement();
+  public WikiLobby(Server server, String id, LinkFinder<WikiPage> linkFinder,
+      WikiPage startPage, WikiPage goalPage) {
+    this.server = server;
+    this.id = id;
     players = new HashMap<>();
     this.linkFinder = linkFinder;
     this.startPage = startPage;
@@ -85,8 +91,7 @@ public class WikiLobby implements Lobby {
       throw new IllegalStateException(
           "Game has already started, cannot add player.");
     }
-    this.players.put(
-        playerId,
+    this.players.put(playerId,
         new WikiPlayer(playerId, "TODO", this, startPage, goalPage)); // TODO:
   }
 
@@ -147,6 +152,13 @@ public class WikiLobby implements Lobby {
   /****************************************/
   /* GETTERS */
   /****************************************/
+
+  /**
+   * @return The players in this map.
+   */
+  public List<WikiPlayer> getPlayers() {
+    return ImmutableList.copyOf(players.values());
+  }
 
   /**
    * @param playerId
@@ -219,6 +231,20 @@ public class WikiLobby implements Lobby {
       throw new IllegalStateException("Lobby has not ended.");
     }
     return endTime;
+  }
+
+  /**
+   * @return The start wiki page of this lobby.
+   */
+  public WikiPage getStartPage() {
+    return startPage;
+  }
+
+  /**
+   * @return The goal wiki page of this lobby.
+   */
+  public WikiPage getGoalPage() {
+    return goalPage;
   }
 
   /**
