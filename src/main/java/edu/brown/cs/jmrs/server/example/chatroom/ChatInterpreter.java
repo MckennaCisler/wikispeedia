@@ -16,7 +16,7 @@ public class ChatInterpreter implements CommandInterpreter {
 
   @Override
   public void interpret(Map<String, ?> command) {
-    switch ((String) command.get("Command")) {
+    switch (((String) command.get("Command")).toLowerCase()) {
       case "message":
         lobby.sendMessage(playerId, (String) command.get("message"));
         return;

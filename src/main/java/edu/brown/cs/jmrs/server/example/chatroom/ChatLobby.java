@@ -1,7 +1,7 @@
 package edu.brown.cs.jmrs.server.example.chatroom;
 
-import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
@@ -19,7 +19,7 @@ public class ChatLobby implements Lobby {
   public ChatLobby(Server server, String id) {
     this.server = server;
     this.id = id;
-    this.playerIds = new ArrayList<>();
+    this.playerIds = new CopyOnWriteArrayList<>();
     this.closed = false;
   }
 
@@ -41,17 +41,23 @@ public class ChatLobby implements Lobby {
   }
 
   public void sendMessage(String fromId, String message) {
+    Gson gson = new Gson();
+    JsonObject jsonObject = new JsonObject();
+    jsonObject.addProperty("type", "message");
+    jsonObject.addProperty("sender", fromId);
+    jsonObject.addProperty("message", message);
+
+    String toClient = gson.toJson(jsonObject);
+
     for (String playerId : playerIds) {
       if (!playerId.equals(fromId)) {
-        Gson gson = new Gson();
-        JsonObject jsonObject = new JsonObject();
-        jsonObject.addProperty("command", "message");
-        jsonObject.addProperty("sender", fromId);
-        jsonObject.addProperty("message", message);
-
-        String toClient = gson.toJson(jsonObject);
         server.sendToClient(playerId, toClient);
       }
     }
+  }
+
+  @Override
+  public void removePlayer(String playerId) {
+    playerIds.remove(playerId);
   }
 }

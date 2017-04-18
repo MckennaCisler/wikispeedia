@@ -1,6 +1,9 @@
 package edu.brown.cs.jmrs.server;
 
 import java.net.InetSocketAddress;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.java_websocket.WebSocket;
@@ -52,6 +55,19 @@ class ServerWorker extends WebSocketServer {
     return players.getReversed(new Player(playerId));
   }
 
+  public List<String> getOpenLobbies() {
+    List<String> lobbyIds = new ArrayList<>();
+    for (Entry<String, Lobby> lobby : lobbies.entrySet()) {
+      if (lobby.getValue().isClosed()) {
+        lobbies.remove(lobby.getKey());
+      } else {
+        lobbyIds.add(lobby.getKey());
+      }
+    }
+
+    return lobbyIds;
+  }
+
   public synchronized Lobby createLobby(String lobbyId) {
     if (lobbies.containsKey(lobbyId)) {
       Lobby lobby = lobbies.get(lobbyId);
@@ -63,6 +79,15 @@ class ServerWorker extends WebSocketServer {
     }
     Lobby lobby = lobbyFactory.getWithAdditionalArgs(server, lobbyId);
     lobbies.put(lobbyId, lobby);
+    return lobby;
+  }
+
+  public synchronized Lobby getLobby(String lobbyId) {
+    Lobby lobby = lobbies.get(lobbyId);
+    if (lobby != null && lobby.isClosed()) {
+      lobbies.remove(lobbyId);
+      lobby = null;
+    }
     return lobby;
   }
 

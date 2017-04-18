@@ -104,3 +104,24 @@ TODO:
 
 ## How to Build and Run
 _A necessary part of any README!_
+
+## How to use server 'library'
+#### built-in commands
+All built-in commands send a response to the client with a field "error" which is an empty string if the operation succeeded and a short description of the error if not. None of these commands are case sensitive, meaning that commands only differing from these in case cannot be used as one's own commands.
+##### Command List
+- set\_player\_id: sets the id of the client which sent the message
+    - \{ "command":"set\_player\_id", "player_id":\**put ID here*\*\ \}
+- start\_lobby: starts up a new lobby and automatically adds the client that sent the command
+    - \{ "command":"start\_lobby", "lobby_id":\**put ID here*\*\ \}
+- leave\_lobby: removes the client from it's current lobby if it is in one
+    - \{ "command":"leave\_lobby" \}
+- join\_lobby: adds the client to specified lobby
+    - \{ "command":"join\_lobby", "lobby_id":\**put ID here*\*\ \}
+- get\_lobbies: retrieves a list of the ids of all open lobbies    *Note: McKenna should this maybe use json-ified info about the lobby instead of just the id? that would allow filtering in a server-browser theoretically.*
+    - \{ "command":"get\_lobbies" \}
+    - response: \{ "error":"", "lobbies": \**json array of lobby ids*\* \}
+
+#### server.customizable
+This is the bread and butter of the 'library'. To make a something that runs on this platform you have to make an implementation of CommandInterpreter and Lobby to manage your game. The command interpreter has to have a constructor that takes a Lobby and a player ID so the factory can properly instance it, or if you make your own factory to pass in that uses any arguments then there must be a constructor that has the aforementioned arguments after the ones defined in the creation of the factory.
+
+The same applies to Lobby, except the required arguments are a Server and a lobby ID
