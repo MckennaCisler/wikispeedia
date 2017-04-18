@@ -1,10 +1,7 @@
 package edu.brown.cs.jmrs.server;
 
 import java.net.InetSocketAddress;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Map.Entry;
-import java.util.concurrent.ConcurrentHashMap;
 
 import org.java_websocket.WebSocket;
 import org.java_websocket.handshake.ClientHandshake;
@@ -19,9 +16,8 @@ import edu.brown.cs.jmrs.server.threading.GlobalThreadManager;
 class ServerWorker extends WebSocketServer {
 
   private Server                                server;
-  private ConcurrentHashMap<String, Lobby>      lobbies;
-  protected ConcurrentBiMap<WebSocket, Player>  players;
-  private Factory<? extends Lobby>              lobbyFactory;
+  private LobbyManager                          lobbies;
+  private ConcurrentBiMap<WebSocket, Player>    players;
   private Factory<? extends CommandInterpreter> interpreterFactory;
 
   public ServerWorker(
@@ -32,8 +28,8 @@ class ServerWorker extends WebSocketServer {
     super(new InetSocketAddress(port));
 
     this.server = server;
-    this.lobbyFactory = lobbyFactory;
     this.interpreterFactory = interpreterFactory;
+    lobbies = new LobbyManager(lobbyFactory);
     players = new ConcurrentBiMap<>();
   }
 
@@ -56,39 +52,15 @@ class ServerWorker extends WebSocketServer {
   }
 
   public List<String> getOpenLobbies() {
-    List<String> lobbyIds = new ArrayList<>();
-    for (Entry<String, Lobby> lobby : lobbies.entrySet()) {
-      if (lobby.getValue().isClosed()) {
-        lobbies.remove(lobby.getKey());
-      } else {
-        lobbyIds.add(lobby.getKey());
-      }
-    }
-
-    return lobbyIds;
+    return lobbies.getOpenLobbies();
   }
 
-  public synchronized Lobby createLobby(String lobbyId) {
-    if (lobbies.containsKey(lobbyId)) {
-      Lobby lobby = lobbies.get(lobbyId);
-      if (lobby.isClosed()) {
-        lobbies.remove(lobbyId);
-      } else {
-        return null;
-      }
-    }
-    Lobby lobby = lobbyFactory.getWithAdditionalArgs(server, lobbyId);
-    lobbies.put(lobbyId, lobby);
-    return lobby;
+  public Lobby createLobby(String lobbyId) {
+    return lobbies.create(lobbyId, server);
   }
 
-  public synchronized Lobby getLobby(String lobbyId) {
-    Lobby lobby = lobbies.get(lobbyId);
-    if (lobby != null && lobby.isClosed()) {
-      lobbies.remove(lobbyId);
-      lobby = null;
-    }
-    return lobby;
+  public Lobby getLobby(String lobbyId) {
+    return lobbies.get(lobbyId);
   }
 
   public CommandInterpreter bundleMessageForLobby(WebSocket conn) {
