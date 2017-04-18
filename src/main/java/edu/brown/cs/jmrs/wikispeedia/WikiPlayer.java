@@ -23,12 +23,12 @@ public class WikiPlayer {
   private final String id;
   private final String name;
 
-  private final WikiLobby lobby;
+  private transient WikiLobby lobby;
 
   /**
    * Time measurements (endTime is only set upon completion).
    */
-  private Instant endTime;
+  private transient Instant endTime;
 
   /**
    * Path and location data.
@@ -125,10 +125,8 @@ public class WikiPlayer {
 
   /**
    * @return The page that the player is currently at.
-   * @throws IOException
-   *           If the current page cannot be accessed.
    */
-  public WikiPage getCurPage() throws IOException {
+  public WikiPage getCurPage() {
     return curPage;
   }
 

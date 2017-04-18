@@ -169,7 +169,7 @@ public class WikiPage extends Page implements JsonSerializable {
       System.out.println(e.getMessage());
     }
 
-    printLinks(start, 1);
+    printLinks(start, 100);
   }
 
   private static void printLinks(WikiPage start, int depth) {
@@ -181,7 +181,7 @@ public class WikiPage extends Page implements JsonSerializable {
       Set<WikiPage> links = new WikiPageLinkFinder().linkedPages(start);
 
       for (WikiPage page : links) {
-        // System.out.println(start.url() + " -> " + page.url());
+        System.out.println(start.url() + " -> " + page.url());
         // System.out.println(page.getTitle());
         // System.out.println(page.getBlurb());
         printLinks(page, depth - 1);

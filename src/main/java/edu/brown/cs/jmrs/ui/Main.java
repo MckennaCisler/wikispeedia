@@ -9,11 +9,26 @@ import edu.brown.cs.jmrs.wikispeedia.WikiHandlers;
 import joptsimple.OptionParser;
 import joptsimple.OptionSet;
 
-public class Main {
-
+/**
+ * Primary execution class.
+ *
+ * @author mcisler
+ *
+ */
+public final class Main {
   public static final int DEFAULT_SPARK_PORT = 4567;
   public static final int DEFAULT_SOCKET_PORT = 4568;
 
+  private Main() {
+    // override default constructor
+  }
+
+  /**
+   * Main execution method for Wikispeedia.
+   *
+   * @param args
+   *          CLI args
+   */
   public static void main(String[] args) {
     OptionParser parser = new OptionParser();
     parser.accepts("gui");
