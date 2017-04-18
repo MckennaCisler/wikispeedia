@@ -1,6 +1,7 @@
 package edu.brown.cs.jmrs.server.example.chatroom;
 
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 import com.google.gson.Gson;
@@ -36,7 +37,7 @@ public class ChatLobby implements Lobby {
   }
 
   @Override
-  public void addPlayer(String playerId) {
+  public void addClient(String playerId) {
     playerIds.add(playerId);
   }
 
@@ -57,7 +58,11 @@ public class ChatLobby implements Lobby {
   }
 
   @Override
-  public void removePlayer(String playerId) {
+  public void removeClient(String playerId) {
     playerIds.remove(playerId);
+  }
+
+  @Override
+  public void init(Map<String, ?> arguments) {
   }
 }

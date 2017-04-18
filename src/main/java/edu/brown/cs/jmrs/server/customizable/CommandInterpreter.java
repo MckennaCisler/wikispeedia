@@ -4,5 +4,5 @@ import java.util.Map;
 
 public interface CommandInterpreter {
 
-  void interpret(Map<String, ?> command);
+  void interpret(Lobby uncastLobby, String clientId, Map<String, ?> command);
 }

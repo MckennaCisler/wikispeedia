@@ -15,20 +15,20 @@ import edu.brown.cs.jmrs.server.threading.GlobalThreadManager;
 
 class ServerWorker extends WebSocketServer {
 
-  private Server                                server;
-  private LobbyManager                          lobbies;
-  private ConcurrentBiMap<WebSocket, Player>    players;
-  private Factory<? extends CommandInterpreter> interpreterFactory;
+  private Server                             server;
+  private LobbyManager                       lobbies;
+  private ConcurrentBiMap<WebSocket, Player> players;
+  private CommandInterpreter                 interpreter;
 
   public ServerWorker(
       Server server,
       int port,
       Factory<? extends Lobby> lobbyFactory,
-      Factory<? extends CommandInterpreter> interpreterFactory) {
+      CommandInterpreter interpreter) {
     super(new InetSocketAddress(port));
 
     this.server = server;
-    this.interpreterFactory = interpreterFactory;
+    this.interpreter = interpreter;
     lobbies = new LobbyManager(lobbyFactory);
     players = new ConcurrentBiMap<>();
   }
@@ -63,12 +63,6 @@ class ServerWorker extends WebSocketServer {
     return lobbies.get(lobbyId);
   }
 
-  public CommandInterpreter bundleMessageForLobby(WebSocket conn) {
-    Player player = players.get(conn);
-    return interpreterFactory
-        .getWithAdditionalArgs(player.getId(), player.getLobby());
-  }
-
   public void playerDisconnected(WebSocket conn) {
     players.remove(conn);
   }
@@ -89,7 +83,8 @@ class ServerWorker extends WebSocketServer {
 
   @Override
   public void onMessage(WebSocket conn, String message) {
-    GlobalThreadManager.submit(new ServerCommandHandler(this, conn, message));
+    GlobalThreadManager
+        .submit(new ServerCommandHandler(this, conn, message, interpreter));
   }
 
   @Override

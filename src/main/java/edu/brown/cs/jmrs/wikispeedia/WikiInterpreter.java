@@ -8,6 +8,7 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
 import edu.brown.cs.jmrs.server.customizable.CommandInterpreter;
+import edu.brown.cs.jmrs.server.customizable.Lobby;
 import edu.brown.cs.jmrs.web.wikipedia.WikiPage;
 
 /**
@@ -18,20 +19,6 @@ import edu.brown.cs.jmrs.web.wikipedia.WikiPage;
  */
 public class WikiInterpreter implements CommandInterpreter {
   private static final Gson GSON = registerSerializers();
-
-  private final WikiLobby lobby;
-  private final String playerId;
-
-  /**
-   * @param playerId
-   *          ??
-   * @param lobby
-   *          The lobby this command was called to.
-   */
-  public WikiInterpreter(String playerId, WikiLobby lobby) {
-    this.playerId = playerId;
-    this.lobby = lobby;
-  }
 
   /**
    * Registers custom Json (Gson) serializers for this project.
@@ -89,8 +76,11 @@ public class WikiInterpreter implements CommandInterpreter {
   }
 
   @Override
-  public void interpret(Map<String, ?> command) {
+  public void interpret(Lobby uncastLobby, String clientId,
+      Map<String, ?> command) {
+    WikiLobby lobby = (WikiLobby) uncastLobby;
     String cname = (String) command.get("command");
+
     if (cname.equals(Command.GET_PLAYERS.command())) {
       String result = new String();
       result = GSON.toJson(lobby.getPlayers());
@@ -112,7 +102,7 @@ public class WikiInterpreter implements CommandInterpreter {
 
     } else if (cname.equals(Command.GOTO_PAGE.command())) {
       String result = new String();
-      WikiPlayer player = lobby.getPlayer((String) command.get("player_id"));
+      WikiPlayer player = lobby.getPlayer(clientId);
 
       // if could go to page (and thus did go to page)
       String reqPage = (String) command.get("page_name");
@@ -139,7 +129,7 @@ public class WikiInterpreter implements CommandInterpreter {
 
     } else if (cname.equals(Command.GET_PATH.command())) {
       String result = new String();
-      WikiPlayer player = lobby.getPlayer((String) command.get("player_id"));
+      WikiPlayer player = lobby.getPlayer(clientId);
       result = GSON.toJson(player.getPath());
 
     } else {
