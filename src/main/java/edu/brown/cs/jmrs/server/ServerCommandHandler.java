@@ -49,8 +49,10 @@ class ServerCommandHandler implements Runnable {
     if (commandMap.containsKey("command")) {
       if (((String) commandMap.get("command"))
           .equalsIgnoreCase("set_client_id")) {
-        String playerId = (String) commandMap.get("player_id");
-        if (server.setPlayerId(conn, playerId)) {
+        jsonObject.addProperty("type", "set_id_reponse");
+        String clientId = (String) commandMap.get("client_id");
+        if (server.setPlayerId(conn, clientId)) {
+          jsonObject.addProperty("client_id", server.getPlayer(conn).getId());
           jsonObject.addProperty("error_message", "");
           String toClient = gson.toJson(jsonObject);
           conn.send(toClient);
@@ -63,6 +65,7 @@ class ServerCommandHandler implements Runnable {
         // do server commands here
         switch (((String) commandMap.get("command")).toLowerCase()) {
           case "start_lobby":
+            jsonObject.addProperty("type", "start_lobby_reponse");
             if (commandMap.containsKey("lobby_id")) {
               String lobbyId = (String) commandMap.get("lobby_id");
               Lobby lobby = server.createLobby(lobbyId);
@@ -71,6 +74,7 @@ class ServerCommandHandler implements Runnable {
                   lobby.init((Map<String, ?>) commandMap.get("arguments"));
                 }
                 lobby.addClient(player.getId());
+                player.setLobby(lobby);
                 jsonObject.addProperty("error_message", "");
                 String toClient = gson.toJson(jsonObject);
                 conn.send(toClient);
@@ -86,6 +90,7 @@ class ServerCommandHandler implements Runnable {
             }
             return;
           case "leave_lobby":
+            jsonObject.addProperty("type", "leave_lobby_reponse");
             if (player.getLobby() != null) {
               player.getLobby().removeClient(player.getId());
               jsonObject.addProperty("error_message", "");
@@ -100,11 +105,17 @@ class ServerCommandHandler implements Runnable {
             }
             return;
           case "join_lobby":
+            jsonObject.addProperty("type", "join_lobby_reponse");
             if (commandMap.containsKey("lobby_id")) {
               String lobbyId = (String) commandMap.get("lobby_id");
               Lobby lobby = server.getLobby(lobbyId);
               if (lobby != null) {
+                Lobby playerLobby = player.getLobby();
+                if (playerLobby != null) {
+                  playerLobby.removeClient(player.getId());
+                }
                 lobby.addClient(player.getId());
+                player.setLobby(lobby);
                 jsonObject.addProperty("error_message", "");
                 String toClient = gson.toJson(jsonObject);
                 conn.send(toClient);
@@ -122,6 +133,7 @@ class ServerCommandHandler implements Runnable {
             }
             return;
           case "get_lobbies":
+            jsonObject.addProperty("type", "get_lobbies_reponse");
             List<String> lobbies = server.getOpenLobbies();
             jsonObject.addProperty("error_message", "");
 
@@ -143,6 +155,7 @@ class ServerCommandHandler implements Runnable {
         conn.send(toClient);
       }
     } else {
+      jsonObject.addProperty("type", "command_error");
       jsonObject.addProperty(
           "error_message",
           "Client-to-Server commands must be JSON with 'command' field");

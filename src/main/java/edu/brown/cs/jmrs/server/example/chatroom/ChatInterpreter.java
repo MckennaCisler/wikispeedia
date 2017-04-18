@@ -7,12 +7,7 @@ import edu.brown.cs.jmrs.server.customizable.Lobby;
 
 public class ChatInterpreter implements CommandInterpreter {
 
-  ChatLobby lobby;
-  String    playerId;
-
-  public ChatInterpreter(String playerId, ChatLobby lobby) {
-    this.playerId = playerId;
-    this.lobby = lobby;
+  public ChatInterpreter() {
   }
 
   @Override
@@ -20,9 +15,17 @@ public class ChatInterpreter implements CommandInterpreter {
       Lobby uncastLobby,
       String clientId,
       Map<String, ?> command) {
-    switch (((String) command.get("Command")).toLowerCase()) {
+    ChatLobby lobby = (ChatLobby) uncastLobby;
+
+    switch (((String) command.get("command")).toLowerCase()) {
       case "message":
-        lobby.sendMessage(playerId, (String) command.get("message"));
+        lobby.sendMessage(clientId, (String) command.get("message"));
+        return;
+      case "whisper":
+        lobby.sendMessage(
+            (String) command.get("recipient"),
+            clientId,
+            (String) command.get("message"));
         return;
     }
   }

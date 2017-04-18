@@ -78,13 +78,15 @@ public class ConcurrentBiMap<E, T> implements Map<E, T> {
     return old;
   }
 
-  public E putReversed(T key, E value) {
+  public boolean putNoOverwrite(E key, T value) {
+    boolean placed = false;
     w.lock();
-    E old = back.put(key, value);
-    fore.remove(old);
-    fore.put(value, key);
+    if (!back.containsKey(value)) {
+      placed = true;
+      put(key, value);
+    }
     w.unlock();
-    return old;
+    return placed;
   }
 
   @Override

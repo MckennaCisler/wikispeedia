@@ -106,8 +106,15 @@ TODO:
 _A necessary part of any README!_
 
 ## How to use server 'library'
+
+#### command and response structure
+All commands to the server must be JSON with a 'command' field. For built-ins this field defines the basic functionality desired by the client, and it is recommended that lobby systems built on the framework follow this convention.
+
+Responses and messages to the client from the built-ins are also JSON, and each has a 'type' field denoting the meaning or context of the message and an 'error' field where the value is a short description of any error that occurred, or an empty string if no errors occurred. This pattern is also recommended to be followed for standardization of communication between the client and server.
+
 #### built-in commands
 All built-in commands send a response to the client with a field "error" which is an empty string if the operation succeeded and a short description of the error if not. None of these commands are case sensitive, meaning that commands only differing from these in case cannot be used as one's own commands.
+
 ##### Command List
 - set\_player\_id: sets the id of the client which sent the message
     - \{ "command":"set\_player\_id", "player_id": *put ID here* \}
