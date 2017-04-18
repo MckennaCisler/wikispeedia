@@ -68,13 +68,19 @@ public class WikiLobby implements Lobby {
   /****************************************/
 
   @Override
+  public void init(Map<String, ?> arguments) {
+    // TODO Auto-generated method stub
+
+  }
+
+  @Override
   public boolean isClosed() {
     // TODO Auto-generated method stub
     return false;
   }
 
   @Override
-  public void addPlayer(String playerId) {
+  public void addClient(String playerId) {
     if (started()) {
       throw new IllegalStateException(
           "Game has already started, cannot add player.");
@@ -85,7 +91,8 @@ public class WikiLobby implements Lobby {
   }
 
   // @Override
-  public void removePlayer(String playerId) {
+  @Override
+  public void removeClient(String playerId) {
     this.players.remove(playerId);
   }
 

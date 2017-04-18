@@ -22,14 +22,14 @@ public class Server {
         this,
         port,
         new Factory<Lobby>(lobbyClass),
-        new Factory<CommandInterpreter>(interpreterClass));
+        new Factory<CommandInterpreter>(interpreterClass).get());
   }
 
   public Server(
       int port,
       Factory<? extends Lobby> lobbyFactory,
-      Factory<? extends CommandInterpreter> interpreterFactory) {
-    server = new ServerWorker(this, port, lobbyFactory, interpreterFactory);
+      CommandInterpreter interpreter) {
+    server = new ServerWorker(this, port, lobbyFactory, interpreter);
   }
 
   public void start() {

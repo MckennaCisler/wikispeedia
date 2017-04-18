@@ -13,21 +13,25 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 
+import edu.brown.cs.jmrs.server.customizable.CommandInterpreter;
 import edu.brown.cs.jmrs.server.customizable.Lobby;
 
 class ServerCommandHandler implements Runnable {
 
-  ServerWorker server;
-  WebSocket    conn;
-  String       unformattedCommand;
+  ServerWorker       server;
+  WebSocket          conn;
+  String             unformattedCommand;
+  CommandInterpreter interpreter;
 
   public ServerCommandHandler(
       ServerWorker server,
       WebSocket conn,
-      String command) {
+      String command,
+      CommandInterpreter interpreter) {
     this.server = server;
     this.conn = conn;
     this.unformattedCommand = command;
+    this.interpreter = interpreter;
   }
 
   @Override
@@ -63,7 +67,10 @@ class ServerCommandHandler implements Runnable {
               String lobbyId = (String) commandMap.get("lobby_id");
               Lobby lobby = server.createLobby(lobbyId);
               if (lobby != null) {
-                lobby.addPlayer(player.getId());
+                if (commandMap.containsKey("arguments")) {
+                  lobby.init((Map<String, ?>) commandMap.get("arguments"));
+                }
+                lobby.addClient(player.getId());
                 jsonObject.addProperty("error_message", "");
                 String toClient = gson.toJson(jsonObject);
                 conn.send(toClient);
@@ -80,7 +87,7 @@ class ServerCommandHandler implements Runnable {
             return;
           case "leave_lobby":
             if (player.getLobby() != null) {
-              player.getLobby().removePlayer(player.getId());
+              player.getLobby().removeClient(player.getId());
               jsonObject.addProperty("error_message", "");
               String toClient = gson.toJson(jsonObject);
               conn.send(toClient);
@@ -97,7 +104,7 @@ class ServerCommandHandler implements Runnable {
               String lobbyId = (String) commandMap.get("lobby_id");
               Lobby lobby = server.getLobby(lobbyId);
               if (lobby != null) {
-                lobby.addPlayer(player.getId());
+                lobby.addClient(player.getId());
                 jsonObject.addProperty("error_message", "");
                 String toClient = gson.toJson(jsonObject);
                 conn.send(toClient);
@@ -128,7 +135,7 @@ class ServerCommandHandler implements Runnable {
         }
 
         // if not a server command pass it to the lobby
-        server.bundleMessageForLobby(conn).interpret(commandMap);
+        interpreter.interpret(player.getLobby(), player.getId(), commandMap);
       } else {
         jsonObject
             .addProperty("error_message", "Cannot continue without unique ID");
