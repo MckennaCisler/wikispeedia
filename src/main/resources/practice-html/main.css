@@ -65,15 +65,22 @@
 .main_content {
 	margin-top: 1em;
 }
-.end_row {
-	
+.list-group-item.end_row {
+	display: flex;
+	flex-direction: column;
 }
 .running {
 	color: red;
 }
 .end_canvas {
-	width: 100vw;
-	height: 30px;
+	width: 95%;
+	height: 50px;
+}
+.end_row_name {
+	align-self: flex-start;
+}
+.end_row_time {
+	align-self: flex-end;
 }
 #main_buttons {
 	margin-top: 15px;
