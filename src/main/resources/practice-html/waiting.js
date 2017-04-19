@@ -19,7 +19,7 @@ $(document).ready(() => {
 	const decrement = (pid) => {
 		if ($("#counter").html() === "0") {
 			clearInterval(pid);
-			alert("Dummy. Will move on to game in the future");
+			window.location.replace("end.html");
 		} else {
 			$("#counter").html($("#counter").html() - 1);
 		}

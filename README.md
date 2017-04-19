@@ -95,6 +95,7 @@ The following files are relevant (all in the docs subfolder):
 - roles-and-deadlines.md
 - routes.md
 - flow.md
+- testing.md
 
 TODO:
 - Package design: packages, classes, methods

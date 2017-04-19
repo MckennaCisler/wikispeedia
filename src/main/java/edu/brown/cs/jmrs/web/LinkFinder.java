@@ -17,7 +17,8 @@ public interface LinkFinder<P extends Page> {
    *
    * @param page
    *          The root page.
-   * @return A list of urls of each outgoing link.
+   * @return A list of urls of each outgoing link. Should be a HashSet for speed
+   *         in link-filtering applications.
    * @throws IOException
    *           If the page could not be reached.
    */
@@ -28,8 +29,8 @@ public interface LinkFinder<P extends Page> {
    *
    * @param page
    *          The root page.
-   * @return A list of pages corresponding to links.
-   *
+   * @return A list of pages corresponding to links. Should be a HashSet for
+   *         speed in link-filtering applications.
    * @throws IOException
    *           If the page could not be reached.
    */

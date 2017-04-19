@@ -101,6 +101,13 @@ public class Page implements Node<Page, Link> {
   }
 
   /**
+   * Clears the internal storage of the parsed content of this page.
+   */
+  public void clearCache() {
+    parsed = null;
+  }
+
+  /**
    * Cleans the given url of irrelevant or non-supported aspects. Note that
    * query strings are not considered to be independent urls.
    *

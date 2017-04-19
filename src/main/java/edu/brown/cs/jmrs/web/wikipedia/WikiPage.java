@@ -3,7 +3,9 @@ package edu.brown.cs.jmrs.web.wikipedia;
 import java.io.IOException;
 import java.lang.reflect.Type;
 import java.util.Set;
+import java.util.regex.Pattern;
 
+import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
 import com.google.gson.JsonElement;
@@ -11,6 +13,7 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonSerializationContext;
 import com.google.gson.JsonSerializer;
 
+import edu.brown.cs.jmrs.web.LinkFinder;
 import edu.brown.cs.jmrs.web.Page;
 
 /**
@@ -28,8 +31,10 @@ public class WikiPage extends Page {
       "https://en.wikipedia.org/wiki/";
 
   // Common regexes
-  public static final String WIKIPEDIA_DOMAIN_REGEX =
-      HTTP_REGEX + ".*?\\.wikipedia\\.org";
+  public static final Pattern WIKIPEDIA_DOMAIN_REGEX =
+      Pattern.compile(HTTP_REGEX + ".*?\\.wikipedia\\.org");
+  public static final Pattern WIKIPEDIA_ARTICLE_REGEX =
+      Pattern.compile(WIKIPEDIA_DOMAIN_REGEX.pattern() + "\\/wiki\\/.*");
 
   /**
    * @param url
@@ -90,6 +95,33 @@ public class WikiPage extends Page {
    *           If the page could not be reached or loaded.
    */
   public String getInnerContent() throws IOException {
+    return getBaseInnerContent().outerHtml();
+  }
+
+  /**
+   * @return The article-specific content in the Wikipedia page.
+   * @param lf
+   *          The LinkFinder to use to limit the links on the page.
+   * @throws IOException
+   *           If the page could not be reached or loaded.
+   */
+  public String getInnerContent(LinkFinder<WikiPage> lf) throws IOException {
+    Elements content = getBaseInnerContent();
+    Set<String> allowableLinks = lf.links(this);
+    // note: the speed of this is dependent on allowableLinks being a HashSet
+    for (Element link : content.select("a[href]")) {
+      if (!allowableLinks.contains(link.attr("abs:href"))) {
+        // replace the element with only it's inner html
+        String html = link.html();
+        link.before(html);
+        link.remove();
+      }
+    }
+    return content.outerHtml();
+
+  }
+
+  private Elements getBaseInnerContent() throws IOException {
     // TODO : More efficent?
     Elements content = parsedContent().select("#content").clone();
 
@@ -103,11 +135,17 @@ public class WikiPage extends Page {
     // remove everything after "See Also" (inclusive)
     Elements seeAlso =
         content.select(
-            "#content > #bodyContent > #mw-content-text  > *:has(#See_also)");
+            "#content > #bodyContent > #mw-content-text > *:has(#See_also)");
     seeAlso.nextAll().remove();
     seeAlso.remove();
 
-    return content.outerHtml();
+    // remove all references
+    content.select("sup.reference").remove();
+
+    // remove all "[edit]" tags
+    content.select(".mw-editsection").remove();
+
+    return content;
   }
 
   /***************************************************************************/
@@ -120,7 +158,7 @@ public class WikiPage extends Page {
    * @return Whether url is under the Wikipedia.org domain.
    */
   public static boolean isWikipediaUrl(String url) {
-    return cleanUrl(url).matches(WIKIPEDIA_DOMAIN_REGEX);
+    return WIKIPEDIA_DOMAIN_REGEX.matcher(cleanUrl(url)).matches();
   }
 
   /**
@@ -129,9 +167,10 @@ public class WikiPage extends Page {
    * @return Whether url is a Wikipedia article page.
    */
   public static boolean isWikipediaArticle(String url) {
-    return url.matches(WIKIPEDIA_DOMAIN_REGEX + "\\/wiki\\/.*")
+    return WIKIPEDIA_ARTICLE_REGEX.matcher(url).matches()
         // ensure there aren't things of the type "Wikipedia:*" or "File:*"
-        && url.indexOf(':', 6) == -1; // 5 = length of 'https:"
+        && url.indexOf(':', 6) == -1 // 5 = length of 'https:"
+        && !url.contains("#cite_note");
   }
 
   /**
