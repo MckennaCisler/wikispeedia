@@ -1,4 +1,4 @@
-package edu.brown.cs.jmrs.io;
+package edu.brown.cs.jmrs.io.db;
 
 import java.sql.ResultSet;
 import java.util.concurrent.ConcurrentHashMap;

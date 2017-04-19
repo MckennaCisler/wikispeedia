@@ -40,8 +40,10 @@ public class WikiHandlers implements SparkHandlers {
     @Override
     public String handle(Request req, Response res) {
       try {
-        return WikiPage.fromName(req.params(":name")).getInnerContent();
+        return WikiPage.fromName(req.params(":name"))
+            .getInnerContent(linkFinder);
       } catch (IOException | IllegalArgumentException e) {
+        e.printStackTrace();
         return SparkServer.reqError(e.getMessage());
       }
     }
@@ -61,6 +63,7 @@ public class WikiHandlers implements SparkHandlers {
         return WikiInterpreter.GSON.toJson(
             linkFinder.linkedPages(WikiPage.fromName(req.params(":name"))));
       } catch (IOException | IllegalArgumentException e) {
+        e.printStackTrace();
         return SparkServer.reqError(e.getMessage());
       }
     }

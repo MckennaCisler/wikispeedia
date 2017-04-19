@@ -63,6 +63,8 @@ public class LinkFinderMethod<P extends Page> implements LinkFinder<P> {
 
     Set<String> urls = new HashSet<>(links.size());
     for (Element el : links) {
+      // use absolute link in case there are external links which may have a
+      // wikipedia-like suffix.
       String link = el.attr("abs:href");
       if (pred.apply(link)) {
         urls.add(link);

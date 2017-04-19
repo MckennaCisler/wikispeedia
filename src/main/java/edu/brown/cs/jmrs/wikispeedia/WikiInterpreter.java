@@ -152,29 +152,28 @@ public class WikiInterpreter implements CommandInterpreter {
         if (player.goToPage(new WikiPage(reqPage))) {
           // if could go to page (and thus did go to page)
           result =
-              Command.RETURN_PAGE.build(
-                  ImmutableMap.of("text", player.getCurPage().getInnerContent(),
-                      "links", player.getLinks()));
+              Command.RETURN_PAGE.build(ImmutableMap.of("text",
+                  player.getCurPage().getInnerContent(lobby.getLinkFinder()),
+                  "links", player.getLinks()));
         } else {
           // if we can't go to the page, revert to the previous current
           result =
               Command.RETURN_PAGE.build(ImmutableMap.of("error",
                   String.format("Player cannot move from page %s to %s",
                       curPage, reqPage),
-                  "text", curPlayerPage.getInnerContent(), "links",
-                  lobby.getLinkFinder().linkedPages(curPlayerPage)));
+                  "text", curPlayerPage.getInnerContent(lobby.getLinkFinder()),
+                  "links", lobby.getLinkFinder().linkedPages(curPlayerPage)));
         }
       } catch (IOException e1) {
         try {
           result =
-              Command.RETURN_PAGE.build(ImmutableMap.of("error",
-                  String.format("Error in accessing page %s: %s", curPage,
-                      e1.getMessage(), "text", curPlayerPage.getInnerContent(),
-                      "links",
-                      lobby.getLinkFinder().linkedPages(curPlayerPage))));
+              Command.RETURN_PAGE.build(ImmutableMap.of("error", String.format(
+                  "Error in accessing page %s: %s", curPage, e1.getMessage(),
+                  "text", curPlayerPage.getInnerContent(lobby.getLinkFinder()),
+                  "links", lobby.getLinkFinder().linkedPages(curPlayerPage))));
         } catch (IOException e2) {
           // this should never happen (this page shoudl've been cached and
-          // already visited.
+          // already visited. TODO: COuld it?
         }
       }
       lobby.getServer().sendToClient(clientId, result);
