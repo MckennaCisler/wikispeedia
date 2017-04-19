@@ -6,7 +6,6 @@ import java.util.Set;
 import java.util.regex.Pattern;
 
 import org.jsoup.nodes.Element;
-import org.jsoup.select.Elements;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
@@ -76,7 +75,7 @@ public class WikiPage extends Page {
    *           If the page could not be reached or loaded.
    */
   public String getTitle() throws IOException {
-    return parsedContent().select("#firstHeading").text();
+    return parsedContentOriginal().select("#firstHeading").text();
   }
 
   /**
@@ -85,29 +84,22 @@ public class WikiPage extends Page {
    *           If the page could not be reached or loaded.
    */
   public String getBlurb() throws IOException {
-    return parsedContent().select("#mw-content-text > p").first().text()
+    return parsedContentOriginal().select("#mw-content-text > p").first().text()
         .replaceAll("\\[\\d+\\]", "");
   }
 
   /**
-   * @return The article-specific content in the Wikipedia page.
-   * @throws IOException
-   *           If the page could not be reached or loaded.
-   */
-  public String getInnerContent() throws IOException {
-    return getBaseInnerContent().outerHtml();
-  }
-
-  /**
-   * @return The article-specific content in the Wikipedia page.
+   * @return The parsedContent() of the Wikipedia page, but with any links NOT
+   *         matched by lf replaced with just their plaintext. Returns Element
+   *         so that can be input into ContentReformatters.
    * @param lf
    *          The LinkFinder to use to limit the links on the page.
    * @throws IOException
    *           If the page could not be reached or loaded.
    */
-  public String getInnerContent(LinkFinder<WikiPage> lf) throws IOException {
-    Elements content = getBaseInnerContent();
+  public Element linksMatching(LinkFinder<WikiPage> lf) throws IOException {
     Set<String> allowableLinks = lf.links(this);
+    Element content = parsedContent(); // copy
     // note: the speed of this is dependent on allowableLinks being a HashSet
     for (Element link : content.select("a[href]")) {
       if (!allowableLinks.contains(link.attr("abs:href"))) {
@@ -117,34 +109,6 @@ public class WikiPage extends Page {
         link.remove();
       }
     }
-    return content.outerHtml();
-
-  }
-
-  private Elements getBaseInnerContent() throws IOException {
-    // TODO : More efficent?
-    Elements content = parsedContent().select("#content").clone();
-
-    // remove everything before the title
-    content.select("#content > #firstHeading").prevAll().remove();
-
-    // remove everything after mw-content-text
-    content.select("#content > #bodyContent > #mw-content-text").nextAll()
-        .remove();
-
-    // remove everything after "See Also" (inclusive)
-    Elements seeAlso =
-        content.select(
-            "#content > #bodyContent > #mw-content-text > *:has(#See_also)");
-    seeAlso.nextAll().remove();
-    seeAlso.remove();
-
-    // remove all references
-    content.select("sup.reference").remove();
-
-    // remove all "[edit]" tags
-    content.select(".mw-editsection").remove();
-
     return content;
   }
 
@@ -219,7 +183,7 @@ public class WikiPage extends Page {
     try {
       System.out.println(start.getTitle());
       System.out.println(start.getBlurb());
-      start.getInnerContent();
+      start.parsedContent();
       // System.out.println(start.getInnerContent());
     } catch (IOException e) {
       System.out.println(e.getMessage());

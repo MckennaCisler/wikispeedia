@@ -152,25 +152,25 @@ public class WikiInterpreter implements CommandInterpreter {
         if (player.goToPage(new WikiPage(reqPage))) {
           // if could go to page (and thus did go to page)
           result =
-              Command.RETURN_PAGE.build(ImmutableMap.of("text",
-                  player.getCurPage().getInnerContent(lobby.getLinkFinder()),
-                  "links", player.getLinks()));
+              Command.RETURN_PAGE
+                  .build(getPlayerPageInfo(curPlayerPage, lobby));
         } else {
           // if we can't go to the page, revert to the previous current
           result =
-              Command.RETURN_PAGE.build(ImmutableMap.of("error",
-                  String.format("Player cannot move from page %s to %s",
-                      curPage, reqPage),
-                  "text", curPlayerPage.getInnerContent(lobby.getLinkFinder()),
-                  "links", lobby.getLinkFinder().linkedPages(curPlayerPage)));
+              Command.RETURN_PAGE.build(ImmutableMap.builder()
+                  .put("error",
+                      String.format("Player cannot move from page %s to %s",
+                          curPage, reqPage))
+                  .putAll(getPlayerPageInfo(curPlayerPage, lobby)).build());
         }
       } catch (IOException e1) {
         try {
           result =
-              Command.RETURN_PAGE.build(ImmutableMap.of("error", String.format(
-                  "Error in accessing page %s: %s", curPage, e1.getMessage(),
-                  "text", curPlayerPage.getInnerContent(lobby.getLinkFinder()),
-                  "links", lobby.getLinkFinder().linkedPages(curPlayerPage))));
+              Command.RETURN_PAGE.build(ImmutableMap.builder()
+                  .put("error",
+                      String.format("Error in accessing page %s: %s", curPage,
+                          e1.getMessage()))
+                  .putAll(getPlayerPageInfo(curPlayerPage, lobby)).build());
         } catch (IOException e2) {
           // this should never happen (this page shoudl've been cached and
           // already visited. TODO: COuld it?
@@ -191,4 +191,11 @@ public class WikiInterpreter implements CommandInterpreter {
     }
   }
 
+  private Map<String, ?> getPlayerPageInfo(WikiPage page, WikiLobby lobby)
+      throws IOException {
+    return ImmutableMap.of("text",
+        lobby.getContentFormatter()
+            .stringFormat(page.linksMatching(lobby.getLinkFinder())),
+        "links", lobby.getLinkFinder().linkedPages(page));
+  }
 }

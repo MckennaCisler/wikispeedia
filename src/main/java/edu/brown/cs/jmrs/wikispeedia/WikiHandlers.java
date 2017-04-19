@@ -2,11 +2,19 @@ package edu.brown.cs.jmrs.wikispeedia;
 
 import java.io.IOException;
 
+import com.google.common.collect.ImmutableList;
+
 import edu.brown.cs.jmrs.ui.SparkHandlers;
 import edu.brown.cs.jmrs.ui.SparkServer;
+import edu.brown.cs.jmrs.web.ContentFormatter;
+import edu.brown.cs.jmrs.web.ContentFormatterChain;
 import edu.brown.cs.jmrs.web.LinkFinder;
+import edu.brown.cs.jmrs.web.wikipedia.WikiAnnotationRemover;
+import edu.brown.cs.jmrs.web.wikipedia.WikiBodyFormatter;
+import edu.brown.cs.jmrs.web.wikipedia.WikiFooterRemover;
 import edu.brown.cs.jmrs.web.wikipedia.WikiPage;
 import edu.brown.cs.jmrs.web.wikipedia.WikiPageLinkFinder;
+import edu.brown.cs.jmrs.web.wikipedia.WikiPageLinkFinder.Filter;
 import spark.Request;
 import spark.Response;
 import spark.Route;
@@ -20,7 +28,12 @@ import spark.template.freemarker.FreeMarkerEngine;
  *
  */
 public class WikiHandlers implements SparkHandlers {
-  private static LinkFinder<WikiPage> linkFinder = new WikiPageLinkFinder();
+  private static LinkFinder<WikiPage> linkFinder =
+      new WikiPageLinkFinder(Filter.DISAMBIGUATION);
+  private static ContentFormatter<WikiPage> contentFormatter =
+      new ContentFormatterChain<WikiPage>(
+          ImmutableList.of(new WikiBodyFormatter(), new WikiFooterRemover(),
+              new WikiAnnotationRemover()));
 
   @Override
   public void registerHandlers(FreeMarkerEngine freeMarker) {
@@ -40,8 +53,8 @@ public class WikiHandlers implements SparkHandlers {
     @Override
     public String handle(Request req, Response res) {
       try {
-        return WikiPage.fromName(req.params(":name"))
-            .getInnerContent(linkFinder);
+        return contentFormatter.stringFormat(
+            WikiPage.fromName(req.params(":name")).linksMatching(linkFinder));
       } catch (IOException | IllegalArgumentException e) {
         e.printStackTrace();
         return SparkServer.reqError(e.getMessage());

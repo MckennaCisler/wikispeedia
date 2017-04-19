@@ -57,7 +57,7 @@ public class Page implements Node<Page, Link> {
    *           If the page could not be reached or loaded.
    */
   public String finalUrl() throws IOException {
-    return cleanUrl(parsedContent().location());
+    return cleanUrl(parsedContentOriginal().location());
   }
 
   /**
@@ -94,10 +94,33 @@ public class Page implements Node<Page, Link> {
    *           If the page could not be reached.
    */
   public Document parsedContent() throws IOException {
+    return parsedContentOriginal().clone();
+  }
+
+  /**
+   * @return The parsed content of the page. Note: for efficiency reasons, this
+   *         returns the interior copy of the parsed content, which WILL be
+   *         changed if modified outside of this object. Use caution when using.
+   * @throws IOException
+   *           If the page could not be reached.
+   */
+  protected Document parsedContentOriginal() throws IOException {
     if (parsed == null) {
       parsed = Jsoup.connect(url).get();
     }
     return parsed;
+  }
+
+  /**
+   * @param formatter
+   *          The formatter to format parsedContent() by.
+   * @return The parsedContent() of this Page, but formatted using formatter.
+   * @throws IOException
+   *           If the page could not be reached or loaded.
+   */
+  public String formattedContent(ContentFormatter<Page> formatter)
+      throws IOException {
+    return formatter.stringFormat(this);
   }
 
   /**

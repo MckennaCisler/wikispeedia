@@ -25,7 +25,7 @@ public class WikiPageLinkFinder implements LinkFinder<WikiPage> {
    *
    */
   public enum Filter {
-    DISAMBAUGUATION((url) -> url.contains("(disambiguation)"));
+    DISAMBIGUATION((url) -> url.contains("(disambiguation)"));
 
     // a method to IGNORE links by (if it's true, the link is filtered out)
     private Predicate<String> method;
@@ -77,7 +77,7 @@ public class WikiPageLinkFinder implements LinkFinder<WikiPage> {
     return (url) -> {
       for (Filter filter : filters) {
         // if this filter says we should filter it, don't take this url
-        if (!filter.test(url)) {
+        if (filter.test(url)) {
           return false;
         }
       }

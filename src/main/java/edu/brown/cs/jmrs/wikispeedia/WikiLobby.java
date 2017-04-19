@@ -12,6 +12,7 @@ import com.google.common.collect.ImmutableList;
 
 import edu.brown.cs.jmrs.server.Server;
 import edu.brown.cs.jmrs.server.customizable.Lobby;
+import edu.brown.cs.jmrs.web.ContentFormatter;
 import edu.brown.cs.jmrs.web.LinkFinder;
 import edu.brown.cs.jmrs.web.wikipedia.WikiPage;
 import edu.brown.cs.jmrs.wikispeedia.WikiInterpreter.Command;
@@ -36,6 +37,7 @@ public class WikiLobby implements Lobby {
                                                  // to
                                                  // player
   private transient LinkFinder<WikiPage> linkFinder;
+  private transient ContentFormatter<WikiPage> contentFormatter;
   private Instant startTime = null;
   private Instant endTime = null;
 
@@ -264,6 +266,14 @@ public class WikiLobby implements Lobby {
    */
   public LinkFinder<WikiPage> getLinkFinder() {
     return linkFinder;
+  }
+
+  /**
+   * @return The ContentFormatter associated with this lobby, used to reformat
+   *         the parsedContent() of player's Wikipages.
+   */
+  public ContentFormatter<WikiPage> getContentFormatter() {
+    return contentFormatter;
   }
 
 }
