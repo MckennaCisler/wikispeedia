@@ -6,6 +6,7 @@ import java.util.Map;
 import com.google.common.collect.ImmutableMap;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.google.gson.JsonObject;
 
 import edu.brown.cs.jmrs.server.customizable.CommandInterpreter;
 import edu.brown.cs.jmrs.server.customizable.Lobby;
@@ -18,7 +19,7 @@ import edu.brown.cs.jmrs.web.wikipedia.WikiPage;
  *
  */
 public class WikiInterpreter implements CommandInterpreter {
-  private static final Gson GSON = registerSerializers();
+  public static final Gson GSON = registerSerializers(); // TODO
 
   /**
    * Registers custom Json (Gson) serializers for this project.
@@ -30,29 +31,54 @@ public class WikiInterpreter implements CommandInterpreter {
    */
   private static Gson registerSerializers() {
     GsonBuilder builder = new GsonBuilder();
-    // builder.registerTypeAdapter(WikiPage.class, new WikiPage.Serializer());
+    builder.registerTypeAdapter(WikiPage.class, new WikiPage.Serializer());
 
     return builder.create();
   }
 
   /**
-   * All possible commands for the WikiInterpreter.
+   * All possible incoming and outgoing commands for the WikiInterpreter. Also
+   * used in WikiLobby for OUTGOING commands.
    *
    * @author mcisler
    *
    */
-  private enum Command {
+  enum Command {
+    /**
+     * INCOMING Commands.
+     */
     // Lobby-specific commands
-    GET_PLAYERS("get_players", "lobby_id"), //
-    GET_WINNER("get_winner", "lobby_id"), //
-    GET_TIME("get_time", "lobby_id"), //
-    GET_SETTINGS("get_settings", "lobby_id"), //
+    GET_PLAYERS("get_players", COMMAND_TYPE.INCOMING, "lobby_id"), //
+    GET_TIME("get_time", COMMAND_TYPE.INCOMING, "lobby_id"), //
+    GET_SETTINGS("get_settings", COMMAND_TYPE.INCOMING, "lobby_id"), //
     // Player-specific commands
-    GOTO_PAGE("goto_page", "player_id", "page_name"), //
-    GET_PATH("get_path", "player_id"); //
-    // GET_LINKS("get_links", "player_id");
+    GOTO_PAGE("goto_page", COMMAND_TYPE.INCOMING, "player_id", "page_name"), //
+    GET_PATH("get_path", COMMAND_TYPE.INCOMING, "player_id"), //
+    // GET_LINKS("get_links", COMMAND_TYPE.INCOMING, "player_id");
+    /**
+     * RESPONSEs to INCOMING Commands.
+     */
+    // Lobby-specific commands
+    RETURN_PLAYERS("return_players", COMMAND_TYPE.RESPONSE, "lobby_id"), //
+    RETURN_TIME("return_time", COMMAND_TYPE.RESPONSE, "lobby_id"), //
+    RETURN_SETTINGS("return_settings", COMMAND_TYPE.RESPONSE, "lobby_id"), //
+    RETURN_PAGE("goto_page", COMMAND_TYPE.RESPONSE, "player_id", "page_name"), //
+    RETURN_PATH("return_path", COMMAND_TYPE.RESPONSE, "player_id"), //
+    ERROR("error", COMMAND_TYPE.RESPONSE, "player_id"), //
+
+    /**
+     * OUTGOING Server Commands.
+     */
+    END_GAME("end_game", COMMAND_TYPE.OUTGOING, "lobby_id", "winner_id");
+
+    private static enum COMMAND_TYPE {
+      INCOMING, // incoming commands for RESPONSEs
+      RESPONSE, // responses to INCOMING commands
+      OUTGOING; // server event-based commands
+    }
 
     private final String command;
+    private final COMMAND_TYPE type;
     private String[] args;
 
     /**
@@ -61,8 +87,9 @@ public class WikiInterpreter implements CommandInterpreter {
      * @param command
      *          The command to create.
      */
-    Command(String command, String... args) {
+    Command(String command, COMMAND_TYPE type, String... args) {
       this.command = command;
+      this.type = type;
       this.args = args;
     }
 
@@ -73,6 +100,22 @@ public class WikiInterpreter implements CommandInterpreter {
     public String[] args() {
       return args;
     }
+
+    /**
+     * Builds the given command from the provided arguments.
+     *
+     * @param data
+     *          An object to use GSON to convert into JSON.
+     * @return A JSON string ready for sending.
+     */
+    public String build(Object data) {
+      assert type.equals(COMMAND_TYPE.RESPONSE)
+          || type.equals(COMMAND_TYPE.OUTGOING);
+      JsonObject root = new JsonObject();
+      root.addProperty("type", command);
+      root.addProperty("payload", GSON.toJson(data));
+      return GSON.toJson(root);
+    }
   }
 
   @Override
@@ -82,61 +125,70 @@ public class WikiInterpreter implements CommandInterpreter {
     String cname = (String) command.get("command");
 
     if (cname.equals(Command.GET_PLAYERS.command())) {
-      String result = new String();
-      result = GSON.toJson(lobby.getPlayers());
-
-    } else if (cname.equals(Command.GET_WINNER.command())) {
-      String result = new String();
-      result = GSON.toJson(lobby.getWinner());
+      lobby.getServer().sendToClient(clientId,
+          Command.RETURN_PLAYERS.build(lobby.getPlayers()));
 
     } else if (cname.equals(Command.GET_TIME.command())) {
-      String result = new String();
-      result = GSON.toJson(lobby.getPlayTime());
+      lobby.getServer().sendToClient(clientId,
+          Command.RETURN_TIME.build(lobby.getPlayTime()));
 
     } else if (cname.equals(Command.GET_SETTINGS.command())) {
       String result = new String();
       result =
-          GSON.toJson(ImmutableMap.builder().put("start", lobby.getStartPage())
-              .put("goal", lobby.getGoalPage())
-              .put("start_time", lobby.getStartTime()).build()); // TODO
+          Command.RETURN_SETTINGS
+              .build(ImmutableMap.builder().put("start", lobby.getStartPage())
+                  .put("goal", lobby.getGoalPage())
+                  .put("start_time", lobby.getStartTime()).build()); // TODO
+      lobby.getServer().sendToClient(clientId, result);
 
     } else if (cname.equals(Command.GOTO_PAGE.command())) {
       String result = new String();
       WikiPlayer player = lobby.getPlayer(clientId);
+      WikiPage curPlayerPage = player.getCurPage();
 
-      // if could go to page (and thus did go to page)
       String reqPage = (String) command.get("page_name");
       String curPage = player.getCurPage().getName();
       try {
         if (player.goToPage(new WikiPage(reqPage))) {
+          // if could go to page (and thus did go to page)
           result =
-              GSON.toJson(
+              Command.RETURN_PAGE.build(
                   ImmutableMap.of("text", player.getCurPage().getInnerContent(),
                       "links", player.getLinks()));
         } else {
+          // if we can't go to the page, revert to the previous current
           result =
-              GSON.toJson(ImmutableMap.of("error",
+              Command.RETURN_PAGE.build(ImmutableMap.of("error",
                   String.format("Player cannot move from page %s to %s",
                       curPage, reqPage),
-                  "text", player.getCurPage().getInnerContent(), "links",
-                  player.getLinks()));
+                  "text", curPlayerPage.getInnerContent(), "links",
+                  lobby.getLinkFinder().linkedPages(curPlayerPage)));
         }
-      } catch (IOException e) {
-        result =
-            GSON.toJson(ImmutableMap.of("error", String.format(
-                "Error in accessing page %s: %s", curPage, e.getMessage())));
+      } catch (IOException e1) {
+        try {
+          result =
+              Command.RETURN_PAGE.build(ImmutableMap.of("error",
+                  String.format("Error in accessing page %s: %s", curPage,
+                      e1.getMessage(), "text", curPlayerPage.getInnerContent(),
+                      "links",
+                      lobby.getLinkFinder().linkedPages(curPlayerPage))));
+        } catch (IOException e2) {
+          // this should never happen (this page shoudl've been cached and
+          // already visited.
+        }
       }
+      lobby.getServer().sendToClient(clientId, result);
+      lobby.update(); // check for winner
 
     } else if (cname.equals(Command.GET_PATH.command())) {
       String result = new String();
       WikiPlayer player = lobby.getPlayer(clientId);
-      result = GSON.toJson(player.getPath());
+      result = Command.RETURN_PATH.build(player.getPath());
+      lobby.getServer().sendToClient(clientId, result);
 
     } else {
-      String result = new String();
-      result =
-          GSON.toJson(
-              ImmutableMap.of("error", "Invalid command specified: " + cname));
+      lobby.getServer().sendToClient(clientId, Command.ERROR.build(
+          ImmutableMap.of("error", "Invalid command specified: " + cname)));
     }
   }
 
