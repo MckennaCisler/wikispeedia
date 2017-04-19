@@ -4,16 +4,45 @@
 	<meta charset="utf-8">
 	<title>Playing W!</title>
 	<link href="main.css" rel="stylesheet" type="text/css">
+	<link href="bootstrap.min.css" rel="stylesheet" type="text/css">
 	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.6/css/bootstrap.min.css" integrity="sha384-rwoIResjU2yc3z8GV/NPeZWAv56rSmLldC3R/AZzGRnGxQQKnKkoFVhFQhNUwEyJ" crossorigin="anonymous">
 	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.0/jquery.min.js"></script>
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/tether/1.4.0/js/tether.min.js" integrity="sha384-DztdAPBWPRXSA/3eYEEUWrWCy7G5KFbe8fFjk5JAIxUYHKkDx6Qin1DkWx51bBrb" crossorigin="anonymous"></script>
 	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.6/js/bootstrap.min.js" integrity="sha384-vBWWzlZJ8ea9aCX4pEW3rVHjgjt7zpkNpZk+02D9phzyeVkE+jo0ieGizqPLForn" crossorigin="anonymous"></script>
+	<script src="serverConn.js"></script>
 	<link rel="icon" type="image/png" href="assets/favicon-32x32.png" sizes="32x32" />
 	<link rel="icon" type="image/png" href="assets/favicon-16x16.png" sizes="16x16" />
 </head>
 <body>
-	<p id="article">
-	</p>
-	<script src="play.js"></script>
+	<div id="game-div">
+		<div class="row" id="info-panel">
+		  <div class="col-md-8">
+				<div class="panel panel-default">
+					<div class="panel-body" id="history"> </div>
+					<div class="panel-footer" id="history-label"> Player history </div>
+				</div>
+		  </div>
+
+			<div class="col-md-2">
+				<div class="panel panel-default">
+					<div class="panel-body" id="destination"> </div>
+					<div class="panel-footer" id="destination-label"> Destination </div>
+				</div>
+			</div>
+
+		  <div class="col-md-2">
+				<div class="panel panel-default">
+					<div class="panel-body" id="timer"> </div>
+					<div class="panel-footer" id="timer-label"> Time </div>
+				</div>
+		  </div>
+		</div>
+
+		<div class="panel panel-default" id="title-article-panel">
+			<div class="panel-heading" id="title"> </div>
+			<div class="panel-body" id="article"> </div>
+		</div>
+	</div>
 </body>
+<script src="play.js"></script>
 </html>
