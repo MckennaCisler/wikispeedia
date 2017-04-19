@@ -1,43 +1,73 @@
-var ws;
-var name = "anon";
+let ws;
+let $chatLog;
+
+function send(obj) {
+	ws.send(JSON.stringify(obj));
+}
 
 function setName(newName) {
-  ws.send("setname" + "newName")
-  name = newName;
+	const payload = { "command":"set_client_id", "client_id":newName };
+  send(payload);
 }
 
-function joinLobby(text) {
-  ws.send("join" + text);
+function joinLobby(lobbyName) {
+	const payload = { "command":"join_lobby", "lobby_id":lobbyName };
+  send(payload);
 }
 
-function closeLobby() {
-  ws.send("close lobby");
+function leaveLobby() {
+	const payload = { "command":"leave_lobby" };
+  send(payload);
 }
 
-function startLobby(text) {
-  ws.send("start" + text);
+function startLobby(lobbyName) {
+	const payload = { "command":"start_lobby", "lobby_id":lobbyName };
+  send(payload);
 }
 
 function message(text) {
-  ws.send("message" + text);
+	const payload = { "command":"message", "message":text };
+  send(payload);
+}
+
+function whisper(recipient, text) {
+	const payload = { "command":"whisper", "recipient":recipient, "message":text };
+  send(payload);
 }
 
 $(document).ready(() => {
   if ("WebSocket" in window)
   {
     console.log("WebSocket is supported by your Browser!");
-
+		$chatLog = $("#chatlog");
     // Let us open a web socket
-    ws = new WebSocket("ws://localhost:4567");
+    ws = new WebSocket("ws://localhost:4568");
 
     ws.onopen = function()
     {
+			setName("");
     };
 
     ws.onmessage = function (evt)
     {
-      var received_msg = evt.data;
-      console.log(received_msg);
+      const received_msg = evt.data;
+
+			const message = JSON.parse(received_msg)
+      console.log(message);
+
+			switch(message.type) {
+				case "message":
+					displayMessage("message", message.sender, message.message);
+					break;
+				case "whisper":
+					displayMessage("whisper", message.sender, message.message);
+					break;
+				case "bounced_whisper":
+					displayBouncedWhisper(message.target);
+					break;
+				default:
+					console.log("unhandled message of type: " + message.type);
+			}
     };
 
     ws.onclose = function()
@@ -51,3 +81,12 @@ $(document).ready(() => {
     alert("WebSocket NOT supported by your Browser!");
   }
 });
+
+function displayMessage(type, sender, message) {
+	console.log("<p class='" + type + "'>" + sender + ": " + message + "</p>");
+	$chatLog.prepend("<p class='" + type + "'>" + sender + ": " + message + "</p>");
+}
+
+function displayBouncedWhisper(recipient) {
+	$chatLog.prepend("<p class='bounced'>" + recipient + " does not exist in this lobby.</p>");
+}

@@ -17,6 +17,9 @@ public class ChatLobby implements Lobby {
   private Server       server;
   private boolean      closed;
 
+  public ChatLobby() {
+  }
+
   public ChatLobby(Server server, String id) {
     this.server = server;
     this.id = id;
@@ -45,6 +48,7 @@ public class ChatLobby implements Lobby {
     Gson gson = new Gson();
     JsonObject jsonObject = new JsonObject();
     jsonObject.addProperty("type", "message");
+    jsonObject.addProperty("error", "");
     jsonObject.addProperty("sender", fromId);
     jsonObject.addProperty("message", message);
 
@@ -55,6 +59,34 @@ public class ChatLobby implements Lobby {
         server.sendToClient(playerId, toClient);
       }
     }
+  }
+
+  public void sendMessage(String recipientId, String fromId, String message) {
+    Gson gson = new Gson();
+
+    for (String playerId : playerIds) {
+      if (playerId.equals(recipientId)) {
+        JsonObject jsonObject = new JsonObject();
+        jsonObject.addProperty("type", "whisper");
+        jsonObject.addProperty("error", "");
+        jsonObject.addProperty("sender", fromId);
+        jsonObject.addProperty("message", message);
+
+        String toClient = gson.toJson(jsonObject);
+        server.sendToClient(playerId, toClient);
+        return;
+      }
+    }
+
+    JsonObject jsonObject = new JsonObject();
+    jsonObject.addProperty("type", "bounced_whisper");
+    jsonObject.addProperty(
+        "error",
+        "No client with specified ID exists in this lobby");
+    jsonObject.addProperty("target", recipientId);
+
+    String toClient = gson.toJson(jsonObject);
+    server.sendToClient(fromId, toClient);
   }
 
   @Override

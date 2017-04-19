@@ -41,6 +41,18 @@ body {
   cursor: pointer;
 }
 
+.message {
+  color: black;
+}
+
+.whisper {
+  color: blue;
+}
+
+.bounced {
+  color: red;
+}
+
 ul {
   text-align: left;
   display: inline-block;
