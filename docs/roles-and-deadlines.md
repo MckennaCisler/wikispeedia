@@ -2,7 +2,11 @@
 
 #### Jacob:
 HTML/CSS/Javascript for general website, design
-- Deadline 1?: Static HTML of the lobby and endgame
+- Deadline 1: Static HTML of the lobby and endgame (4/19)
+- Deadline 2: Pages fully working with dummy data (4/21)
+- Deadline 3: FTL conversion of the practice HTML files (4/24)
+- Deadline 4: Canvas of the endgame working (4/26)
+- Deadline 5: Mobile viewport (optional) and other embellishments (5/1)
 
 #### McKenna:
 Interfacing with Wikipedia, data, routing

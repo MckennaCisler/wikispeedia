@@ -1,6 +1,11 @@
 ## Testing
 
 #### Jacob:
+ - Manually clicking every single button on each page
+ - Since my Javascript is all visual, testing will have to be consistently done by humans
+ - Testing window resizing is also going to be a major focus
+   - Especially including the canvases
+ - Once mobile viewports are added, Chrome Dev Tools can be used
 
 #### McKenna:
 ##### Wikipedia Parsing:
