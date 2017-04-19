@@ -65,7 +65,16 @@
 .main_content {
 	margin-top: 1em;
 }
-
+.end_row {
+	
+}
+.running {
+	color: red;
+}
+.end_canvas {
+	width: 100vw;
+	height: 30px;
+}
 #main_buttons {
 	margin-top: 15px;
 	align-self: center;
