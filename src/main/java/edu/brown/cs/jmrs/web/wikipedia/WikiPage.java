@@ -1,13 +1,16 @@
 package edu.brown.cs.jmrs.web.wikipedia;
 
 import java.io.IOException;
+import java.lang.reflect.Type;
 import java.util.Set;
 
 import org.jsoup.select.Elements;
 
-import com.google.common.collect.ImmutableMap;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonSerializationContext;
+import com.google.gson.JsonSerializer;
 
-import edu.brown.cs.jmrs.io.JsonSerializable;
 import edu.brown.cs.jmrs.web.Page;
 
 /**
@@ -17,7 +20,7 @@ import edu.brown.cs.jmrs.web.Page;
  * @author mcisler
  *
  */
-public class WikiPage extends Page implements JsonSerializable {
+public class WikiPage extends Page {
 
   // TODO Optimize with Pattern.compile() among others :
   // http://www.javaworld.com/article/2077757/core-java/optimizing-regular-expressions-in-java.html?page=2
@@ -54,7 +57,12 @@ public class WikiPage extends Page implements JsonSerializable {
    * @return The name of this Wikipedia page as indicated by it's url.
    */
   public String getName() {
-    return url().substring(url().lastIndexOf('/'));
+    int lastSlash = url().lastIndexOf('/');
+    if (lastSlash != -1 && lastSlash + 1 < url().length()) {
+      return url().substring(lastSlash + 1);
+    } else {
+      return url();
+    }
   }
 
   /**
@@ -135,20 +143,29 @@ public class WikiPage extends Page implements JsonSerializable {
     return isWikipediaArticle(url) && url != super.url();
   }
 
-  @Override
-  public String toJson() {
-    return toJson(ImmutableMap.of("url", url(), "name", getName()));
-  }
-
   /**
-   * @return A more complete Json of this Wikipedia page which requests data
-   *         about the page.
-   * @throws IOException
-   *           If the article could not be read.
+   * Custom serializer for use with GSON.
+   *
+   * @author mcisler
+   *
    */
-  public String toJsonFull() throws IOException {
-    return toJson(ImmutableMap.of("url", url(), "name", getName(), "title",
-        getTitle(), "blurb", getBlurb()));
+  public static class Serializer implements JsonSerializer<WikiPage> {
+
+    @Override
+    public JsonElement serialize(WikiPage src, Type typeOfSrc,
+        JsonSerializationContext context) {
+      JsonObject root = new JsonObject();
+      root.addProperty("url", src.url());
+      root.addProperty("name", src.getName());
+      // try {
+      // // root.addProperty("title", src.getTitle());
+      // // root.addProperty("blurb", src.getBlurb());
+      // root.addProperty("found", true);
+      // } catch (IOException e) {
+      // root.addProperty("found", false);
+      // }
+      return root;
+    }
   }
 
   /**

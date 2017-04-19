@@ -34,12 +34,16 @@ class ServerWorker extends WebSocketServer {
   }
 
   public boolean setPlayerId(WebSocket conn, String playerId) {
-    Player newPlayer = new Player(playerId);
-    if (players.containsValue(newPlayer)) {
-      return false;
-    } else {
-      players.put(conn, newPlayer);
+    if (playerId.length() == 0) {
+      Player player = new Player(conn.hashCode() + "");
+      player.setLobby(players.get(conn).getLobby());
+      while (!players.putNoOverwrite(conn, player)) {
+        player = new Player(Math.random() + "");
+      }
       return true;
+    } else {
+      Player newPlayer = new Player(playerId);
+      return players.putNoOverwrite(conn, newPlayer);
     }
   }
 
@@ -64,6 +68,11 @@ class ServerWorker extends WebSocketServer {
   }
 
   public void playerDisconnected(WebSocket conn) {
+    Player player = players.get(conn);
+    if (player.getLobby() != null) {
+      player.getLobby().removeClient(player.getId());
+      player.setLobby(null);
+    }
     players.remove(conn);
   }
 

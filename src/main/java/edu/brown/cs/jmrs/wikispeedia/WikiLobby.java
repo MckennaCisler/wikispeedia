@@ -14,6 +14,7 @@ import edu.brown.cs.jmrs.server.Server;
 import edu.brown.cs.jmrs.server.customizable.Lobby;
 import edu.brown.cs.jmrs.web.LinkFinder;
 import edu.brown.cs.jmrs.web.wikipedia.WikiPage;
+import edu.brown.cs.jmrs.wikispeedia.WikiInterpreter.Command;
 
 /**
  * Coordinates a lobby of players in a Wiki game.
@@ -28,20 +29,20 @@ public class WikiLobby implements Lobby {
    */
   // private static AtomicInteger nextLobbyId = new AtomicInteger(0);
 
-  private final Server server;
+  private transient Server server;
   private final String id;
   private final Map<String, WikiPlayer> players; // from
                                                  // id
                                                  // to
                                                  // player
-  private final LinkFinder<WikiPage> linkFinder;
+  private transient LinkFinder<WikiPage> linkFinder;
   private Instant startTime = null;
   private Instant endTime = null;
 
   private WikiPage startPage;
   private WikiPage goalPage;
 
-  private WikiPlayer winner;
+  private transient WikiPlayer winner;
 
   /**
    * Constructs a new WikiLobby (likely through a Factory in
@@ -137,21 +138,31 @@ public class WikiLobby implements Lobby {
       }
     }
 
-    if (done.size() == 1) {
-      winner = done.get(0);
-      stop();
+    if (done.size() > 0) {
+      if (done.size() > 1) {
+        // sort by play time TODO: what about shortest path?
+        done.sort((p1, p2) -> p1.getPlayTime().compareTo(p2.getPlayTime()));
+      }
 
-    } else if (done.size() > 1) {
-      // sort by play time TODO: what about shortest path?
-      done.sort((p1, p2) -> p1.getPlayTime().compareTo(p2.getPlayTime()));
       winner = done.get(0);
       stop();
+      String endGameData = Command.END_GAME.build(winner);
+      for (Entry<String, WikiPlayer> entry : players.entrySet()) {
+        server.sendToClient(entry.getKey(), endGameData);
+      }
     }
   }
 
   /****************************************/
   /* GETTERS */
   /****************************************/
+
+  /**
+   * @return The server associated with this lobby.
+   */
+  public Server getServer() {
+    return server;
+  }
 
   /**
    * @return The players in this map.

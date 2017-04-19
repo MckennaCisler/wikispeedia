@@ -2,7 +2,6 @@ package edu.brown.cs.jmrs.wikispeedia;
 
 import java.io.IOException;
 
-import edu.brown.cs.jmrs.io.JsonSerializable;
 import edu.brown.cs.jmrs.ui.SparkHandlers;
 import edu.brown.cs.jmrs.ui.SparkServer;
 import edu.brown.cs.jmrs.web.LinkFinder;
@@ -58,15 +57,9 @@ public class WikiHandlers implements SparkHandlers {
     @Override
     public String handle(Request req, Response res) {
       try {
-        return JsonSerializable.toJson(
-            linkFinder.linkedPages(WikiPage.fromName(req.params(":name"))),
-            (wp) -> {
-              try {
-                return wp.toJsonFull();
-              } catch (IOException e) {
-                return "";
-              }
-            });
+        // TODO
+        return WikiInterpreter.GSON.toJson(
+            linkFinder.linkedPages(WikiPage.fromName(req.params(":name"))));
       } catch (IOException | IllegalArgumentException e) {
         return SparkServer.reqError(e.getMessage());
       }
