@@ -1,5 +1,55 @@
 @charset "utf-8";
-/* CSS Document */
+
+/* Game page */
+
+#game-div {
+	margin-left: 40px;
+	margin-right: 40px;
+	margin-top: 20px;
+}
+
+#history {
+	text-align: left;
+	font-size: medium;
+}
+
+#history-label {
+	text-align: left;
+	font-size: small;
+}
+
+#destination {
+	text-align: center;
+	font-size: medium;
+}
+
+#destination-label {
+	text-align: center;
+	font-size: small;
+}
+
+#timer {
+	text-align: center;
+	font-size: medium;
+}
+
+#timer-label {
+	text-align: center;
+	font-size: small;
+}
+
+#title {
+	font-size: x-large;
+}
+
+#article {
+	font-size: medium;
+	overflow-wrap: break-word;
+	overflow-y: scroll;
+	max-height: 370px;
+}
+
+/* Lobby page */
 
 .top {
 	float: top;
@@ -7,27 +57,42 @@
 	border-bottom: thin solid black;
 	background: #CCC;
 }
+
 .title-a {
 	color: black;
 }
+
 .main_content {
 	margin-top: 1em;
+}
+.end_row {
+	
+}
+.running {
+	color: red;
+}
+.end_canvas {
+	width: 100vw;
+	height: 30px;
 }
 #main_buttons {
 	margin-top: 15px;
 	align-self: center;
 }
+
 #main_buttons .btn-outline-secondary {
 	color: black;
 }
+
 #counter {
-	float: right; 
-	display: none; 
+	float: right;
+	display: none;
 	padding-bottom: .2em;
-	padding-right: 1em; 
-	padding-left: 1em; 
-	border-left: thin solid black; 
+	padding-right: 1em;
+	padding-left: 1em;
+	border-left: thin solid black;
 }
+
 body {
 	background-image: url("assets/shattered.png");
 }
