@@ -5,7 +5,7 @@
 - List of available games (just names)
 - -> list ${games}
 
-###### Waiting:
+#### Waiting:
 - Settings and players in a game -> Start and end articles
 - -> list ${players}
 - -> ${startArticle}

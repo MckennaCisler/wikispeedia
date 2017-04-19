@@ -59,7 +59,7 @@ function updateHistory(title) {
     startIndex = 0;
     if (history.length > 12) {
       startIndex = history.length - 9;
-      historyString = "<i>" + startIndex + " articles</i> - ";
+      historyString = "<i>(" + startIndex + " articles before)</i> - ";
     }
 
     for (i = startIndex; i < history.length - 1; i++) {
