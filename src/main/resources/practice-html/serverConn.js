@@ -173,21 +173,21 @@ class ServerConn {
      * Primary WebSocket interpreters
      */
     ws_onopen() {
-		// TODO
+		// TODO : what in the world to do?
     };
 
     ws_onmessage(jsonMsg) {
         const parsedMsg = JSON.parse(jsonMsg);
 
-        if (parsedMsg.client_id === this.clientId) { // TODO!!
+        if (parsedMsg.client_id === this.clientId) { // TODO: Will the client_id of the message always be there?
             if (this.pendingResponses.contains(parsedMsg.command)) {
                 // note we can't really localize an error command to a player
                 if (parsedMsg.command === Command.ERROR.name) {
                     console.log("\nGot error: ");
                     console.log(parsedMsg);
 
-                    // explicit loose typing to catch "", null
-                } else if (parsedMsg.payload.error_message != undefined) {
+                // explicit loose typing to catch "", null
+            } else if (parsedMsg.payload.error_message != undefined) { // TODO: Is this error message always there on some return?
                     const actions = this.pendingResponses[parsedMsg.command];
                     actions.errCallback(parsedMsg.payload);
                     window.clearTimeout(actions.timeout);
@@ -204,7 +204,7 @@ class ServerConn {
     }
 
     ws_onclose() {
-        // TODO
+        // TODO : what in the world to do?
     }
 
     _send(command, callback, errCallback, args) {
@@ -229,5 +229,5 @@ class ServerConn {
 
 $(document).ready(() => {
     // global
-    var serverConn = new ServerConn("localhost:4568", "TODO - SOMETHING"); // TODO
+    var serverConn = new ServerConn("localhost:4568", "TODO - SOMETHING"); // TODO: hwo to get the client's ID???
 })
