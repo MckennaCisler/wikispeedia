@@ -64,8 +64,13 @@ class ServerWorker extends WebSocketServer {
     return lobbies.getOpenLobbies();
   }
 
-  public Lobby createLobby(String lobbyId) {
-    return lobbies.create(lobbyId, server);
+  public Lobby createLobby(String lobbyId) throws InputError {
+    Lobby lobby = lobbies.create(lobbyId, server);
+    if (lobby == null) {
+      throw new InputError("Lobby ID in use");
+    } else {
+      return lobby;
+    }
   }
 
   public Lobby getLobby(String lobbyId) {
