@@ -112,7 +112,7 @@ public class WikiInterpreter implements CommandInterpreter {
       assert type.equals(COMMAND_TYPE.RESPONSE)
           || type.equals(COMMAND_TYPE.OUTGOING);
       JsonObject root = new JsonObject();
-      root.addProperty("type", command);
+      root.addProperty("command", command);
       root.addProperty("payload", GSON.toJson(data));
       return GSON.toJson(root);
     }
@@ -146,7 +146,7 @@ public class WikiInterpreter implements CommandInterpreter {
       WikiPlayer player = lobby.getPlayer(clientId);
       WikiPage curPlayerPage = player.getCurPage();
 
-      String reqPage = (String) command.get("page_name");
+      String reqPage = (String) ((Map) command.get("payload")).get("page_name");
       String curPage = player.getCurPage().getName();
       try {
         if (player.goToPage(new WikiPage(reqPage))) {
@@ -158,7 +158,7 @@ public class WikiInterpreter implements CommandInterpreter {
           // if we can't go to the page, revert to the previous current
           result =
               Command.RETURN_PAGE.build(ImmutableMap.builder()
-                  .put("error",
+                  .put("error_message",
                       String.format("Player cannot move from page %s to %s",
                           curPage, reqPage))
                   .putAll(getPlayerPageInfo(curPlayerPage, lobby)).build());
@@ -167,7 +167,7 @@ public class WikiInterpreter implements CommandInterpreter {
         try {
           result =
               Command.RETURN_PAGE.build(ImmutableMap.builder()
-                  .put("error",
+                  .put("error_message",
                       String.format("Error in accessing page %s: %s", curPage,
                           e1.getMessage()))
                   .putAll(getPlayerPageInfo(curPlayerPage, lobby)).build());
@@ -186,8 +186,8 @@ public class WikiInterpreter implements CommandInterpreter {
       lobby.getServer().sendToClient(clientId, result);
 
     } else {
-      lobby.getServer().sendToClient(clientId, Command.ERROR.build(
-          ImmutableMap.of("error", "Invalid command specified: " + cname)));
+      lobby.getServer().sendToClient(clientId, Command.ERROR.build(ImmutableMap
+          .of("error_message", "Invalid command specified: " + cname)));
     }
   }
 

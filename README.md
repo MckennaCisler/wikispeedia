@@ -103,4 +103,10 @@ The package design is in a drawing on the team's Google drive linked here: https
 All of this information is put together on a presentation linked here: https://docs.google.com/presentation/d/1TLTGCigOeg-Qjv6DaxHQvf6MLPCUOMU5wO36yg87u4s/edit#slide=id.g21f33bc2a0_0_32.
 
 ## How to Build and Run
-_A necessary part of any README!_
+1. Run `mvn package`
+2. Run `./run` with any of the following options:
+  - `--gui` To run the main WebSocket for the GUI
+  - `--chat-test` To run the chat-test WebSocket for testing purposes. DO NOT run along with `--gui`
+  - `--spark` To run a Spark server with basic Wikipedia handlers (`/wiki/<page_name>` and `/wiki/links/<page_name>`) for testing
+  - `--spark-port <port>` To set the port of the `--spark` server.
+  - `--socket-port <port>` To set the port of either the `--gui` socket or the `--chat-test` socket.
