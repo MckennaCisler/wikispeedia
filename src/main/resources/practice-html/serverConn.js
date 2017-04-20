@@ -38,7 +38,7 @@ const Command = {
      * ([A-Z_]+)\((\".*\")\, (COMMAND_TYPE\.\w+)\, \"(.*)\"\)(,//|;)
      * ->
      * $1 : { \n\t\tname: $2, \n\t\ttype: $3,\n\t\tconstruct: ($4) => {}\n\t},
-     * (You'll need to do some manual chages... it's not the same on both sides)
+     * (You'll need to do some manual changes... it's not the same on both sides)
      */
     /**
      * INCOMING Commands.
@@ -173,12 +173,82 @@ class ServerConn {
      * Primary WebSocket interpreters
      */
     ws_onopen() {
-		// TODO : what in the world to do?
+			// This will set an initial client ID to a random value, it can be overwritten by sending a new ID later
+			const toServer = { "command":"set_client_id", "client_id":""};
+			ws.send(JSON.stringify(toServer));
     };
 
     ws_onmessage(jsonMsg) {
         const parsedMsg = JSON.parse(jsonMsg);
 
+				switch (parsedMsg.type) {
+					case "set_id_response":
+						this.clientId = parsedMsg.client_id;
+						if (parsedMsg.error_message !== "") {
+							console.log(parsedMsg.error_message);
+						}
+						break;
+					case "start_lobby_response":
+						if (parsedMsg.error_message !== "") {
+							console.log(parsedMsg.error_message);
+						} else {
+							// TODO: lobby created successfully
+						}
+						break;
+					case "leave_lobby_response":
+						if (parsedMsg.error_message !== "") {
+							console.log(parsedMsg.error_message);
+						} else {
+							// TODO: lobby left successfully
+						}
+						break;
+					case "join_lobby_response":
+						if (parsedMsg.error_message !== "") {
+							console.log(parsedMsg.error_message);
+						} else {
+							// TODO: lobby joined successfully
+						}
+						break;
+					case "get_lobbies_response":
+						if (parsedMsg.error_message !== "") {
+							console.log(parsedMsg.error_message);
+						} else {
+							const lobbies_array = parsedMsg.lobbies;
+							// TODO: something with this
+						}
+						break;
+					case "command_error": // only will get this if you send JSON with no 'command' field to the server
+						console.log(parsedMsg.error_message);
+						break;
+
+						// From here are the wiki-specific commands
+
+					case "return_players":
+							// TODO: something
+						break;
+					case "return_time":
+							// TODO: something
+						break;
+					case "return_settings":
+							// TODO: something
+						break;
+					case "goto_page":
+							// TODO: something
+						break;
+					case "return_path":
+							// TODO: something
+						break;
+					case "error":
+							// TODO: something
+						break;
+					case "end_game":
+							// TODO: something
+						break;
+					default: // if a command slipped through somehow, just print it out
+						console.log(parsedMsg);
+
+				}
+			/*
         if (parsedMsg.client_id === this.clientId) { // TODO: Will the client_id of the message always be there?
             if (this.pendingResponses.contains(parsedMsg.command)) {
                 // note we can't really localize an error command to a player
@@ -201,6 +271,7 @@ class ServerConn {
                 console.log(parsedMsg);
             }
         }
+				*/
     }
 
     ws_onclose() {

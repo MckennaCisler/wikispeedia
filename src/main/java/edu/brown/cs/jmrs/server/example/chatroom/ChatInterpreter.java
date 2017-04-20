@@ -7,6 +7,10 @@ import edu.brown.cs.jmrs.server.customizable.Lobby;
 
 public class ChatInterpreter implements CommandInterpreter {
 
+  private enum Commands {
+    MESSAGE, WHISPER
+  }
+
   public ChatInterpreter() {
   }
 
@@ -17,11 +21,13 @@ public class ChatInterpreter implements CommandInterpreter {
       Map<String, ?> command) {
     ChatLobby lobby = (ChatLobby) uncastLobby;
 
-    switch (((String) command.get("command")).toLowerCase()) {
-      case "message":
+    String commandString = (String) command.get("command");
+
+    switch (Commands.valueOf(commandString.toUpperCase())) {
+      case MESSAGE:
         lobby.sendMessage(clientId, (String) command.get("message"));
         return;
-      case "whisper":
+      case WHISPER:
         lobby.sendMessage(
             (String) command.get("recipient"),
             clientId,
