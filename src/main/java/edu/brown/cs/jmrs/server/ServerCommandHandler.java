@@ -51,13 +51,17 @@ class ServerCommandHandler implements Runnable {
           .equalsIgnoreCase("set_client_id")) {
         jsonObject.addProperty("type", "set_id_reponse");
         String clientId = (String) commandMap.get("client_id");
-        if (server.setPlayerId(conn, clientId)) {
-          jsonObject.addProperty("client_id", server.getPlayer(conn).getId());
+        try {
+          server.setPlayerId(conn, clientId);
+          String trueId = clientId.length() == 0
+              ? server.getPlayer(conn).getId() : clientId;
+          jsonObject.addProperty("client_id", trueId);
           jsonObject.addProperty("error_message", "");
           String toClient = gson.toJson(jsonObject);
           conn.send(toClient);
-        } else {
-          jsonObject.addProperty("error_message", "Player ID in use");
+        } catch (InputError e) {
+          jsonObject.addProperty("client_id", player.getId());
+          jsonObject.addProperty("error_message", e.getMessage());
           String toClient = gson.toJson(jsonObject);
           conn.send(toClient);
         }

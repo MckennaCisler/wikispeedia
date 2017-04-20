@@ -33,17 +33,22 @@ class ServerWorker extends WebSocketServer {
     players = new ConcurrentBiMap<>();
   }
 
-  public boolean setPlayerId(WebSocket conn, String playerId) {
-    if (playerId.length() == 0) {
-      Player player = new Player(conn.hashCode() + "");
-      player.setLobby(players.get(conn).getLobby());
-      while (!players.putNoOverwrite(conn, player)) {
-        player = new Player(Math.random() + "");
+  public void setPlayerId(WebSocket conn, String playerId) throws InputError {
+    Lobby lobby = players.get(conn).getLobby();
+    if (lobby == null) {
+      if (playerId.length() == 0) {
+        Player player = new Player(conn.hashCode() + "");
+        while (!players.putNoOverwrite(conn, player)) {
+          player = new Player(Math.random() + "");
+        }
+      } else {
+        Player newPlayer = new Player(playerId);
+        if (!players.putNoOverwrite(conn, newPlayer)) {
+          throw new InputError("ID currently in use.");
+        }
       }
-      return true;
     } else {
-      Player newPlayer = new Player(playerId);
-      return players.putNoOverwrite(conn, newPlayer);
+      throw new InputError("Cannot change ID while in lobby.");
     }
   }
 

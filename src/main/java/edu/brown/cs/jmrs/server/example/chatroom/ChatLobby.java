@@ -45,6 +45,8 @@ public class ChatLobby implements Lobby {
   }
 
   public void sendMessage(String fromId, String message) {
+
+    System.out.println(fromId + ": " + message);
     Gson gson = new Gson();
     JsonObject jsonObject = new JsonObject();
     jsonObject.addProperty("type", "message");
