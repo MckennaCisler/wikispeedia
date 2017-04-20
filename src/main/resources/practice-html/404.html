@@ -2,14 +2,13 @@
 <html>
 <head>
 	<meta charset="utf-8">
-	<title>W Waiting Lobby</title>
+	<title>Page Not Found: Wikispeedia</title>
 	<link href="main.css" rel="stylesheet" type="text/css">
 	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.6/css/bootstrap.min.css" integrity="sha384-rwoIResjU2yc3z8GV/NPeZWAv56rSmLldC3R/AZzGRnGxQQKnKkoFVhFQhNUwEyJ" crossorigin="anonymous">
 	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.0/jquery.min.js"></script>
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/tether/1.4.0/js/tether.min.js" integrity="sha384-DztdAPBWPRXSA/3eYEEUWrWCy7G5KFbe8fFjk5JAIxUYHKkDx6Qin1DkWx51bBrb" crossorigin="anonymous"></script>
 	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.6/js/bootstrap.min.js" integrity="sha384-vBWWzlZJ8ea9aCX4pEW3rVHjgjt7zpkNpZk+02D9phzyeVkE+jo0ieGizqPLForn" crossorigin="anonymous"></script>
 	<link href="https://fonts.googleapis.com/css?family=Heebo:400,900|Rubik+Mono+One" rel="stylesheet">
-	<script src="waiting.js"></script>
 	<link rel="apple-touch-icon-precomposed" sizes="57x57" href="assets/apple-touch-icon-57x57.png" />
 	<link rel="apple-touch-icon-precomposed" sizes="114x114" href="assets/apple-touch-icon-114x114.png" />
 	<link rel="apple-touch-icon-precomposed" sizes="72x72" href="assets/apple-touch-icon-72x72.png" />
@@ -33,40 +32,19 @@
 </head>
 <body>
 	<div class="top">
-		<h1 style="margin-left: 5px; display: inline-block;" title="Go back to the main screen"><a class="title-a" href="index.html">Wikispeedia</a></h1>
-		<h1 id="counter">5</h1>
+		<h1 title="Wikispeedia"><a class="title-a" href="index.html">Wikispeedia</a></h1>
 	</div>
-	<div class="main_content container-fluid">
+
+	<div class="container text-center main_content">
 		<div class="row">
-			<div class="col-2"></div>
-			<div class="col-8">
+			<div class="col">
 				<div class="card card-default">
-					<h3 class="text-center card-header">Waiting for the game to start<span id="dots">...</span></h3>
-					<div class="card-block text-center">
-						<div class="row">
-							<ul class="list-group col-4">
-								<!--<#list users as u>-->
-								<li class="list-group-item"><input type="checkbox" id="u0" checked disabled> You</li>
-								<li class="list-group-item"><input type="checkbox" id="u1" checked disabled> Player 1</li>
-								<li class="list-group-item"><input type="checkbox" id="u2" disabled> Player 2</li>
-								<li class="list-group-item"><input type="checkbox" id="u3" checked disabled> And so on</li>
-							</ul>
-							<div class="col text-center">
-								<!--${start}-->
-								<h4>First Article</h4>
-								<p>Lorem ipsum sit dolorem et</p>
-								<img src="assets/down-arrow.jpg" height="20" style="text-align: center;">
-								<br><br>
-								<!--${end}-->
-								<h4>End Article</h4>
-								<p>Lorem ipsum sit dolorem et</p>
-							</div>
-						</div>
-						<button id="force" class="btn my_success" title="Leave 'em all behind, start the game even though not everyone may have joined">Force the game to start</button> <!-- Only visible for the game owner -->
+					<h3 class="card-header">404: Page not found</h3>
+					<div class="card-block">
+						<p>We couldn't find the page you were looking for. You can go to our home page <a href="index.html">here</a>.</p>
 					</div>
 				</div>
 			</div>
-			<div class="col-2"></div>
 		</div>
 	</div>
 </body>
