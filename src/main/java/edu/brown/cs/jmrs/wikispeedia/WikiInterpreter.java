@@ -77,9 +77,9 @@ public class WikiInterpreter implements CommandInterpreter {
       OUTGOING; // server event-based commands
     }
 
-    private final String command;
+    private final String       command;
     private final COMMAND_TYPE type;
-    private String[] args;
+    private String[]           args;
 
     /**
      * Creates a particular defined command based on command.
@@ -112,90 +112,104 @@ public class WikiInterpreter implements CommandInterpreter {
       assert type.equals(COMMAND_TYPE.RESPONSE)
           || type.equals(COMMAND_TYPE.OUTGOING);
       JsonObject root = new JsonObject();
-      root.addProperty("type", command);
+      root.addProperty("command", command);
       root.addProperty("payload", GSON.toJson(data));
       return GSON.toJson(root);
     }
   }
 
   @Override
-  public void interpret(Lobby uncastLobby, String clientId,
+  public void interpret(
+      Lobby uncastLobby,
+      String clientId,
       Map<String, ?> command) {
     WikiLobby lobby = (WikiLobby) uncastLobby;
     String cname = (String) command.get("command");
 
-    if (cname.equals(Command.GET_PLAYERS.command())) {
-      lobby.getServer().sendToClient(clientId,
-          Command.RETURN_PLAYERS.build(lobby.getPlayers()));
+    // switch > if/else
+    switch (Command.valueOf(cname.toUpperCase())) {
+      case GET_PLAYERS:
+        lobby.getServer().sendToClient(
+            clientId,
+            Command.RETURN_PLAYERS.build(lobby.getPlayers()));
+        break;
+      case GET_TIME:
+        lobby.getServer().sendToClient(
+            clientId,
+            Command.RETURN_TIME.build(lobby.getPlayTime()));
+        break;
+      case GET_SETTINGS:
+        String __result = new String();
+        __result = Command.RETURN_SETTINGS.build(
+            ImmutableMap.builder().put("start", lobby.getStartPage())
+                .put("goal", lobby.getGoalPage())
+                .put("start_time", lobby.getStartTime()).build()); // TODO
+        lobby.getServer().sendToClient(clientId, __result);
+        break;
+      case GOTO_PAGE:
+        String result = new String();
+        WikiPlayer player = lobby.getPlayer(clientId);
+        WikiPage curPlayerPage = player.getCurPage();
 
-    } else if (cname.equals(Command.GET_TIME.command())) {
-      lobby.getServer().sendToClient(clientId,
-          Command.RETURN_TIME.build(lobby.getPlayTime()));
-
-    } else if (cname.equals(Command.GET_SETTINGS.command())) {
-      String result = new String();
-      result =
-          Command.RETURN_SETTINGS
-              .build(ImmutableMap.builder().put("start", lobby.getStartPage())
-                  .put("goal", lobby.getGoalPage())
-                  .put("start_time", lobby.getStartTime()).build()); // TODO
-      lobby.getServer().sendToClient(clientId, result);
-
-    } else if (cname.equals(Command.GOTO_PAGE.command())) {
-      String result = new String();
-      WikiPlayer player = lobby.getPlayer(clientId);
-      WikiPage curPlayerPage = player.getCurPage();
-
-      String reqPage = (String) command.get("page_name");
-      String curPage = player.getCurPage().getName();
-      try {
-        if (player.goToPage(new WikiPage(reqPage))) {
-          // if could go to page (and thus did go to page)
-          result =
-              Command.RETURN_PAGE
-                  .build(getPlayerPageInfo(curPlayerPage, lobby));
-        } else {
-          // if we can't go to the page, revert to the previous current
-          result =
-              Command.RETURN_PAGE.build(ImmutableMap.builder()
-                  .put("error",
-                      String.format("Player cannot move from page %s to %s",
-                          curPage, reqPage))
-                  .putAll(getPlayerPageInfo(curPlayerPage, lobby)).build());
-        }
-      } catch (IOException e1) {
+        String reqPage = (String) ((Map) command.get("payload"))
+            .get("page_name");
+        String curPage = player.getCurPage().getName();
         try {
-          result =
-              Command.RETURN_PAGE.build(ImmutableMap.builder()
-                  .put("error",
-                      String.format("Error in accessing page %s: %s", curPage,
-                          e1.getMessage()))
-                  .putAll(getPlayerPageInfo(curPlayerPage, lobby)).build());
-        } catch (IOException e2) {
-          // this should never happen (this page shoudl've been cached and
-          // already visited. TODO: COuld it?
+          if (player.goToPage(new WikiPage(reqPage))) {
+            // if could go to page (and thus did go to page)
+            result = Command.RETURN_PAGE
+                .build(getPlayerPageInfo(curPlayerPage, lobby));
+          } else {
+            // if we can't go to the page, revert to the previous current
+            result = Command.RETURN_PAGE.build(
+                ImmutableMap.builder()
+                    .put(
+                        "error_message",
+                        String.format(
+                            "Player cannot move from page %s to %s",
+                            curPage,
+                            reqPage))
+                    .putAll(getPlayerPageInfo(curPlayerPage, lobby)).build());
+          }
+        } catch (IOException e1) {
+          try {
+            result = Command.RETURN_PAGE.build(
+                ImmutableMap.builder()
+                    .put(
+                        "error_message",
+                        String.format(
+                            "Error in accessing page %s: %s",
+                            curPage,
+                            e1.getMessage()))
+                    .putAll(getPlayerPageInfo(curPlayerPage, lobby)).build());
+          } catch (IOException e2) {
+            // this should never happen (this page shoudl've been cached and
+            // already visited. TODO: Could it?
+          }
         }
-      }
-      lobby.getServer().sendToClient(clientId, result);
-      lobby.update(); // check for winner
-
-    } else if (cname.equals(Command.GET_PATH.command())) {
-      String result = new String();
-      WikiPlayer player = lobby.getPlayer(clientId);
-      result = Command.RETURN_PATH.build(player.getPath());
-      lobby.getServer().sendToClient(clientId, result);
-
-    } else {
-      lobby.getServer().sendToClient(clientId, Command.ERROR.build(
-          ImmutableMap.of("error", "Invalid command specified: " + cname)));
+        lobby.getServer().sendToClient(clientId, result);
+        lobby.update(); // check for winner
+        break;
+      case GET_PATH:
+        WikiPlayer _player = lobby.getPlayer(clientId);
+        String _result = Command.RETURN_PATH.build(_player.getPath());
+        lobby.getServer().sendToClient(clientId, _result);
+        break;
+      default:
+        lobby.getServer()
+            .sendToClient(clientId, Command.ERROR.build(ImmutableMap.of(
+                "error_message",
+                "Invalid command specified: " + cname)));
     }
   }
 
   private Map<String, ?> getPlayerPageInfo(WikiPage page, WikiLobby lobby)
       throws IOException {
-    return ImmutableMap.of("text",
+    return ImmutableMap.of(
+        "text",
         lobby.getContentFormatter()
             .stringFormat(page.linksMatching(lobby.getLinkFinder())),
-        "links", lobby.getLinkFinder().linkedPages(page));
+        "links",
+        lobby.getLinkFinder().linkedPages(page));
   }
 }
