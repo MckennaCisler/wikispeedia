@@ -17,9 +17,6 @@ public class ChatLobby implements Lobby {
   private Server       server;
   private boolean      closed;
 
-  public ChatLobby() {
-  }
-
   public ChatLobby(Server server, String id) {
     this.server = server;
     this.id = id;
