@@ -1,5 +1,14 @@
 /*jshint esversion: 6 */
 let winner = true;
+let time = 312;
+let increment = () => {
+	"use strict";
+	time++;
+	let minutes = Math.floor(time / 60);
+	var seconds = time - minutes * 60;
+	$("#end_timer").html(minutes + ":" + seconds);
+	$(".going").html(time + " seconds...");
+};
 
 $(document).ready(() => {
 	"use strict";
@@ -15,4 +24,6 @@ $(document).ready(() => {
 		let audio = new Audio("assets/applause.wav");
 		audio.play();
 	}
+	
+	setInterval(increment, 1000);
 });

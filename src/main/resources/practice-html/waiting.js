@@ -1,17 +1,18 @@
 /*jshint esversion: 6 */
 
-window.setInterval(() => {
+//Maybe do this with the title instead
+let dots = 0;
+let ddd = window.setInterval(() => {
 	"use strict";
-	const dot_str = $("#dots").html();
-	if (dot_str.length === 2) {
-		$("#dots").html("...");
-	} else if (dot_str.length === 1) {
-		$("#dots").html("..");
-	} else if (dot_str.length === 3) {
-		$("#dots").html("");
-	} else {
-		$("#dots").html(".");
+	dots++;
+	if (dots === 4) {
+		dots = 0;
 	}
+	let dot_str = "";
+	for (let i = 0; i < dots; i++) {
+		dot_str += ".";
+	}
+	document.title = "Waiting" + dot_str;
 }, 1000);
 
 $(document).ready(() => {
@@ -34,7 +35,10 @@ $(document).ready(() => {
 		}
 	};
 	$("#force").on('click', () => {
+		$(".loader").hide();
 		$("#counter").show();
+		clearInterval(ddd);
+		document.title = "The game is starting";
 		let audio = new Audio('assets/beep.wav');
 		audio.play();
 		var pid = setInterval(decrement, 1000, pid);
