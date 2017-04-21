@@ -228,7 +228,7 @@ public class WikiInterpreter implements CommandInterpreter {
 
   private Map<String, ?> getPlayerPageInfo(WikiPage page, WikiLobby lobby)
       throws IOException {
-    return ImmutableMap.of("title", page.getTitle(), "text",
+    return ImmutableMap.of("href", page.url(), "title", page.getTitle(), "text",
         lobby.getContentFormatter()
             .stringFormat(page.linksMatching(lobby.getLinkFinder())),
         "links", lobby.getLinkFinder().linkedPages(page));
