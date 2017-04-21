@@ -21,7 +21,7 @@ let history = [];
 // Game info
 let currHistory = username; // the player whose history is currently displayed
 let startHref = "https://en.wikipedia.org/wiki/Cat"; // the start article
-let currHref; // the current title
+let currHref; // the current article
 let destHref = "https://en.wikipedia.org/wiki/Dog"; // the end article
 
 // Time
@@ -32,7 +32,7 @@ $(document).ready(() => {
   window.setTimeout(() => {
     setInterval(updateTimer, 1000);
     $timer.text("0:00");
-    $destination.html(destHref);
+    $destination.html(titleFromHref(destHref));
 
     goToPage(startHref);
   }, 1000);
@@ -53,14 +53,15 @@ function drawPage(message) {
   payload = message.payload;
   html = payload.text;
   href = payload.href;
+  title = titleFromHref(href);
 
   if (href != currHref) {
     $title.html("<b>" + title + "</b>");
     $article.html(html);
-
+    $article.scrollTop(0);
     cleanHtml();
 
-    history.push(currHref);
+    history.push(title);
     if (currHistory == username) {
       drawHistory();
     }
@@ -71,7 +72,7 @@ function drawPage(message) {
 
 // Error callback
 function errorPage() {
-  console.log("Error in going to page");
+  console.log("Couldn't go to page");
 }
 
 // Replaces the links with callbacks

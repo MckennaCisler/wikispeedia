@@ -2,9 +2,9 @@
 /* Game page */
 
 #game-div {
-	margin-left: 40px;
-	margin-right: 40px;
-	margin-top: 20px;
+	margin-left: 15px;
+	margin-right: 15px;
+	margin-top: 15px;
 }
 
 #info-panel {
@@ -13,7 +13,7 @@
 
 #history {
 	text-align: left;
-	font-size: medium;
+	font-size: small;
 }
 
 #history-label {
