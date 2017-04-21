@@ -27,7 +27,7 @@ let destHref = "https://en.wikipedia.org/wiki/Dog"; // the end article
 // Time
 let startTime = new Date().getTime();
 
-$(document).ready(() => {
+serverConn.ready(() => {
   setInterval(updateTimer, 500);
   $timer.text("0:00");
 
@@ -58,7 +58,7 @@ function drawPage(message) {
 
     cleanHtml();
 
-    history.push(currTitle);
+    history.push(currHref);
     if (currHistory == username) {
       drawHistory();
     }
@@ -75,15 +75,13 @@ function errorPage() {
 // Replaces the links with callbacks
 function cleanHtml() {
   $article.find("a").each(function() {
-    href = this.attr('href');
-    title = "";
-    this.attr("href", hrefHelper(href));
+    this.attr("href", hrefHelper(this.attr('href')));
   });
 }
 
 // Helper to get callback
-function hrefHelper(title) {
-  return "javascript:goToPage('" + title + "')";
+function hrefHelper(href) {
+  return "javascript:goToPage('" + href + "')";
 }
 
 ///
