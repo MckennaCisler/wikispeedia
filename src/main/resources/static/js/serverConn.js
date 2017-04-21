@@ -142,6 +142,12 @@ class ServerConn {
          // TODO: What if the message returns with a DIFFERENT palyer id?
          */
         this.pendingResponses = {};
+
+
+        /**
+         * callbacks called once websocket is ready
+         */
+        this.readyCallbacks = []
     }
 
     /**
@@ -206,10 +212,19 @@ class ServerConn {
         }
     }
 
+    ready(callback) {
+        this.readyCallbacks.append(callback);
+    }
+
     /**
      * Primary WebSocket interpreters
      */
     ws_onopen() {
+        // call ready callbacks
+        for (let i = 0; i < this.readyCallbacks.length; i++) {
+            this.readyCallbacks[i]();
+        }
+
 		// This will set an initial client ID to a random value, it can be overwritten by sending a new ID later
         this.setPlayerId("", (parsedMsg) => {
             this.clientId = parsedMsg.client_id
