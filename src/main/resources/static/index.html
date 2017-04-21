@@ -3,34 +3,14 @@
 <head>
 	<meta charset="utf-8">
 	<title>Wikispeedia</title>
-	<link href="main.css" rel="stylesheet" type="text/css">
-	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.6/css/bootstrap.min.css" integrity="sha384-rwoIResjU2yc3z8GV/NPeZWAv56rSmLldC3R/AZzGRnGxQQKnKkoFVhFQhNUwEyJ" crossorigin="anonymous">
-	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.0/jquery.min.js"></script>
-	<script src="https://cdnjs.cloudflare.com/ajax/libs/tether/1.4.0/js/tether.min.js" integrity="sha384-DztdAPBWPRXSA/3eYEEUWrWCy7G5KFbe8fFjk5JAIxUYHKkDx6Qin1DkWx51bBrb" crossorigin="anonymous"></script>
-	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.6/js/bootstrap.min.js" integrity="sha384-vBWWzlZJ8ea9aCX4pEW3rVHjgjt7zpkNpZk+02D9phzyeVkE+jo0ieGizqPLForn" crossorigin="anonymous"></script>
+	<link href="css/main.css" rel="stylesheet" type="text/css">
+	<link href="lib/css/bootstrap-alt.min.css" rel="stylesheet" type="text/css">
+	<script src="lib/js/jquery.min.js"></script>
+	<script src="lib/js/tether.min.js"></script>
+	<script src="lib/js/bootstrap.min.js"></script>
 	<link href="https://fonts.googleapis.com/css?family=Heebo:400,900|Rubik+Mono+One" rel="stylesheet">
-	<script src="jqui/jquery-ui.js"></script>
-	<script src="drop_advanced.js"></script>
-	<link rel="apple-touch-icon-precomposed" sizes="57x57" href="assets/apple-touch-icon-57x57.png" />
-	<link rel="apple-touch-icon-precomposed" sizes="114x114" href="assets/apple-touch-icon-114x114.png" />
-	<link rel="apple-touch-icon-precomposed" sizes="72x72" href="assets/apple-touch-icon-72x72.png" />
-	<link rel="apple-touch-icon-precomposed" sizes="144x144" href="assets/apple-touch-icon-144x144.png" />
-	<link rel="apple-touch-icon-precomposed" sizes="60x60" href="assets/apple-touch-icon-60x60.png" />
-	<link rel="apple-touch-icon-precomposed" sizes="120x120" href="assets/apple-touch-icon-120x120.png" />
-	<link rel="apple-touch-icon-precomposed" sizes="76x76" href="assets/apple-touch-icon-76x76.png" />
-	<link rel="apple-touch-icon-precomposed" sizes="152x152" href="assets/apple-touch-icon-152x152.png" />
-	<link rel="icon" type="image/png" href="assets/favicon-196x196.png" sizes="196x196" />
-	<link rel="icon" type="image/png" href="assets/favicon-96x96.png" sizes="96x96" />
-	<link rel="icon" type="image/png" href="assets/favicon-32x32.png" sizes="32x32" />
-	<link rel="icon" type="image/png" href="assets/favicon-16x16.png" sizes="16x16" />
-	<link rel="icon" type="image/png" href="assets/favicon-128.png" sizes="128x128" />
-	<meta name="application-name" content="&nbsp;"/>
-	<meta name="msapplication-TileColor" content="#FFFFFF" />
-	<meta name="msapplication-TileImage" content="assets/mstile-144x144.png" />
-	<meta name="msapplication-square70x70logo" content="assets/mstile-70x70.png" />
-	<meta name="msapplication-square150x150logo" content="assets/mstile-150x150.png" />
-	<meta name="msapplication-wide310x150logo" content="assets/mstile-310x150.png" />
-	<meta name="msapplication-square310x310logo" content="assets/mstile-310x310.png" />
+	<script src="lib/jqui/jquery-ui.js"></script>
+	<script src="js/drop_advanced.js"></script>
 </head>
 <body>
 	<div class="top">
@@ -45,13 +25,13 @@
 					<div class="card-block">
 						<div id="main_buttons" class="btn-group" data-toggle="buttons">
 							<label class="btn btn-lg btn-outline-secondary active">
-								<input type="radio" name="gametypes" id="time" checked><img src="assets/clock.png" height="20"> Time Trial
+								<input type="radio" name="gametypes" id="time" checked><img src="lib/assets/clock.png" height="20"> Time Trial
 							</label>
 							<label class="btn btn-lg btn-outline-secondary">
-								<input type="radio" name="gametypes" id="clicks" class="btn btn-lg btn-outline-secondary"><img src="assets/mouse-cursor.png" height="20"> Least Clicks
+								<input type="radio" name="gametypes" id="clicks" class="btn btn-lg btn-outline-secondary"><img src="lib/assets/mouse-cursor.png" height="20"> Least Clicks
 							</label>
 							<label class="btn btn-lg btn-outline-secondary">
-								<input type="radio" name="gametypes" id="explore" class="btn btn-lg btn-outline-secondary"><img src="assets/explore-icon.png" height="20"> Explore
+								<input type="radio" name="gametypes" id="explore" class="btn btn-lg btn-outline-secondary"><img src="lib/assets/explore-icon.png" height="20"> Explore
 							</label>
 						</div>
 						<br><br>
@@ -74,7 +54,7 @@
 						  		</div>
 						</div>
 
-						<p id="advanced"><b>Advanced <img src="assets/side-triangle.png" id="advanced_im" height="10"></b></p>
+						<p id="advanced"><b>Advanced <img src="lib/assets/side-triangle.png" id="advanced_im" height="10"></b></p>
 						<div id="advanced_ops" style="display: none;">
 							<p>Music <select>
 								<option value="0">No sound</option>

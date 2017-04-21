@@ -12,24 +12,28 @@ const $historyDropdown = $("#history-dropdown");
 const $title = $("#title");
 const $article = $("#article");
 
-let ding = new Audio('assets/ding.mp3');
+let ding = new Audio('lib/assets/ding.mp3');
 
+// Player info
 let username = "Player 1";
-let currHistory = username; // the player whose history is currently displayed
-let currTitle = "Cat"; // the start article
-let destTitle = "Dog"; // the end article
-let startTime = new Date().getTime();
 let history = [];
+
+// Game info
+let currHistory = username; // the player whose history is currently displayed
+let startTitle = "Cat"; // the start article
+let currTitle; // the current title
+let destTitle = "Dog"; // the end article
+
+// Time
+let startTime = new Date().getTime();
 
 $(document).ready(() => {
   setInterval(updateTimer, 500);
   $timer.text("0:00");
-  $title.html("<b>" + currTitle + "</b>");
-  $article.html(getArticleHtmlTemp(currTitle));
-  $destination.html("<b>" + destTitle + "</b>");
-  history.push(currTitle);
-  drawHistory();
-	$("#info-col").matchHeight();
+
+  $destination.html(destTitle);
+
+  goToLink(startTitle);
 });
 
 
@@ -38,7 +42,7 @@ $(document).ready(() => {
 ///
 
 // Link is clicked
-function linkClick(title) {
+function goToLink(title) {
   if (title != currTitle) {
     $title.html("<b>" + title + "</b>");
     $article.html(getArticleHtmlTemp(title));

@@ -46,5 +46,5 @@ function getPlayerHistory(playerName) {
 
 // Helper to get an "internal link"
 function linkHelper(param, text) {
-  return "<a href=\"javascript:linkClick('" + param + "')\">" + text + "</a>";
+  return "<a href=\"javascript:goToLink('" + param + "')\">" + text + "</a>";
 }

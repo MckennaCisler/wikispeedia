@@ -133,7 +133,7 @@
 }
 
 body {
-	/*background-image: url("assets/shattered.png");*/
+	/*background-image: url("lib/assets/shattered.png");*/
 	background: #e52d27;  /* fallback for old browsers */
 background: -webkit-linear-gradient(right, #b31270, #e52d27);
 background: -o-linear-gradient(right, #b31270, #e52d27);
