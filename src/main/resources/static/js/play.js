@@ -33,7 +33,7 @@ $(document).ready(() => {
 
   $destination.html(destTitle);
 
-  goToLink(startTitle);
+  goToPage(startTitle);
 });
 
 
@@ -42,18 +42,48 @@ $(document).ready(() => {
 ///
 
 // Link is clicked
-function goToLink(title) {
+function goToPage(href) {
+  serverConn.gotoPage(href, drawPage, errorPage);
+}
+
+// Callback to the server Request
+function drawPage(message) {
+  payload = message.payload;
+  html = payload.text;
+  title = payload.title;
+
   if (title != currTitle) {
     $title.html("<b>" + title + "</b>");
-    $article.html(getArticleHtmlTemp(title));
-    currTitle = title;
-    history.push(currTitle);
-    drawHistory();
+    $article.html(html);
 
-    if (title == destTitle) {
-      ding.play();
+    cleanHtml();
+
+    history.push(currTitle);
+    if (currHistory == username) {
+      drawHistory();
     }
+
+    currTitle = title;
   }
+}
+
+// Error callback
+function errorPage() {
+  console.log("Error in going to page");
+}
+
+// Replaces the links with callbacks
+function cleanHtml() {
+  $article.find("a").each(function() {
+    href = this.attr('href');
+    title = "";
+    this.attr("href", hrefHelper(href));
+  });
+}
+
+// Helper to get callback
+function hrefHelper(title) {
+  return "javascript:goToPage('" + title + "')";
 }
 
 ///
