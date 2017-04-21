@@ -10,7 +10,7 @@
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/tether/1.4.0/js/tether.min.js" integrity="sha384-DztdAPBWPRXSA/3eYEEUWrWCy7G5KFbe8fFjk5JAIxUYHKkDx6Qin1DkWx51bBrb" crossorigin="anonymous"></script>
 	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.6/js/bootstrap.min.js" integrity="sha384-vBWWzlZJ8ea9aCX4pEW3rVHjgjt7zpkNpZk+02D9phzyeVkE+jo0ieGizqPLForn" crossorigin="anonymous"></script>
 	<link href="https://fonts.googleapis.com/css?family=Heebo:400,900|Rubik+Mono+One" rel="stylesheet">
-	<script src="serverConn.js"></script>
+	<script src="fakeServerConn.js"></script>
 	<link rel="apple-touch-icon-precomposed" sizes="57x57" href="assets/apple-touch-icon-57x57.png" />
 	<link rel="apple-touch-icon-precomposed" sizes="114x114" href="assets/apple-touch-icon-114x114.png" />
 	<link rel="apple-touch-icon-precomposed" sizes="72x72" href="assets/apple-touch-icon-72x72.png" />
@@ -37,23 +37,33 @@
 		<h1 style="margin-left: 5px; margin-top: 5px;" title="Wikispeedia"><a class="title-a" href="index.html">Wikispeedia</a></h1>
 	</div>
 	<div id="game-div">
-		<div class="row" id="info-panel">
-		  <div class="col-md-8">
-				<div class="panel panel-default">
+		<div class="row">
+			<div class="col-md-8">
+				<div class="panel panel-default" id="info-panel">
 					<div class="panel-body" id="history"> </div>
-					<div class="panel-footer" id="history-label"> Player history </div>
+					<div class="panel-footer" id="history-label">
+						<div class="dropdown">
+						  <button class="btn btn-default dropdown-toggle" id="history-dropdown" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
+						  </button>
+						  <ul class="dropdown-menu" aria-labelledby="dropdownMenu1">
+						    <li><a href="javascript:historyChange('Player 1')"><b>Me</b></a></li>
+						    <li><a href="javascript:historyChange('Player 2')">Player 2</a></li>
+						    <li><a href="javascript:historyChange('Player 3')">Player 3</a></li>
+						  </ul>
+						</div>
+					</div>
 				</div>
 		  </div>
 
 			<div class="col-md-2">
-				<div class="panel panel-default">
+				<div class="panel panel-default" id="info-panel">
 					<div class="panel-body" id="destination"> </div>
 					<div class="panel-footer" id="destination-label"> Destination </div>
 				</div>
 			</div>
 
 		  <div class="col-md-2">
-				<div class="panel panel-default">
+				<div class="panel panel-default" id="info-panel">
 					<div class="panel-body" id="timer"> </div>
 					<div class="panel-footer" id="timer-label"> Time </div>
 				</div>
@@ -66,5 +76,7 @@
 		</div>
 	</div>
 </body>
+<script src="jquery.matchHeight.js" type="text/javascript"></script>
 <script src="play.js"></script>
+<script src="jquery.matchHeight.js" type="text/javascript"></script>
 </html>

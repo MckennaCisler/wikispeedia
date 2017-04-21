@@ -7,12 +7,15 @@
 const $history = $("#history");
 const $destination = $("#destination");
 const $timer = $("#timer");
+const $historyDropdown = $("#history-dropdown");
 
 const $title = $("#title");
 const $article = $("#article");
 
 let ding = new Audio('assets/ding.mp3');
 
+let username = "Player 1";
+let currHistory = username; // the player whose history is currently displayed
 let currTitle = "Cat"; // the start article
 let destTitle = "Dog"; // the end article
 let startTime = new Date().getTime();
@@ -24,7 +27,9 @@ $(document).ready(() => {
   $title.html("<b>" + currTitle + "</b>");
   $article.html(getArticleHtmlTemp(currTitle));
   $destination.html("<b>" + destTitle + "</b>");
-  $history.html(updateHistory(currTitle));
+  history.push(currTitle);
+  drawHistory();
+	$("#info-col").matchHeight();
 });
 
 
@@ -37,8 +42,9 @@ function linkClick(title) {
   if (title != currTitle) {
     $title.html("<b>" + title + "</b>");
     $article.html(getArticleHtmlTemp(title));
-    updateHistory(title);
     currTitle = title;
+    history.push(currTitle);
+    drawHistory();
 
     if (title == destTitle) {
       ding.play();
@@ -50,26 +56,19 @@ function linkClick(title) {
 // History
 ///
 
-// Update history
-function updateHistory(title) {
-  history.push(title);
-  historyString = "";
+function historyChange(newHistory) {
+  currHistory = newHistory;
+  drawHistory();
+}
 
-  if (history.length > 0) {
-    startIndex = 0;
-    if (history.length > 12) {
-      startIndex = history.length - 9;
-      historyString = "<i>(" + startIndex + " articles before)</i> - ";
-    }
+function drawHistory() {
+  $history.html(getPlayerHistory(currHistory));
 
-    for (i = startIndex; i < history.length - 1; i++) {
-      historyString = historyString + history[i] + " - ";
-    }
-
-    historyString = historyString + "<b>" + history[history.length - 1] + "</b>";
+  if (currHistory != username) {
+    $historyDropdown.html(currHistory + "'s progress");
+  } else {
+    $historyDropdown.html("<b>My progress</b>");
   }
-
-  $history.html(historyString);
 }
 
 ///

@@ -7,6 +7,10 @@
 	margin-top: 20px;
 }
 
+#info-panel {
+	height: 100px;
+}
+
 #history {
 	text-align: left;
 	font-size: medium;
@@ -15,6 +19,10 @@
 #history-label {
 	text-align: left;
 	font-size: small;
+}
+
+#history-dropdown {
+	border-color: #e52d27;
 }
 
 #destination {
