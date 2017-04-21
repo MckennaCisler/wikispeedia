@@ -1,11 +1,14 @@
 @charset "utf-8";
-@import url(http://fonts.googleapis.com/css?family=Changa+One&effect=anaglyph);
 /* Game page */
 
 #game-div {
 	margin-left: 40px;
 	margin-right: 40px;
 	margin-top: 20px;
+}
+
+#info-panel {
+	height: 100px;
 }
 
 #history {
@@ -16,6 +19,10 @@
 #history-label {
 	text-align: left;
 	font-size: small;
+}
+
+#history-dropdown {
+	border-color: #e52d27;
 }
 
 #destination {
@@ -99,8 +106,8 @@
 	display: none;
 	font-family: 'Rubik Mono One', sans-serif;
 	font-size: 3em;
-	padding-top: 5px;
-	padding-bottom: .06em;
+	padding-top: 10px;
+	padding-bottom: 0.16em;
 	padding-right: 1em;
 	padding-left: 1em;
 	border-left: thin solid black;
@@ -110,36 +117,29 @@
 	float: right;
 	font-family: 'Rubik Mono One', sans-serif;
 	font-size: 3em;
-	padding-top: 5px;
-	padding-bottom: .06em;
+	padding-top: 10px;
+	padding-bottom: 0.16em;
 	padding-right: 1em;
 	padding-left: 1em;
 	border-left: thin solid black;
 }
 
-.my_danger {
-	color: white;
-	background-color: #80A1D4;
-}
-.my_danger:hover {
-	background-color: #7593C1;
-}
-
 .my_success {
 	color: white;
-	background-color: #BBBE64;
+	background-color: #2EA7C0;
 }
 .my_success:hover {
-	background-color: #AAAD5B;
+	background-color: #2A98AF;
 }
 
 body {
-	/*background-image: url("assets/shattered.png");*/
+	/*background-image: url("lib/assets/shattered.png");*/
 	background: #e52d27;  /* fallback for old browsers */
-background: -webkit-linear-gradient(right, #b31217, #e52d27);
-background: -o-linear-gradient(right, #b31217, #e52d27);
-background: linear-gradient(to left, #b31217, #e52d27);  /* Chrome 10-25, Safari 5.1-6 */ /* W3C, IE 10+/ Edge, Firefox 16+, Chrome 26+, Opera 12+, Safari 7+ */
+background: -webkit-linear-gradient(right, #b31270, #e52d27);
+background: -o-linear-gradient(right, #b31270, #e52d27);
+background: linear-gradient(to left, #b31270, #e52d27);  /* Chrome 10-25, Safari 5.1-6 */ /* W3C, IE 10+/ Edge, Firefox 16+, Chrome 26+, Opera 12+, Safari 7+ */
 	font-family: 'Heebo', sans-serif !important;
+	font-weight: 400;
 }
 
 h3.card-header {

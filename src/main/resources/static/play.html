@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<title>Playing W</title>
+	<link href="css/main.css" rel="stylesheet" type="text/css">
+	<link href="lib/css/bootstrap.min.css" rel="stylesheet" type="text/css">
+	<link href="lib/css/bootstrap-alt.min.css" rel="stylesheet" type="text/css">
+	<script src="lib/js/jquery.min.js"></script>
+	<script src="lib/js/tether.min.js"></script>
+	<script src="lib/js/bootstrap.min.js"></script>
+	<link href="https://fonts.googleapis.com/css?family=Heebo:400,900|Rubik+Mono+One" rel="stylesheet">
+	<script src="js/fakeServerConn.js"></script>
+</head>
+<body>
+	<div class="top">
+		<h1 title="Wikispeedia" style="padding-top: 10px;"><a class="title-a" href="index.html">Wikispeedia</a></h1>
+	</div>
+
+	<div id="game-div">
+		<div class="row">
+			<div class="col-md-8">
+				<div class="panel panel-default" id="info-panel">
+					<div class="panel-body" id="history"> </div>
+					<div class="panel-footer" id="history-label">
+						<div class="dropdown">
+						  <button class="btn btn-default dropdown-toggle" id="history-dropdown" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
+						  </button>
+						  <ul class="dropdown-menu" aria-labelledby="dropdownMenu1">
+						    <li><a href="javascript:historyChange('Player 1')"><b>Me</b></a></li>
+						    <li><a href="javascript:historyChange('Player 2')">Player 2</a></li>
+						    <li><a href="javascript:historyChange('Player 3')">Player 3</a></li>
+						  </ul>
+						</div>
+					</div>
+				</div>
+		  </div>
+
+			<div class="col-md-2">
+				<div class="panel panel-default" id="info-panel">
+					<div class="panel-body" id="destination"> </div>
+					<div class="panel-footer" id="destination-label"> Destination </div>
+				</div>
+			</div>
+
+		  <div class="col-md-2">
+				<div class="panel panel-default" id="info-panel">
+					<div class="panel-body" id="timer"> </div>
+					<div class="panel-footer" id="timer-label"> Time </div>
+				</div>
+		  </div>
+		</div>
+
+		<div class="panel panel-default" id="title-article-panel">
+			<div class="panel-heading" id="title"> </div>
+			<div class="panel-body" id="article"> </div>
+		</div>
+	</div>
+
+	<!-- Scripts -->
+	<script src="js/play.js"></script>
+</body>
+</html>
