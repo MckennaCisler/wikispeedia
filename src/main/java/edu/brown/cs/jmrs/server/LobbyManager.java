@@ -6,20 +6,21 @@ import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
+import java.util.function.BiFunction;
 
 import edu.brown.cs.jmrs.server.customizable.Lobby;
-import edu.brown.cs.jmrs.server.factory.Factory;
 
 public class LobbyManager {
 
-  private final ReentrantReadWriteLock     rwl = new ReentrantReadWriteLock();
-  private final Lock                       r   = rwl.readLock();
-  private final Lock                       w   = rwl.writeLock();
+  private final ReentrantReadWriteLock                rwl = new ReentrantReadWriteLock();
+  private final Lock                                  r   = rwl.readLock();
+  private final Lock                                  w   = rwl.writeLock();
 
-  private ConcurrentHashMap<String, Lobby> lobbies;
-  private Factory<? extends Lobby>         lobbyFactory;
+  private ConcurrentHashMap<String, Lobby>            lobbies;
+  private BiFunction<Server, String, ? extends Lobby> lobbyFactory;
 
-  public LobbyManager(Factory<? extends Lobby> lobbyFactory) {
+  public LobbyManager(
+      BiFunction<Server, String, ? extends Lobby> lobbyFactory) {
     lobbies = new ConcurrentHashMap<>();
     this.lobbyFactory = lobbyFactory;
   }
@@ -73,7 +74,7 @@ public class LobbyManager {
       }
     }
     r.unlock();
-    Lobby lobby = lobbyFactory.getWithAdditionalArgs(server, lobbyId);
+    Lobby lobby = lobbyFactory.apply(server, lobbyId);
     w.lock();
     lobbies.put(lobbyId, lobby);
     w.unlock();

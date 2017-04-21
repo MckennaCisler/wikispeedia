@@ -2,6 +2,7 @@ package edu.brown.cs.jmrs.server;
 
 import java.net.InetSocketAddress;
 import java.util.List;
+import java.util.function.BiFunction;
 
 import org.java_websocket.WebSocket;
 import org.java_websocket.handshake.ClientHandshake;
@@ -10,7 +11,6 @@ import org.java_websocket.server.WebSocketServer;
 import edu.brown.cs.jmrs.server.collections.ConcurrentBiMap;
 import edu.brown.cs.jmrs.server.customizable.CommandInterpreter;
 import edu.brown.cs.jmrs.server.customizable.Lobby;
-import edu.brown.cs.jmrs.server.factory.Factory;
 import edu.brown.cs.jmrs.server.threading.GlobalThreadManager;
 
 class ServerWorker extends WebSocketServer {
@@ -23,7 +23,7 @@ class ServerWorker extends WebSocketServer {
   public ServerWorker(
       Server server,
       int port,
-      Factory<? extends Lobby> lobbyFactory,
+      BiFunction<Server, String, ? extends Lobby> lobbyFactory,
       CommandInterpreter interpreter) {
     super(new InetSocketAddress(port));
 
