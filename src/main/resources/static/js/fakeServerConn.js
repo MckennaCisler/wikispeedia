@@ -24,13 +24,13 @@ function getPlayerHistory(playerName) {
     html = "";
     if (history.length > 0) {
       startIndex = 0;
-      if (history.length > 12) {
-        startIndex = history.length - 9;
-        html = html + "<i>(" + startIndex + " articles before)</i> - ";
+      if (history.length > 8) {
+        startIndex = history.length - 6;
+        html = html + "<i>(" + startIndex + " articles before)</i><br>";
       }
 
       for (i = startIndex; i < history.length - 1; i++) {
-        html = html + history[i] + " - ";
+        html = html + history[i] + "<br>";
       }
 
       html = html + "<b>" + history[history.length - 1] + "</b>";

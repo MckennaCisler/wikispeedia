@@ -15,43 +15,41 @@
 	<script src="js/utils.js"></script>
 </head>
 <body>
-	<div id="game-div">
-		<div class="row">
-			<div class="col-md-8">
-				<div class="panel panel-default" id="info-panel">
-					<div class="panel-body" id="history"> </div>
-					<div class="panel-footer" id="history-label">
-						<div class="dropdown">
-						  <button class="btn btn-default dropdown-toggle" id="history-dropdown" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
-						  </button>
-						  <ul class="dropdown-menu" aria-labelledby="dropdownMenu1">
-						    <li><a href="javascript:historyChange('Player 1')"><b>Me</b></a></li>
-						    <li><a href="javascript:historyChange('Player 2')">Player 2</a></li>
-						    <li><a href="javascript:historyChange('Player 3')">Player 3</a></li>
-						  </ul>
-						</div>
-					</div>
-				</div>
-		  </div>
-
-			<div class="col-md-2">
-				<div class="panel panel-default" id="info-panel">
-					<div class="panel-body" id="destination"> </div>
-					<div class="panel-footer" id="destination-label"> Destination </div>
-				</div>
+	<div class="row" id="game-div">
+		<div class="col-md-2">
+			<div class="panel panel-default">
+				<div class="panel-heading" id="destination-label"> Destination </div>
+				<div class="panel-body" id="destination"> <b>.</b> </div> <!-- Better solution here -->
 			</div>
 
-		  <div class="col-md-2">
-				<div class="panel panel-default" id="info-panel">
-					<div class="panel-body" id="timer"> </div>
-					<div class="panel-footer" id="timer-label"> Time </div>
-				</div>
-		  </div>
-		</div>
+			<div class="panel panel-default">
+				<div class="panel-heading" id="timer-label"> Time </div>
+				<div class="panel-body" id="timer"> <p>0:00</p> </div>
+			</div>
 
-		<div class="panel panel-default" id="title-article-panel">
-			<div class="panel-heading" id="title"> </div>
-			<div class="panel-body" id="article"> </div>
+			<div class="panel panel-default" id="history-panel">
+				<div class="panel-heading" id="history-label">
+					<div class="dropdown">
+						<button class="btn btn-default dropdown-toggle" id="history-dropdown" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
+						</button>
+						<ul class="dropdown-menu" aria-labelledby="dropdownMenu1">
+							<li><a href="javascript:historyChange('Player 1')"><b>Me</b></a></li>
+							<li><a href="javascript:historyChange('Player 2')">Player 2</a></li>
+							<li><a href="javascript:historyChange('Player 3')">Player 3</a></li>
+						</ul>
+					</div>
+				</div>
+				<div class="panel-body">
+					<p id="history"> </p>
+				</div>
+			</div>
+	  </div>
+
+		<div class="col-md-10">
+			<div class="panel panel-default" id="title-article-panel">
+				<div class="panel-heading" id="title"> </div>
+				<div class="panel-body" id="article"> </div>
+			</div>
 		</div>
 	</div>
 

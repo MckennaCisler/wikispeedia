@@ -28,14 +28,15 @@ let destHref = "https://en.wikipedia.org/wiki/Dog"; // the end article
 let startTime = new Date().getTime();
 
 // TODO: Wait for server to be ready
+// TODO: Create a page run script that runs earlier
 $(document).ready(() => {
-  window.setTimeout(() => {
-    setInterval(updateTimer, 1000);
-    $timer.text("0:00");
-    $destination.html(titleFromHref(destHref));
+  $timer.text("0:00");
+  $title.html("<b>Loading...</b>");
 
-    goToPage(startHref);
-  }, 1000);
+  $destination.html("<b>" + titleFromHref(destHref) + "</b>");
+  setInterval(updateTimer, 200);
+
+  window.setTimeout(() => { goToPage(startHref); }, 1000);
 });
 
 
@@ -77,8 +78,12 @@ function errorPage() {
 
 // Replaces the links with callbacks
 function cleanHtml() {
-  $article.find("a").each(function() {
-    $(this).attr("href", hrefHelper($(this).attr('href')));
+  $article.find("a").each(function(index, element) {
+    // Adding a "" because attributes are not strings
+    let link = "" + $(element).attr("href");
+    if (link.charAt(0) != "#") {
+      $(element).attr("href", hrefHelper(link));
+    }
   });
 }
 
