@@ -27,13 +27,15 @@ let destHref = "https://en.wikipedia.org/wiki/Dog"; // the end article
 // Time
 let startTime = new Date().getTime();
 
-serverConn.ready(() => {
-  setInterval(updateTimer, 500);
-  $timer.text("0:00");
+// TODO: Wait for server to be ready
+$(document).ready(() => {
+  window.setTimeout(() => {
+    setInterval(updateTimer, 1000);
+    $timer.text("0:00");
+    $destination.html(destHref);
 
-  $destination.html(destHref);
-
-  goToPage(startHref);
+    goToPage(startHref);
+  }, 1000);
 });
 
 
