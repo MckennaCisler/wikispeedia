@@ -62,7 +62,7 @@ public class WikiInterpreter implements CommandInterpreter {
     RETURN_PLAYERS("return_players", COMMAND_TYPE.RESPONSE, "lobby_id"), //
     RETURN_TIME("return_time", COMMAND_TYPE.RESPONSE, "lobby_id"), //
     RETURN_SETTINGS("return_settings", COMMAND_TYPE.RESPONSE, "lobby_id"), //
-    RETURN_PAGE("goto_page", COMMAND_TYPE.RESPONSE, "player_id", "page_name"), //
+    RETURN_PAGE("return_page", COMMAND_TYPE.RESPONSE, "player_id", "page_name"), //
     RETURN_PATH("return_path", COMMAND_TYPE.RESPONSE, "player_id"), //
     ERROR("error", COMMAND_TYPE.RESPONSE, "player_id"), //
 
@@ -133,7 +133,7 @@ public class WikiInterpreter implements CommandInterpreter {
       JsonObject root = new JsonObject();
       root.addProperty("command", command);
       root.addProperty("error_message", errorMessage);
-      root.addProperty("payload", GSON.toJson(data));
+      root.add("payload", GSON.toJsonTree(data));
       return GSON.toJson(root);
     }
 
@@ -186,11 +186,12 @@ public class WikiInterpreter implements CommandInterpreter {
                 .getAsString();
         String curPage = player.getCurPage().getName();
         try {
-          if (player.goToPage(new WikiPage(reqPage))) {
+          WikiPage reqWikiPage = WikiPage.fromAny(reqPage);
+          if (player.goToPage(reqWikiPage)) {
             // if could go to page (and thus did go to page)
             json1 =
                 Command.RETURN_PAGE
-                    .build(getPlayerPageInfo(curPlayerPage, lobby));
+                    .build(getPlayerPageInfo(reqWikiPage, lobby));
           } else {
             // if we can't go to the page, revert to the previous current
             json1 =
@@ -220,15 +221,14 @@ public class WikiInterpreter implements CommandInterpreter {
         lobby.getServer().sendToClient(clientId, json2);
         break;
       default:
-        lobby.getServer().sendToClient(clientId,
-            Command.ERROR.build(ImmutableMap.of("error_message",
-                "Invalid command specified: " + cname)));
+        lobby.getServer().sendToClient(clientId, Command.ERROR
+            .build(ImmutableMap.of(), "Invalid command specified: " + cname));
     }
   }
 
   private Map<String, ?> getPlayerPageInfo(WikiPage page, WikiLobby lobby)
       throws IOException {
-    return ImmutableMap.of("text",
+    return ImmutableMap.of("title", page.getTitle(), "text",
         lobby.getContentFormatter()
             .stringFormat(page.linksMatching(lobby.getLinkFinder())),
         "links", lobby.getLinkFinder().linkedPages(page));

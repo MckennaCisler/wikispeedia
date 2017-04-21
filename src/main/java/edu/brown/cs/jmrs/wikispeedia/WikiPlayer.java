@@ -34,10 +34,9 @@ public class WikiPlayer {
   /**
    * Path and location data.
    */
-  private final List<WikiPage> path;
+  private final List<WikiPage> path; // curPage is last page in here
   private final WikiPage startPage;
   private final WikiPage goalPage;
-  private WikiPage curPage;
 
   /**
    * @param id
@@ -54,13 +53,13 @@ public class WikiPlayer {
   public WikiPlayer(String id, String name, WikiLobby lobby, WikiPage startPage,
       WikiPage goalPage) {
     super();
-    this.path = new ArrayList<>();
     this.id = id;
     this.name = name;
     this.lobby = lobby;
     this.startPage = startPage;
     this.goalPage = goalPage;
-    this.curPage = startPage;
+    this.path = new ArrayList<>();
+    this.path.add(startPage);
   }
 
   /****************************************/
@@ -130,7 +129,7 @@ public class WikiPlayer {
    * @return The page that the player is currently at.
    */
   public WikiPage getCurPage() {
-    return curPage;
+    return path.get(path.size() - 1);
   }
 
   /**
@@ -139,7 +138,7 @@ public class WikiPlayer {
    *           If the current page cannot be accessed.
    */
   public Set<WikiPage> getLinks() throws IOException {
-    return lobby.getLinkFinder().linkedPages(curPage);
+    return lobby.getLinkFinder().linkedPages(getCurPage());
   }
 
   /****************************************/
@@ -160,7 +159,7 @@ public class WikiPlayer {
           "Player " + id + " has already reached goal.");
     }
 
-    if (curPage.equals(goalPage)) {
+    if (getCurPage().equals(goalPage)) {
       this.endTime = endTimeIfSo;
       return true;
     }
@@ -196,7 +195,7 @@ public class WikiPlayer {
     }
 
     // we assume that the curPage page has been cached already (speed issue)
-    if (lobby.getLinkFinder().linkedPages(curPage).contains(page)) {
+    if (lobby.getLinkFinder().linkedPages(getCurPage()).contains(page)) {
       return path.add(page);
     }
     return false;
@@ -226,7 +225,7 @@ public class WikiPlayer {
   @Override
   public String toString() {
     return "Player " + id + " named '" + name + "' in lobby " + lobby + " at "
-        + curPage.url();
+        + getCurPage().url();
   }
 
 }

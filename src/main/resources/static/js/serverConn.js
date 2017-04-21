@@ -219,7 +219,7 @@ class ServerConn {
         // TODO: This
         // TODO: is just
         // TOOD: temporary
-        this.startLobby("HARD CODED CRAZY LOBBY", () => console.log("Lobby started"), () => console.log("Lobby failed to start"));
+        this.startLobby("HARD CODED CRAZY LIT LOBBY", () => console.log("Lobby started"), () => console.log("Lobby failed to start"));
     };
 
     ws_onmessage(jsonMsg) {
