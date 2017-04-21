@@ -20,9 +20,9 @@ let history = [];
 
 // Game info
 let currHistory = username; // the player whose history is currently displayed
-let startTitle = "Cat"; // the start article
-let currTitle; // the current title
-let destTitle = "Dog"; // the end article
+let startHref = "https://en.wikipedia.org/wiki/Cat"; // the start article
+let currHref; // the current title
+let destHref = "https://en.wikipedia.org/wiki/Dog"; // the end article
 
 // Time
 let startTime = new Date().getTime();
@@ -31,9 +31,9 @@ $(document).ready(() => {
   setInterval(updateTimer, 500);
   $timer.text("0:00");
 
-  $destination.html(destTitle);
+  $destination.html(destHref);
 
-  goToPage(startTitle);
+  goToPage(startHref);
 });
 
 
@@ -50,9 +50,9 @@ function goToPage(href) {
 function drawPage(message) {
   payload = message.payload;
   html = payload.text;
-  title = payload.title;
+  href = payload.href;
 
-  if (title != currTitle) {
+  if (href != currHref) {
     $title.html("<b>" + title + "</b>");
     $article.html(html);
 
@@ -63,7 +63,7 @@ function drawPage(message) {
       drawHistory();
     }
 
-    currTitle = title;
+    currHref = href;
   }
 }
 
