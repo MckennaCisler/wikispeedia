@@ -98,8 +98,8 @@
 	display: none;
 	font-family: 'Rubik Mono One', sans-serif;
 	font-size: 3em;
-	padding-top: 5px;
-	padding-bottom: .06em;
+	padding-top: 10px;
+	padding-bottom: 0.16em;
 	padding-right: 1em;
 	padding-left: 1em;
 	border-left: thin solid black;
@@ -109,27 +109,19 @@
 	float: right;
 	font-family: 'Rubik Mono One', sans-serif;
 	font-size: 3em;
-	padding-top: 5px;
-	padding-bottom: .06em;
+	padding-top: 10px;
+	padding-bottom: 0.16em;
 	padding-right: 1em;
 	padding-left: 1em;
 	border-left: thin solid black;
 }
 
-.my_danger {
-	color: white;
-	background-color: #80A1D4;
-}
-.my_danger:hover {
-	background-color: #7593C1;
-}
-
 .my_success {
 	color: white;
-	background-color: #BBBE64;
+	background-color: #2EA7C0;
 }
 .my_success:hover {
-	background-color: #AAAD5B;
+	background-color: #2A98AF;
 }
 
 body {
