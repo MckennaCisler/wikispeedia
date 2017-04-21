@@ -147,7 +147,7 @@ class ServerConn {
         /**
          * callbacks called once websocket is ready
          */
-        this.readyCallbacks = []
+        this.readyCallbacks = []; // TODO: Figure this out!!!!
     }
 
     /**
