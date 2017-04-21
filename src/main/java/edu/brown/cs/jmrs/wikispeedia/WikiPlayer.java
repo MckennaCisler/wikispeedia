@@ -3,6 +3,7 @@ package edu.brown.cs.jmrs.wikispeedia;
 import java.io.IOException;
 import java.time.Duration;
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
@@ -33,7 +34,7 @@ public class WikiPlayer {
   /**
    * Path and location data.
    */
-  private List<WikiPage> path;
+  private final List<WikiPage> path;
   private final WikiPage startPage;
   private final WikiPage goalPage;
   private WikiPage curPage;
@@ -53,11 +54,13 @@ public class WikiPlayer {
   public WikiPlayer(String id, String name, WikiLobby lobby, WikiPage startPage,
       WikiPage goalPage) {
     super();
+    this.path = new ArrayList<>();
     this.id = id;
     this.name = name;
     this.lobby = lobby;
     this.startPage = startPage;
     this.goalPage = goalPage;
+    this.curPage = startPage;
   }
 
   /****************************************/

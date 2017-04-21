@@ -18,7 +18,7 @@ import joptsimple.OptionSet;
  *
  */
 public final class Main {
-  public static final int DEFAULT_SPARK_PORT  = 4567;
+  public static final int DEFAULT_SPARK_PORT = 4567;
   public static final int DEFAULT_SOCKET_PORT = 4568;
 
   private Main() {
@@ -44,9 +44,9 @@ public final class Main {
 
     if (options.has("spark")) {
       try {
-        SparkServer.runSparkServer(
-            (int) options.valueOf("spark-port"),
+        SparkServer.runSparkServer((int) options.valueOf("spark-port"),
             ImmutableList.of(new WikiHandlers()));
+        System.out.println("[ Started Spark ]");
 
       } finally {
         SparkServer.stop();
@@ -54,22 +54,20 @@ public final class Main {
     }
 
     if (options.has("gui")) {
-      Server server = new Server(
-          (int) options.valueOf("socket-port"),
-          (Server, String) -> {
-            return new WikiLobby(Server, String, null, null, null);
-          },
-          new WikiInterpreter());
+      Server server =
+          new Server((int) options.valueOf("socket-port"), (serv, str) -> {
+            return new WikiLobby(serv, str);
+          }, new WikiInterpreter());
       server.start();
+      System.out.println("[ Started Main GUI ]");
 
     } else if (options.has("chat-test")) {
-      Server server = new Server(
-          (int) options.valueOf("socket-port"),
-          (Server, String) -> {
-            return new ChatLobby(Server, String);
-          },
-          new ChatInterpreter());
+      Server server =
+          new Server((int) options.valueOf("socket-port"), (serv, str) -> {
+            return new ChatLobby(serv, str);
+          }, new ChatInterpreter());
       server.start();
+      System.out.println("[ Started Chat Test ]");
     }
   }
 }

@@ -15,14 +15,12 @@ import edu.brown.cs.jmrs.server.threading.GlobalThreadManager;
 
 class ServerWorker extends WebSocketServer {
 
-  private Server                             server;
-  private LobbyManager                       lobbies;
+  private Server server;
+  private LobbyManager lobbies;
   private ConcurrentBiMap<WebSocket, Player> players;
-  private CommandInterpreter                 interpreter;
+  private CommandInterpreter interpreter;
 
-  public ServerWorker(
-      Server server,
-      int port,
+  public ServerWorker(Server server, int port,
       BiFunction<Server, String, ? extends Lobby> lobbyFactory,
       CommandInterpreter interpreter) {
     super(new InetSocketAddress(port));
@@ -36,7 +34,7 @@ class ServerWorker extends WebSocketServer {
   public void setPlayerId(WebSocket conn, String playerId) throws InputError {
     Lobby lobby = players.get(conn).getLobby();
     if (lobby == null) {
-      if (playerId.length() == 0) {
+      if (playerId == null || playerId.length() == 0) {
         Player player = new Player(conn.hashCode() + "");
         while (!players.putNoOverwrite(conn, player)) {
           player = new Player(Math.random() + "");

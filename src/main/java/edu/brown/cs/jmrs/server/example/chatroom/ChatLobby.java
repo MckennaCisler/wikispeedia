@@ -1,7 +1,6 @@
 package edu.brown.cs.jmrs.server.example.chatroom;
 
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 import com.google.gson.Gson;
@@ -12,10 +11,10 @@ import edu.brown.cs.jmrs.server.customizable.Lobby;
 
 public class ChatLobby implements Lobby {
 
-  private String       id;
+  private String id;
   private List<String> playerIds;
-  private Server       server;
-  private boolean      closed;
+  private Server server;
+  private boolean closed;
 
   public ChatLobby(Server server, String id) {
     this.server = server;
@@ -79,8 +78,7 @@ public class ChatLobby implements Lobby {
 
     JsonObject jsonObject = new JsonObject();
     jsonObject.addProperty("type", "bounced_whisper");
-    jsonObject.addProperty(
-        "error",
+    jsonObject.addProperty("error",
         "No client with specified ID exists in this lobby");
     jsonObject.addProperty("target", recipientId);
 
@@ -94,6 +92,6 @@ public class ChatLobby implements Lobby {
   }
 
   @Override
-  public void init(Map<String, ?> arguments) {
+  public void init(JsonObject arguments) {
   }
 }

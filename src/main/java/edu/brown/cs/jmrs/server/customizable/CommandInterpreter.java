@@ -1,8 +1,8 @@
 package edu.brown.cs.jmrs.server.customizable;
 
-import java.util.Map;
+import com.google.gson.JsonObject;
 
 public interface CommandInterpreter {
 
-  void interpret(Lobby uncastLobby, String clientId, Map<String, ?> command);
+  void interpret(Lobby uncastLobby, String clientId, JsonObject command);
 }
