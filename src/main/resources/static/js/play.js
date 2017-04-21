@@ -77,7 +77,7 @@ function errorPage() {
 // Replaces the links with callbacks
 function cleanHtml() {
   $article.find("a").each(function() {
-    this.attr("href", hrefHelper(this.attr('href')));
+    $(this).attr("href", hrefHelper($(this).attr('href')));
   });
 }
 
