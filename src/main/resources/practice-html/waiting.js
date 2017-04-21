@@ -16,16 +16,27 @@ window.setInterval(() => {
 
 $(document).ready(() => {
 	"use strict";
+	let keepGoing = true;
 	const decrement = (pid) => {
 		if ($("#counter").html() === "0") {
 			clearInterval(pid);
 			window.location.replace("end.html");
 		} else {
 			$("#counter").html($("#counter").html() - 1);
+			if ($("#counter").html() > 1) {
+				let audio = new Audio('assets/beep.wav');
+				audio.play();
+			} else if (keepGoing) {
+				let audio = new Audio('assets/launch.wav');
+				audio.play();
+				keepGoing = false;
+			}
 		}
 	};
 	$("#force").on('click', () => {
 		$("#counter").show();
+		let audio = new Audio('assets/beep.wav');
+		audio.play();
 		var pid = setInterval(decrement, 1000, pid);
 	});
 });

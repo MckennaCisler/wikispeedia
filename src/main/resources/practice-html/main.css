@@ -1,5 +1,4 @@
 @charset "utf-8";
-@import url(http://fonts.googleapis.com/css?family=Changa+One&effect=anaglyph);
 /* Game page */
 
 #game-div {
@@ -136,10 +135,11 @@
 body {
 	/*background-image: url("assets/shattered.png");*/
 	background: #e52d27;  /* fallback for old browsers */
-background: -webkit-linear-gradient(right, #b31217, #e52d27);
-background: -o-linear-gradient(right, #b31217, #e52d27);
-background: linear-gradient(to left, #b31217, #e52d27);  /* Chrome 10-25, Safari 5.1-6 */ /* W3C, IE 10+/ Edge, Firefox 16+, Chrome 26+, Opera 12+, Safari 7+ */
+background: -webkit-linear-gradient(right, #b31270, #e52d27);
+background: -o-linear-gradient(right, #b31270, #e52d27);
+background: linear-gradient(to left, #b31270, #e52d27);  /* Chrome 10-25, Safari 5.1-6 */ /* W3C, IE 10+/ Edge, Firefox 16+, Chrome 26+, Opera 12+, Safari 7+ */
 	font-family: 'Heebo', sans-serif !important;
+	font-weight: 400;
 }
 
 h3.card-header {
