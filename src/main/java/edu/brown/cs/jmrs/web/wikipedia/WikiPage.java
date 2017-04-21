@@ -54,7 +54,37 @@ public class WikiPage extends Page {
    * @return A new Wikipage constructed with the url using the given page.
    */
   public static WikiPage fromName(String name) {
+    // it will likely be escaped, but replace spaces otherwise.
     return new WikiPage(WIKIPEDIA_ARTICLE_PREFIX + name.replaceAll("\\s", "_"));
+  }
+
+  /**
+   * Constructs a Wikipage from the given string of some type and attempts to
+   * create the appropriate page.
+   *
+   * @param identifier
+   *          The String page to convert to a Wikipedia URL. Can be either a
+   *          full wiki url, a relative wiki url, or a page name.
+   *
+   * @return A new Wikipage constructed with the url using the given name.
+   */
+  public static WikiPage fromAny(String identifier) {
+    String cleanedId = cleanUrl(identifier);
+
+    // remove a VERY last slash
+    if (cleanedId.charAt(cleanedId.length() - 1) == '/') {
+      cleanedId = cleanedId.substring(0, cleanedId.length() - 2);
+    }
+
+    int lastSlash = cleanedId.lastIndexOf('/');
+
+    // extract title and add it onto full link to be safe
+    if (lastSlash != -1) {
+      return WikiPage.fromName(cleanedId.substring(lastSlash + 1));
+    } else {
+      // already just a title
+      return WikiPage.fromName(cleanedId);
+    }
   }
 
   /**
