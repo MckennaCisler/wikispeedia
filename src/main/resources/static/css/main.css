@@ -2,19 +2,27 @@
 /* Game page */
 
 #game-div {
-	margin-left: 40px;
-	margin-right: 40px;
-	margin-top: 20px;
+	margin-left: 15px;
+	margin-right: 15px;
+	margin-top: 25px;
 }
 
 #history {
 	text-align: left;
-	font-size: medium;
+	font-size: small;
 }
 
 #history-label {
 	text-align: left;
 	font-size: small;
+}
+
+#history-dropdown {
+	border-color: #e52d27;
+}
+
+#history-panel {
+	height: 290px;
 }
 
 #destination {
@@ -45,7 +53,7 @@
 	font-size: medium;
 	overflow-wrap: break-word;
 	overflow-y: scroll;
-	max-height: 370px;
+	height: 465px;
 }
 
 /* Lobby page */
@@ -125,7 +133,7 @@
 }
 
 body {
-	/*background-image: url("assets/shattered.png");*/
+	/*background-image: url("lib/assets/shattered.png");*/
 	background: #e52d27;  /* fallback for old browsers */
 background: -webkit-linear-gradient(right, #b31270, #e52d27);
 background: -o-linear-gradient(right, #b31270, #e52d27);

@@ -7,7 +7,7 @@ import edu.brown.cs.jmrs.server.customizable.Lobby;
 
 /**
  * User access point to server functionality, keeps functionality black-boxed.
- * 
+ *
  * @author shastin1
  *
  */
@@ -15,8 +15,7 @@ public class Server {
 
   protected ServerWorker server;
 
-  public Server(
-      int port,
+  public Server(int port,
       BiFunction<Server, String, ? extends Lobby> lobbyFactory,
       CommandInterpreter interpreter) {
     server = new ServerWorker(this, port, lobbyFactory, interpreter);

@@ -9,12 +9,19 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import com.google.common.collect.ImmutableList;
+import com.google.gson.JsonObject;
 
 import edu.brown.cs.jmrs.server.Server;
 import edu.brown.cs.jmrs.server.customizable.Lobby;
 import edu.brown.cs.jmrs.web.ContentFormatter;
+import edu.brown.cs.jmrs.web.ContentFormatterChain;
 import edu.brown.cs.jmrs.web.LinkFinder;
+import edu.brown.cs.jmrs.web.wikipedia.WikiAnnotationRemover;
+import edu.brown.cs.jmrs.web.wikipedia.WikiBodyFormatter;
+import edu.brown.cs.jmrs.web.wikipedia.WikiFooterRemover;
 import edu.brown.cs.jmrs.web.wikipedia.WikiPage;
+import edu.brown.cs.jmrs.web.wikipedia.WikiPageLinkFinder;
+import edu.brown.cs.jmrs.web.wikipedia.WikiPageLinkFinder.Filter;
 import edu.brown.cs.jmrs.wikispeedia.WikiInterpreter.Command;
 
 /**
@@ -24,11 +31,12 @@ import edu.brown.cs.jmrs.wikispeedia.WikiInterpreter.Command;
  *
  */
 public class WikiLobby implements Lobby {
-  /**
-   * Global id available for next lobby. Each newly constructed lobby gets and
-   * increments this.
-   */
-  // private static AtomicInteger nextLobbyId = new AtomicInteger(0);
+  private static final LinkFinder<WikiPage> DEFAULT_LINK_FINDER =
+      new WikiPageLinkFinder(Filter.DISAMBIGUATION);
+  private static final ContentFormatter<WikiPage> DEFAULT_CONTENT_FORMATTER =
+      new ContentFormatterChain<WikiPage>(
+          ImmutableList.of(new WikiBodyFormatter(), new WikiFooterRemover(),
+              new WikiAnnotationRemover()));
 
   private transient Server server;
   private final String id;
@@ -54,22 +62,15 @@ public class WikiLobby implements Lobby {
    *          The server it was called from.
    * @param id
    *          The id of this lobby.
-   * @param linkFinder
-   *          The linkFinder to use when showing / letting players move through
-   *          pages.
-   * @param startPage
-   *          The starting page of players in this lobby.
-   * @param goalPage
-   *          The page players in this lobby are trying to get to.
    */
-  public WikiLobby(Server server, String id, LinkFinder<WikiPage> linkFinder,
-      WikiPage startPage, WikiPage goalPage) {
+  public WikiLobby(Server server, String id) {
     this.server = server;
     this.id = id;
     players = new HashMap<>();
-    this.linkFinder = linkFinder;
-    this.startPage = startPage;
-    this.goalPage = goalPage;
+    this.linkFinder = DEFAULT_LINK_FINDER;
+    this.contentFormatter = DEFAULT_CONTENT_FORMATTER;
+    this.startPage = WikiPage.fromName("Cat"); // TODO
+    this.goalPage = WikiPage.fromName("Brown University"); // TODO
   }
 
   /****************************************/
@@ -77,9 +78,8 @@ public class WikiLobby implements Lobby {
   /****************************************/
 
   @Override
-  public void init(Map<String, ?> arguments) {
+  public void init(JsonObject arguments) {
     // TODO Auto-generated method stub
-
   }
 
   @Override
@@ -109,10 +109,44 @@ public class WikiLobby implements Lobby {
   /****************************************/
 
   /**
+   * @param page
+   *          The starting page of players in this lobby.
+   */
+  public void setStartPage(WikiPage page) {
+    this.startPage = page;
+  }
+
+  /**
+   * @param page
+   *          The page players in this lobby are trying to get to.
+   */
+  public void setGoalPage(WikiPage page) {
+    this.goalPage = page;
+  }
+
+  /**
+   * @param linkFinder
+   *          The linkFinder to use when showing / letting players move through
+   *          pages.
+   */
+  public void setLinkFinder(LinkFinder<WikiPage> linkFinder) {
+    this.linkFinder = linkFinder;
+  }
+
+  /**
+   * @param contentFormatter
+   *          The ContentFormatter associated with this lobby, used to reformat
+   *          the parsedContent() of player's Wikipages.
+   */
+  public void setContentFormatter(ContentFormatter<WikiPage> contentFormatter) {
+    this.contentFormatter = contentFormatter;
+  }
+
+  /**
    * Start the game by setting a start time. Players cannot join after this.
    */
   public void start() {
-    startTime = Instant.now();
+    startTime = Instant.now(); // this is how we determine whether started
   }
 
   /**
@@ -158,6 +192,36 @@ public class WikiLobby implements Lobby {
   /****************************************/
   /* GETTERS */
   /****************************************/
+
+  /**
+   * @return The LinkFinder associated with this lobby, used in finding links
+   *         from WikiPages.
+   */
+  public LinkFinder<WikiPage> getLinkFinder() {
+    return linkFinder;
+  }
+
+  /**
+   * @return The ContentFormatter associated with this lobby, used to reformat
+   *         the parsedContent() of player's Wikipages.
+   */
+  public ContentFormatter<WikiPage> getContentFormatter() {
+    return contentFormatter;
+  }
+
+  /**
+   * @return The start wiki page of this lobby.
+   */
+  public WikiPage getStartPage() {
+    return startPage;
+  }
+
+  /**
+   * @return The goal wiki page of this lobby.
+   */
+  public WikiPage getGoalPage() {
+    return goalPage;
+  }
 
   /**
    * @return The server associated with this lobby.
@@ -244,36 +308,6 @@ public class WikiLobby implements Lobby {
       throw new IllegalStateException("Lobby has not ended.");
     }
     return endTime;
-  }
-
-  /**
-   * @return The start wiki page of this lobby.
-   */
-  public WikiPage getStartPage() {
-    return startPage;
-  }
-
-  /**
-   * @return The goal wiki page of this lobby.
-   */
-  public WikiPage getGoalPage() {
-    return goalPage;
-  }
-
-  /**
-   * @return The LinkFinder associated with this lobby, used in finding links
-   *         from WikiPages.
-   */
-  public LinkFinder<WikiPage> getLinkFinder() {
-    return linkFinder;
-  }
-
-  /**
-   * @return The ContentFormatter associated with this lobby, used to reformat
-   *         the parsedContent() of player's Wikipages.
-   */
-  public ContentFormatter<WikiPage> getContentFormatter() {
-    return contentFormatter;
   }
 
 }

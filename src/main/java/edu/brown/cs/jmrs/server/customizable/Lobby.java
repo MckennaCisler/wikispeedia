@@ -1,10 +1,10 @@
 package edu.brown.cs.jmrs.server.customizable;
 
-import java.util.Map;
+import com.google.gson.JsonObject;
 
 public interface Lobby {
 
-  void init(Map<String, ?> arguments);
+  void init(JsonObject jsonElement);
 
   boolean isClosed();
 

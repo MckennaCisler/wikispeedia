@@ -1,6 +1,6 @@
 package edu.brown.cs.jmrs.server.example.chatroom;
 
-import java.util.Map;
+import com.google.gson.JsonObject;
 
 import edu.brown.cs.jmrs.server.customizable.CommandInterpreter;
 import edu.brown.cs.jmrs.server.customizable.Lobby;
@@ -15,23 +15,19 @@ public class ChatInterpreter implements CommandInterpreter {
   }
 
   @Override
-  public void interpret(
-      Lobby uncastLobby,
-      String clientId,
-      Map<String, ?> command) {
+  public void interpret(Lobby uncastLobby, String clientId,
+      JsonObject command) {
     ChatLobby lobby = (ChatLobby) uncastLobby;
 
-    String commandString = (String) command.get("command");
+    String commandString = command.get("command").getAsString();
 
     switch (Commands.valueOf(commandString.toUpperCase())) {
       case MESSAGE:
-        lobby.sendMessage(clientId, (String) command.get("message"));
+        lobby.sendMessage(clientId, command.get("message").getAsString());
         return;
       case WHISPER:
-        lobby.sendMessage(
-            (String) command.get("recipient"),
-            clientId,
-            (String) command.get("message"));
+        lobby.sendMessage(command.get("recipient").getAsString(), clientId,
+            command.get("message").getAsString());
         return;
     }
   }

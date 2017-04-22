@@ -58,7 +58,7 @@ public interface ContentFormatter<T extends Page> {
    * Make sure not to manipulate the internal DOM of the page with
    * parsedContentOriginal()! This is included only to allow increased memory
    * efficiency by allowing an implemented to clone() only a subset of the
-   * original DOM>
+   * original DOM
    *
    * @param page
    *          The page to format under this ContentFormatter's particular

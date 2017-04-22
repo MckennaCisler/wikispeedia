@@ -3,18 +3,18 @@ $(document).ready(function() {
 	"use strict";
 	let isMaking;
 	let lobbyName;
-	
+
 	$("#advanced_ops").hide();
 	$("#advanced").on('click', () => {
 		if ($("#advanced_ops").is(":hidden")) {
 			$("#advanced_ops").show();
-			$("#advanced_im").attr("src", "assets/down-triangle.png");
+			$("#advanced_im").attr("src", "lib/assets/down-triangle.png");
 		} else {
 			$("#advanced_ops").hide();
-			$("#advanced_im").attr("src", "assets/side-triangle.png");
+			$("#advanced_im").attr("src", "lib/assets/side-triangle.png");
 		}
 	});
-	
+
 	$("#start_game").on('click', () => {
 		if ($("#game_name").val() === "") {
 			$("#game_name").effect("highlight", {"color": "red"}, 1000);
@@ -28,7 +28,7 @@ $(document).ready(function() {
 			console.log(lobbyName);
 		}
 	});
-	
+
 	$("#open_games").on('click', (event) => {
 		isMaking = false;
 		lobbyName = $(event.target).html();
@@ -37,13 +37,13 @@ $(document).ready(function() {
 		$("#uname_picker").show();
 		$("#u_header").html(lobbyName);
 	});
-	
+
 	$("#back_main").on('click', () => {
 		$("#uname_picker").hide();
 		$("#main").show();
 		$("#rules").show();
 	});
-	
+
 	$("#launch").on('click', () => {
 		if ($("#uname").val() === "") {
 			$("#uname").effect("highlight", {"color": "red"}, 1000);

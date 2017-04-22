@@ -25,10 +25,10 @@ $(document).ready(() => {
 		} else {
 			$("#counter").html($("#counter").html() - 1);
 			if ($("#counter").html() > 1) {
-				let audio = new Audio('assets/beep.wav');
+				let audio = new Audio('lib/assets/beep.wav');
 				audio.play();
 			} else if (keepGoing) {
-				let audio = new Audio('assets/launch.wav');
+				let audio = new Audio('lib/assets/launch.wav');
 				audio.play();
 				keepGoing = false;
 			}
@@ -39,7 +39,7 @@ $(document).ready(() => {
 		$("#counter").show();
 		clearInterval(ddd);
 		document.title = "The game is starting";
-		let audio = new Audio('assets/beep.wav');
+		let audio = new Audio('lib/assets/beep.wav');
 		audio.play();
 		var pid = setInterval(decrement, 1000, pid);
 	});
