@@ -10,6 +10,11 @@ import edu.brown.cs.jmrs.wikispeedia.WikiInterpreter;
 import edu.brown.cs.jmrs.wikispeedia.WikiLobby;
 import joptsimple.OptionParser;
 import joptsimple.OptionSet;
+import spark.Request;
+import spark.Response;
+import spark.Route;
+import spark.Spark;
+import spark.template.freemarker.FreeMarkerEngine;
 
 /**
  * Primary execution class.
@@ -18,7 +23,7 @@ import joptsimple.OptionSet;
  *
  */
 public final class Main {
-  public static final int DEFAULT_SPARK_PORT = 4567;
+  public static final int DEFAULT_SPARK_PORT  = 4567;
   public static final int DEFAULT_SOCKET_PORT = 4568;
 
   private Main() {
@@ -44,7 +49,8 @@ public final class Main {
 
     if (options.has("spark")) {
       try {
-        SparkServer.runSparkServer((int) options.valueOf("spark-port"),
+        SparkServer.runSparkServer(
+            (int) options.valueOf("spark-port"),
             ImmutableList.of(new WikiHandlers()));
         System.out.println("[ Started Spark ]");
 
@@ -54,18 +60,44 @@ public final class Main {
     }
 
     if (options.has("gui")) {
-      Server server =
-          new Server((int) options.valueOf("socket-port"), (serv, str) -> {
+      Server server = new Server(
+          (int) options.valueOf("socket-port"),
+          (serv, str) -> {
             return new WikiLobby(serv, str);
-          }, new WikiInterpreter());
+          },
+          new WikiInterpreter());
       server.start();
       System.out.println("[ Started Main GUI ]");
 
     } else if (options.has("chat-test")) {
-      Server server =
-          new Server((int) options.valueOf("socket-port"), (serv, str) -> {
+      Spark.staticFileLocation("/public");
+      SparkServer.runSparkServer(
+          (int) options.valueOf("spark-port"),
+          ImmutableList.of(new SparkHandlers() {
+
+            @Override
+            public void registerHandlers(FreeMarkerEngine freeMarker) {
+              Spark.staticFileLocation("/public");
+              Spark.get("/", new Route() {
+
+                @Override
+                public Object handle(Request request, Response response)
+                    throws Exception {
+                  response.redirect("/index.html");
+                  return null;
+                }
+
+              });
+            }
+
+          }));
+
+      Server server = new Server(
+          (int) options.valueOf("socket-port"),
+          (serv, str) -> {
             return new ChatLobby(serv, str);
-          }, new ChatInterpreter());
+          },
+          new ChatInterpreter());
       server.start();
       System.out.println("[ Started Chat Test ]");
     }
