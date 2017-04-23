@@ -1,5 +1,8 @@
 /*jshint esversion: 6 */
 
+// Globals
+
+
 //Maybe do this with the title instead
 let dots = 0;
 let ddd = window.setInterval(() => {
@@ -18,29 +21,62 @@ let ddd = window.setInterval(() => {
 $(document).ready(() => {
 	"use strict";
 	let keepGoing = true;
-	const decrement = (pid) => {
-		if ($("#counter").html() === "0") {
-			clearInterval(pid);
-			window.location.replace("end");
-		} else {
-			$("#counter").html($("#counter").html() - 1);
-			if ($("#counter").html() > 1) {
-				let audio = new Audio('lib/assets/beep.wav');
-				audio.play();
-			} else if (keepGoing) {
-				let audio = new Audio('lib/assets/launch.wav');
-				audio.play();
-				keepGoing = false;
-			}
-		}
-	};
+
 	$("#force").on('click', () => {
 		$(".loader").hide();
 		$("#counter").show();
-		clearInterval(ddd);
-		document.title = "The game is starting";
-		let audio = new Audio('lib/assets/beep.wav');
-		audio.play();
-		var pid = setInterval(decrement, 1000, pid);
+		startGame();
 	});
 });
+
+function decrement(pid) {
+	if ($("#counter").html() === "0") {
+		clearInterval(pid);
+		window.location.replace("end");
+	} else {
+		$("#counter").html($("#counter").html() - 1);
+		if ($("#counter").html() > 1) {
+			let audio = new Audio('lib/assets/beep.wav');
+			audio.play();
+		} else if (keepGoing) {
+			let audio = new Audio('lib/assets/launch.wav');
+			audio.play();
+			keepGoing = false;
+		}
+	}
+};
+
+function startGame() {
+	clearInterval(ddd);
+	document.title = "The game is starting";
+	let audio = new Audio('lib/assets/beep.wav');
+	audio.play();
+	var pid = setInterval(decrement, 1000, pid);
+}
+
+// game logic handlers
+serverConn.ready(() => {
+	// Get player states
+	serverConn.registerAllPlayers(drawPlayers);
+
+	serverConn.registerBeginGame(startGame); // TODO: Game will be 5s off in time!!!!
+
+	// Get current lobby settings
+	serverConn.getSettings("", (settings) => {
+ 		// Get articles
+		serverConn.getPage(settings.start.name, drawArticle, displayServerConnError);
+		serverConn.getPage(settings.goal.name, drawArticle, displayServerConnError);
+	}, displayServerConnError);
+
+});
+
+function drawArticle(article) {
+	// TODO
+	console.log(article);
+}
+
+function drawPlayers(players) {
+	for (let i = 0; i < players.length; i++) {
+		console.log(player[i]);
+	}
+}

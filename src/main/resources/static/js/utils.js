@@ -9,3 +9,30 @@ function titleFromHref(href) {
 function replaceAll(str, find, replace) {
   return str.replace(new RegExp(find, 'g'), replace);
 }
+
+function assert(statement, ifFalse, ifTrue) {
+    if (statement === false) {
+        if (ifFalse !== undefined) {
+            console.log("ASSERTION ERROR - See stack trace");
+        } else {
+            console.log("ASSERTION ERROR - " + msg);
+        }
+    } else {
+        if (ifTrue !== undefined) {
+            console.log(ifTrue);
+        }
+    }
+}
+
+function displayError(msg) {
+    // TODO
+    alert(msg);
+}
+
+function clearError() {
+    // TODO
+}
+
+function displayServerConnError(error) {
+    displayError(error.error_message);
+}

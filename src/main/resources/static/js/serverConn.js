@@ -1,5 +1,5 @@
 /**
- * Globals
+ * Globals (created at bottom)
  */
  var serverConn;
 
@@ -55,7 +55,7 @@ const Command = {
     },
     GET_LOBBIES: {
       name: "get_lobbies",
-      responseName: "get_lobbies_response",
+      responseName: "all_lobbies",
       type: COMMAND_TYPE.SERVER,
       construct: () => { return "" }
     },
@@ -90,10 +90,24 @@ const Command = {
             return { "lobby_id" : lobby_id };
         }
 	},
+    FORCE_BEGIN_GAME: {
+        name: "force_begin_game",
+        responseName: "begin_game",
+        type: COMMAND_TYPE.INCOMING,
+        construct: () => { return "" }
+    },
+    GET_PAGE : {
+		name: "get_page",
+        responseName: "return_get_page",
+		type: COMMAND_TYPE.INCOMING,
+		construct: (page_name) => {
+            return { "page_name" : page_name };
+        }
+	},
     // Player-specific commands
     GOTO_PAGE : {
 		name: "goto_page",
-        responseName: "return_page",
+        responseName: "return_goto_page",
 		type: COMMAND_TYPE.INCOMING,
 		construct: (page_name) => {
             return { "page_name" : page_name };
@@ -119,6 +133,18 @@ const Command = {
     /**
      * OUTGOING Server Commands.
      */
+    ALL_LOBBIES: {
+   		name: "all_lobbies",
+   		type: COMMAND_TYPE.OUTGOING,
+   	},
+    ALL_PLAYERS: {
+  		name: "all_players",
+  		type: COMMAND_TYPE.OUTGOING,
+  	},
+    BEGIN_GAME : {
+ 		name: "begin_game",
+ 		type: COMMAND_TYPE.OUTGOING,
+ 	},
     END_GAME : {
 		name: "end_game",
 		type: COMMAND_TYPE.OUTGOING,
@@ -151,7 +177,7 @@ class ServerConn {
     }
 
     /**
-     * Exposed functions
+     * Exposed functions; callbacks are called with relevant payload
      */
     getPlayers(lobby_id, callback, errCallback) {
         this._send(Command.GET_PLAYERS, callback, errCallback, [lobby_id]);
@@ -169,8 +195,16 @@ class ServerConn {
         this._send(Command.GOTO_PAGE, callback, errCallback, [page_name]);
     }
 
+    getPage(page_name, callback, errCallback) {
+        this._send(Command.GET_PAGE, callback, errCallback, [page_name]);
+    }
+
     getPath(player_id, callback, errCallback) {
         this._send(Command.GET_PATH, callback, errCallback, [player_id]);
+    }
+
+    forceBeginGame(callback, errCallback) {
+        this._send(Command.FORCE_BEGIN_GAME, callback, errCallback, []);
     }
 
     /**
@@ -199,21 +233,36 @@ class ServerConn {
     }
 
     /**
-     * Register a specific handler for the END_GAME message. Note that the handler is erased after every END_GAME call.
+     * Handlers for OUTGOING commands
      */
-    registerEndgame(callback) {
+    registerAllLobbies(callback) {
+        this._registerOutgoing(Command.ALL_LOBBIES, callback);
+    }
 
-        // TODO: What happens on a new page????????????????? (Jacob maybe does this somewhere?)
+    registerAllPlayers(callback) {
+        this._registerOutgoing(Command.ALL_PLAYERS, callback);
+    }
 
-        this.pendingResponses[Command.END_GAME.name] = {
+    registerBeginGame(callback) {
+        this._registerOutgoing(Command.BEGIN_GAME, callback);
+    }
+
+    registerEndGame(callback) {
+        this._registerOutgoing(Command.END_GAME, callback);
+    }
+
+    _registerOutgoing(command, callback) {
+        this.pendingResponses[command.name] = {
             "callback": callback,
-            "errCallback" : () => {},
-            "timeout" : null
+            "errCallback" : () => {}, // no reason
+            "timeout" : null          // no reason
         }
     }
 
+
     ready(callback) {
-        this.readyCallbacks.append(callback);
+        // this.readyCallbacks.append(callback);
+        window.setTimeout(callback, 1000); // TODO
     }
 
     /**
@@ -234,7 +283,7 @@ class ServerConn {
         // TODO: This
         // TODO: is just
         // TOOD: temporary
-        this.startLobby("HARD CODED CRAZY LIT LOBBY", () => console.log("Lobby started"), () => console.log("Lobby failed to start"));
+        // this.startLobby("HARD CODED CRAZY LIT LOBBY", () => console.log("Lobby started"), () => console.log("Lobby failed to start"));
     };
 
     ws_onmessage(jsonMsg) {
@@ -257,11 +306,18 @@ class ServerConn {
                 // that should be called on the return message, so we can reference these all in one line
                 // without a switch statement
                 const actions = this.pendingResponses[parsedMsg.command];
-                actions.callback(parsedMsg);
+
+                // if this is NOT a server command, just apply the callback on the payload too keep a nice interface
+                if (actions.command.type !== COMMAND_TYPE.SERVER) {
+                    actions.callback(parsedMsg.payload);
+                } else {
+                    actions.callback(parsedMsg);
+                }
                 window.clearTimeout(actions.timeout);
             } else {
+                // (but give any command type access to the top-level error_message)
                 const actions = this.pendingResponses[parsedMsg.command];
-                actions.errCallback(parsedMsg);
+                if (actions.errCallback !== undefined) { actions.errCallback(parsedMsg); }
                 window.clearTimeout(actions.timeout);
 
                 console.log("\nGot error: ");
@@ -296,6 +352,7 @@ class ServerConn {
 
         // add an entry for the RESPONSE command to this one
         this.pendingResponses[command.responseName] = {
+            "command": command,
             "callback": callback,
             "errCallback": errCallback,
             "timeout": window.setTimeout(() => {
@@ -310,7 +367,66 @@ class ServerConn {
     }
 }
 
-$(document).ready(() => {
-    // global
-    serverConn = new ServerConn("localhost:4568");
-})
+/**
+ * Create global server. NOTE THat it is done outside a doc.ready because it is needed everywhere at doc.ready().
+ * And also does not need the DOM
+ */
+serverConn = new ServerConn("localhost:4568");
+
+
+
+/**
+ * TESTING
+ */
+serverConn.ready(() => {
+    serverConn.startLobby("CRAZY LIT TESTING LOBBY", () => {
+     serverConn.getPlayers("CRAZY LIT TESTING LOBBY",
+         (players) => {
+             console.log("SUCCESS: ");
+             console.log(players);
+         }, console.log);
+
+    }, console.log);
+
+    //
+    // getTime(callback, errCallback) {
+    //     this._send(Command.GET_TIME, callback, errCallback, []);
+    // }
+    //
+    // getSettings(lobby_id, callback, errCallback) {
+    //     this._send(Command.GET_SETTINGS, callback, errCallback, [lobby_id]);
+    // }
+    //
+    // gotoPage(page_name, callback, errCallback) {
+    //     this._send(Command.GOTO_PAGE, callback, errCallback, [page_name]);
+    // }
+    //
+    // getPage(page_name, callback, errCallback) {
+    //     this._send(Command.GET_PAGE, callback, errCallback, [page_name]);
+    // }
+    //
+    // getPath(player_id, callback, errCallback) {
+    //     this._send(Command.GET_PATH, callback, errCallback, [player_id]);
+    // }
+    //
+    // forceBeginGame(callback, errCallback) {
+    //     this._send(Command.FORCE_BEGIN_GAME, callback, errCallback, []);
+    // }
+    //
+    // // set lobby_id to null or undefined to generate a random one
+    // startLobby(lobby_id, callback, errCallback) {
+    //     this._send(Command.START_LOBBY, callback, errCallback, [lobby_id]);
+    // }
+    //
+    // leaveLobby(callback, errCallback) {
+    //     this._send(Command.LEAVE_LOBBY, callback, errCallback, []);
+    // }
+    //
+    // joinLobby(lobby_id, callback, errCallback) {
+    //     this._send(Command.JOIN_LOBBY, callback, errCallback, [lobby_id]);
+    // }
+    //
+    // getLobbies(callback, errCallback) {
+    //     this._send(Command.GET_LOBBIES, callback, errCallback, []);
+    // }
+});

@@ -1,5 +1,7 @@
 package edu.brown.cs.jmrs.ui;
 
+import java.io.IOException;
+
 import com.google.common.collect.ImmutableList;
 
 import edu.brown.cs.jmrs.server.Server;
@@ -9,6 +11,7 @@ import edu.brown.cs.jmrs.wikispeedia.WikiInterpreter;
 import edu.brown.cs.jmrs.wikispeedia.WikiLobby;
 import edu.brown.cs.jmrs.wikispeedia.WikiMainHandlers;
 import edu.brown.cs.jmrs.wikispeedia.WikiPageHandlers;
+import joptsimple.OptionException;
 import joptsimple.OptionParser;
 import joptsimple.OptionSet;
 import spark.Request;
@@ -36,8 +39,10 @@ public final class Main {
    *
    * @param args
    *          CLI args
+   * @throws IOException
+   *           If we can't print for some reason
    */
-  public static void main(String[] args) {
+  public static void main(String[] args) throws IOException {
     OptionParser parser = new OptionParser();
     parser.accepts("gui");
     parser.accepts("chat-test");
@@ -45,7 +50,15 @@ public final class Main {
         .defaultsTo(DEFAULT_SPARK_PORT);
     parser.accepts("socket-port").withRequiredArg().ofType(Integer.class)
         .defaultsTo(DEFAULT_SOCKET_PORT);
-    OptionSet options = parser.parse(args);
+
+    OptionSet options;
+    try {
+      options = parser.parse(args);
+    } catch (OptionException ope) {
+      System.out.println(ope.getMessage());
+      parser.printHelpOn(System.out);
+      return;
+    }
 
     if (options.has("gui")) {
       try {
@@ -64,7 +77,7 @@ public final class Main {
         System.out.println("[ Started Main GUI ]");
 
       } finally {
-        // SparkServer.stop();
+        // SparkServer.stop(); // TODO: how to really stop it?
       }
 
     } else if (options.has("chat-test")) {

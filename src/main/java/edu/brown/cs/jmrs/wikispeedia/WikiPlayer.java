@@ -27,9 +27,10 @@ public class WikiPlayer {
   private transient WikiLobby lobby;
 
   /**
-   * Time measurements (endTime is only set upon completion).
+   * State variables (endTime is only set upon completion).
    */
   private transient Instant endTime;
+  private boolean ready;
 
   /**
    * Path and location data.
@@ -53,6 +54,7 @@ public class WikiPlayer {
   public WikiPlayer(String id, String name, WikiLobby lobby, WikiPage startPage,
       WikiPage goalPage) {
     super();
+    ready = false;
     this.id = id;
     this.name = name;
     this.lobby = lobby;
@@ -65,6 +67,13 @@ public class WikiPlayer {
   /****************************************/
   /* GETTERS */
   /****************************************/
+
+  /**
+   * @return Whether this player is ready to start.
+   */
+  public final boolean ready() {
+    return ready;
+  }
 
   /**
    * @return This player's unique ID.
@@ -146,6 +155,14 @@ public class WikiPlayer {
   /****************************************/
 
   /**
+   * @param ready
+   *          The ready state to set this player to.
+   */
+  public synchronized void setReady(boolean ready) {
+    this.ready = ready;
+  }
+
+  /**
    * Checks internally whether the player is done.
    *
    * @param endTimeIfSo
@@ -153,10 +170,10 @@ public class WikiPlayer {
    *          did finish.
    * @return Whether the player was done after checking.
    */
-  public synchronized boolean checkIfDone(Instant endTimeIfSo) {
+  private synchronized boolean checkIfDone(Instant endTimeIfSo) {
     if (isDone()) {
       throw new IllegalStateException(
-          "Player " + id + " has already reached goal.");
+          String.format("Player %s has already reached the goal", name));
     }
 
     if (getCurPage().equals(goalPage)) {
@@ -189,14 +206,22 @@ public class WikiPlayer {
    *           If the curPage page cannot be accessed.
    */
   public synchronized boolean goToPage(WikiPage page) throws IOException {
-    if (isDone()) {
+    if (!lobby.started()) {
       throw new IllegalStateException(
-          "Player " + id + " has already reached goal.");
+          String.format("Player %s's lobby has not started", name));
+    } else if (lobby.ended()) {
+      throw new IllegalStateException(
+          String.format("Player %s's lobby has ended", name));
+    } else if (isDone()) {
+      throw new IllegalStateException(
+          String.format("Player %s has already reached the goal", name));
     }
 
     // we assume that the curPage page has been cached already (speed issue)
     if (lobby.getLinkFinder().linkedPages(getCurPage()).contains(page)) {
-      return path.add(page);
+      path.add(page);
+      checkIfDone(Instant.now());
+      return true;
     }
     return false;
   }

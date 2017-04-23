@@ -1,9 +1,12 @@
 /*jshint esversion: 6 */
+
+// globals for use in game logic
+let isMaking;
+let lobbyName;
+
 $(document).ready(function () {
 	"use strict";
 	resize();
-	let isMaking;
-	let lobbyName;
 
 	$("#advanced_ops").hide();
 	$("#advanced").on('click', () => {
@@ -47,16 +50,7 @@ $(document).ready(function () {
 		$("#rules").show();
 	});
 
-	$("#launch").on('click', () => {
-		if ($("#uname").val() === "") {
-			$("#uname").effect("highlight", {
-				"color": "red"
-			}, 1000);
-		} else {
-			// BE SURE TO ACTUALLY DO SOMETHING WITH THE ID
-			window.location.href = "waiting";
-		}
-	});
+
 });
 
 $(window).resize(function () {
@@ -76,5 +70,36 @@ function resize() {
 		$('#row_div').removeClass("row");
 	} else {
 		$('#row_div').addClass("row");
+	}
+}
+
+// game logic handlers
+serverConn.ready(() => {
+	// setup lobbies
+	serverConn.registerAllLobbies(drawLobbies);
+
+	$("#launch").on('click', () => {
+		if ($("#uname").val() === "") {
+			$("#uname").effect("highlight", {
+				"color": "red"
+			}, 1000);
+		} else if (lobbyName !== "") {
+			if (isMaking) {
+				serverConn.startLobby(lobbyName.trim(),
+				() => { window.location.href = "waiting"; },
+				(error) => { displayError(error.error_message); });
+			} else {
+				serverConn.joinLobby(lobbyName.trim(),
+				() => { window.location.href = "waiting"; },
+				(error) => { displayError(error.error_message); });
+			}
+		}
+	});
+});
+
+function drawLobbies(lobbies) {
+	for (let i = 0; i < lobbies.length; i++) {
+		$("#open_games").append('<li class="alobby list-group-item list-group-item-action" id="' +
+		 	lobbies[i].id + '">' + lobbies[i].id + '</li>');
 	}
 }

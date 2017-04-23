@@ -24,6 +24,15 @@ $(document).ready(() => {
 		let audio = new Audio("lib/assets/applause.wav");
 		audio.play();
 	}
-	
+
 	setInterval(increment, 1000);
+});
+
+
+serverConn.ready(() => {
+	// get the info and display it
+
+	serverConn.registerAllPlayers(() => {
+		// update player info as they move through pages
+	});
 });

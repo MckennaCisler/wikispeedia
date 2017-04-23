@@ -18,8 +18,8 @@ public class WikiBodyFormatter implements ContentFormatter<WikiPage> {
     // TODO : More efficent?
     Element content = input.select("#content").first().clone();
 
-    // remove everything before the title
-    content.select("#content > #firstHeading").prevAll().remove();
+    // remove everything before the bodyContent
+    content.select("#content > #bodyContent").prevAll().remove();
 
     // remove everything after mw-content-text
     content.select("#content > #bodyContent > #mw-content-text").nextAll()

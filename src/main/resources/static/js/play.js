@@ -36,8 +36,21 @@ $(document).ready(() => {
   $destination.html("<b>" + titleFromHref(destHref) + "</b>");
   setInterval(updateTimer, 200);
 
-  window.setTimeout(() => { goToPage(startHref); }, 1000);
 });
+
+serverConn.ready(() => {
+    serverConn.registerEndGame(() => {
+        window.location.href = "end";
+    });
+
+    serverConn.registerAllPlayers(drawPlayers);
+
+    goToPage(startHref);
+});
+
+function drawPlayers(players) {
+    // TODO: Display player paths in sidebar
+}
 
 
 ///
@@ -73,7 +86,7 @@ function drawPage(message) {
 
 // Error callback
 function errorPage() {
-  console.log("Couldn't go to page");
+  displayError("Couldn't go to page");
 }
 
 // Replaces the links with callbacks

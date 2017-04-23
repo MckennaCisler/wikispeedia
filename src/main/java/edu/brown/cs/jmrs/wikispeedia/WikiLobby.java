@@ -22,7 +22,6 @@ import edu.brown.cs.jmrs.web.wikipedia.WikiFooterRemover;
 import edu.brown.cs.jmrs.web.wikipedia.WikiPage;
 import edu.brown.cs.jmrs.web.wikipedia.WikiPageLinkFinder;
 import edu.brown.cs.jmrs.web.wikipedia.WikiPageLinkFinder.Filter;
-import edu.brown.cs.jmrs.wikispeedia.WikiInterpreter.Command;
 
 /**
  * Coordinates a lobby of players in a Wiki game.
@@ -40,10 +39,8 @@ public class WikiLobby implements Lobby {
 
   private transient Server server;
   private final String id;
-  private final Map<String, WikiPlayer> players; // from
-                                                 // id
-                                                 // to
-                                                 // player
+  // map from id to player
+  private transient Map<String, WikiPlayer> players;
   private transient LinkFinder<WikiPage> linkFinder;
   private transient ContentFormatter<WikiPage> contentFormatter;
   private Instant startTime = null;
@@ -144,8 +141,17 @@ public class WikiLobby implements Lobby {
 
   /**
    * Start the game by setting a start time. Players cannot join after this.
+   *
+   * @throws IllegalStateException
+   *           if a player is not ready.
    */
   public void start() {
+    for (Entry<String, WikiPlayer> entry : players.entrySet()) {
+      if (!entry.getValue().ready()) {
+        throw new IllegalStateException(String.format("Player %s is not ready",
+            entry.getValue().getName()));
+      }
+    }
     startTime = Instant.now(); // this is how we determine whether started
   }
 
@@ -162,11 +168,40 @@ public class WikiLobby implements Lobby {
   }
 
   /**
-   * Checks for a winning player based on each's position. Should be called
-   * periodically. Note that winners are not determine here, so the race
-   * condition occurs elsewhere if two are close.
+   * Sends a message to all players with the states of all other players. Also
+   * initiates game start.
+   *
+   * @return Whether all were ready and the game is starting.
    */
-  public void update() {
+  public boolean checkAllReady() {
+    boolean allReady = true;
+    Map<String, Boolean> playerStates = new HashMap<>(players.size());
+    for (Entry<String, WikiPlayer> entry : players.entrySet()) {
+      boolean ready = entry.getValue().ready();
+      if (!ready) {
+        allReady = false;
+      }
+      playerStates.put(entry.getKey(), ready);
+    }
+
+    // notify with new states (state)
+    Command.allPlayers(this);
+
+    if (allReady) {
+      Command.beginGame(this);
+    }
+
+    return allReady;
+  }
+
+  /**
+   * Checks for a winning player based on each's position. Should be called
+   * periodically, or at least at every player move. Note that winners are not
+   * determined here, so the race condition occurs elsewhere if two are close.
+   *
+   * @return Whether there was a winner.
+   */
+  public boolean checkForWinner() {
     List<WikiPlayer> done = new ArrayList<>(1);
     for (Entry<String, WikiPlayer> entry : players.entrySet()) {
       if (entry.getValue().isDone()) {
@@ -182,11 +217,11 @@ public class WikiLobby implements Lobby {
 
       winner = done.get(0);
       stop();
-      String endGameData = Command.END_GAME.build(winner);
-      for (Entry<String, WikiPlayer> entry : players.entrySet()) {
-        server.sendToClient(entry.getKey(), endGameData);
-      }
+
+      Command.endGame(this);
+      return true;
     }
+    return false;
   }
 
   /****************************************/

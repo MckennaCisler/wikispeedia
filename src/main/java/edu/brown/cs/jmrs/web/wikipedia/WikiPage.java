@@ -190,13 +190,7 @@ public class WikiPage extends Page {
       JsonObject root = new JsonObject();
       root.addProperty("url", src.url());
       root.addProperty("name", src.getName());
-      // try {
-      // // root.addProperty("title", src.getTitle());
-      // // root.addProperty("blurb", src.getBlurb());
-      // root.addProperty("found", true);
-      // } catch (IOException e) {
-      // root.addProperty("found", false);
-      // }
+      // all we can do without actually getting it
       return root;
     }
   }
