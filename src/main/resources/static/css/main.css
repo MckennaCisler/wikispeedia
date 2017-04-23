@@ -70,11 +70,6 @@
 	margin-left: 5px;
 	font-family: 'Rubik Mono One', sans-serif;
 }
-@media(min-width: 500px) {
-	.title-a {
-		font-size: 1.2em;
-	}
-}
 
 .main_content {
 	margin-top: 1em;
@@ -212,4 +207,17 @@ h3.card-header {
     box-shadow: 0 -2em;
     height: 5em;
   }
+}
+
+@media(min-width: 500px) {
+	.title-a {
+		font-size: 1.2em;
+	}
+}
+
+@media(min-width: 900px) {
+	#row_div {
+		margin-left: 2em;
+		margin-right: 2em;
+	}
 }
