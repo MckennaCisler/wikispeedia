@@ -69,7 +69,11 @@
 	color: black;
 	margin-left: 5px;
 	font-family: 'Rubik Mono One', sans-serif;
-	font-size: 1.2em;
+}
+@media(min-width: 500px) {
+	.title-a {
+		font-size: 1.2em;
+	}
 }
 
 .main_content {
@@ -162,9 +166,9 @@ h3.card-header {
   text-indent: -9999em;
   margin: 1.5em 5em;
   position: absolute;
-	top: 0%;
+	top: 1.5%;
 	right: 0%;
-  font-size: 11px;
+  font-size: .5em;
   -webkit-transform: translateZ(0);
   -ms-transform: translateZ(0);
   transform: translateZ(0);
