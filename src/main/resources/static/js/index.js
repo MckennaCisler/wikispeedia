@@ -1,6 +1,7 @@
 /*jshint esversion: 6 */
-$(document).ready(function() {
+$(document).ready(function () {
 	"use strict";
+	resize();
 	let isMaking;
 	let lobbyName;
 
@@ -17,7 +18,9 @@ $(document).ready(function() {
 
 	$("#start_game").on('click', () => {
 		if ($("#game_name").val() === "") {
-			$("#game_name").effect("highlight", {"color": "red"}, 1000);
+			$("#game_name").effect("highlight", {
+				"color": "red"
+			}, 1000);
 		} else {
 			isMaking = true;
 			lobbyName = $("#game_name").val();
@@ -46,10 +49,32 @@ $(document).ready(function() {
 
 	$("#launch").on('click', () => {
 		if ($("#uname").val() === "") {
-			$("#uname").effect("highlight", {"color": "red"}, 1000);
+			$("#uname").effect("highlight", {
+				"color": "red"
+			}, 1000);
 		} else {
 			// BE SURE TO ACTUALLY DO SOMETHING WITH THE ID
 			window.location.href = "waiting.html";
 		}
 	});
 });
+
+$(window).resize(function () {
+	"use strict";
+	resize();
+});
+
+function resize() {
+	"use strict";
+	if ($(window).width() <= 600) {
+		$('#main_buttons').removeClass("btn-group");
+	} else {
+		$('#main_buttons').addClass("btn-group");
+	}
+	
+	if ($(window).width() <= 800) {
+		$('#row_div').removeClass("row");
+	} else {
+		$('#row_div').addClass("row");
+	}
+}
