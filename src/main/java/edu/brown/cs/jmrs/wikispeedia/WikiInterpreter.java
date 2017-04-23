@@ -134,7 +134,8 @@ public class WikiInterpreter implements CommandInterpreter {
       WikiPage reqWikiPage = WikiPage.fromAny(reqPage);
       if (player.goToPage(reqWikiPage)) {
         // if could go to page (and thus did go to page)
-        Command.RETURN_GOTO_PAGE.build(getPlayerPageInfo(reqWikiPage, lobby));
+        Command.RETURN_GOTO_PAGE.send(lobby.getServer(), clientId,
+            getPlayerPageInfo(reqWikiPage, lobby));
 
         // on success, check for winner, in which case we'll send an additional
         // mass message

@@ -253,6 +253,7 @@ class ServerConn {
 
     _registerOutgoing(command, callback) {
         this.pendingResponses[command.name] = {
+            "command": command,
             "callback": callback,
             "errCallback" : () => {}, // no reason
             "timeout" : null          // no reason
@@ -371,7 +372,7 @@ class ServerConn {
  * Create global server. NOTE THat it is done outside a doc.ready because it is needed everywhere at doc.ready().
  * And also does not need the DOM
  */
-serverConn = new ServerConn("localhost:4568");
+serverConn = new ServerConn("localhost:4567/websocket");
 
 
 

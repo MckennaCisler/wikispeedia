@@ -48,8 +48,6 @@ public final class Main {
     parser.accepts("chat-test");
     parser.accepts("spark-port").withRequiredArg().ofType(Integer.class)
         .defaultsTo(DEFAULT_SPARK_PORT);
-    parser.accepts("socket-port").withRequiredArg().ofType(Integer.class)
-        .defaultsTo(DEFAULT_SOCKET_PORT);
 
     OptionSet options;
     try {
@@ -62,6 +60,13 @@ public final class Main {
 
     if (options.has("gui")) {
       try {
+        // Setup websocket lobby server (which will use Spark)
+        Server server = new Server((serv, str) -> {
+          return new WikiLobby(serv, str);
+        }, new WikiInterpreter());
+        Spark.webSocket("/websocket", server);
+        System.out.println("[ Started Websocket ]");
+
         // Setup Spark for main page and extra serving
         SparkServer.runSparkServer(
             (int) options.valueOf("spark-port"),
@@ -70,11 +75,6 @@ public final class Main {
             "src/main/resources/public");
         System.out.println("[ Started Spark ]");
 
-        // Setup websocket lobby server (which will use Spark)
-        Server server = new Server((serv, str) -> {
-          return new WikiLobby(serv, str);
-        }, new WikiInterpreter());
-        System.out.println("[ Started Main GUI ]");
       } finally {
         // SparkServer.stop(); // TODO: how to really stop it?
       }

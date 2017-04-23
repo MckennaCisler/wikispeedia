@@ -63,10 +63,9 @@ function goToPage(href) {
 }
 
 // Callback to the server Request
-function drawPage(message) {
-  payload = message.payload;
-  html = payload.text;
-  href = payload.href;
+function drawPage(page) {
+  html = page.text;
+  href = page.href;
   title = titleFromHref(href);
 
   if (href != currHref) {

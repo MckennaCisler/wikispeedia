@@ -206,10 +206,11 @@ public class WikiPlayer {
    *           If the curPage page cannot be accessed.
    */
   public synchronized boolean goToPage(WikiPage page) throws IOException {
-    if (!lobby.started()) {
-      throw new IllegalStateException(
-          String.format("Player %s's lobby has not started", name));
-    } else if (lobby.ended()) {
+    // if (!lobby.started()) {
+    // throw new IllegalStateException(
+    // String.format("Player %s's lobby has not started", name));
+    // } else
+    if (lobby.ended()) {
       throw new IllegalStateException(
           String.format("Player %s's lobby has ended", name));
     } else if (isDone()) {

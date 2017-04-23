@@ -134,6 +134,8 @@ enum Command {
    * Sends a JSONified version of data to the client with clientId.
    */
   void send(Server server, String clientId, Object data, String errorMessage) {
+    System.out.println(data);
+    System.out.println(errorMessage);
     server.sendToClient(clientId, build(data));
   }
 
@@ -150,7 +152,7 @@ enum Command {
    */
   void sendToAll(WikiLobby lobby, Object data, String errorMessage) {
     for (WikiPlayer player : lobby.getPlayers()) {
-      lobby.getServer().sendToClient(player.getId(), build(data, errorMessage));
+      send(lobby.getServer(), player.getId(), data, errorMessage);
     }
   }
 
