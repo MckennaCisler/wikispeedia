@@ -18,6 +18,7 @@
 }
 
 #history-dropdown {
+	font-size: x-small;
 	border-color: #e52d27;
 }
 
@@ -54,6 +55,15 @@
 	overflow-wrap: break-word;
 	overflow-y: scroll;
 	height: 495px;
+}
+
+#link {
+	color: #800000;
+	text-decoration: underline;
+}
+
+#toc {
+	max-width: 40%;
 }
 
 /* Lobby page */
