@@ -5,9 +5,10 @@ import com.google.common.collect.ImmutableList;
 import edu.brown.cs.jmrs.server.Server;
 import edu.brown.cs.jmrs.server.example.chatroom.ChatInterpreter;
 import edu.brown.cs.jmrs.server.example.chatroom.ChatLobby;
-import edu.brown.cs.jmrs.wikispeedia.WikiHandlers;
 import edu.brown.cs.jmrs.wikispeedia.WikiInterpreter;
 import edu.brown.cs.jmrs.wikispeedia.WikiLobby;
+import edu.brown.cs.jmrs.wikispeedia.WikiMainHandlers;
+import edu.brown.cs.jmrs.wikispeedia.WikiPageHandlers;
 import joptsimple.OptionParser;
 import joptsimple.OptionSet;
 import spark.Request;
@@ -39,7 +40,6 @@ public final class Main {
   public static void main(String[] args) {
     OptionParser parser = new OptionParser();
     parser.accepts("gui");
-    parser.accepts("spark");
     parser.accepts("chat-test");
     parser.accepts("spark-port").withRequiredArg().ofType(Integer.class)
         .defaultsTo(DEFAULT_SPARK_PORT);
@@ -47,58 +47,51 @@ public final class Main {
         .defaultsTo(DEFAULT_SOCKET_PORT);
     OptionSet options = parser.parse(args);
 
-    if (options.has("spark")) {
+    if (options.has("gui")) {
       try {
+        // Setup Spark for main page and extra serving
         SparkServer.runSparkServer(
             (int) options.valueOf("spark-port"),
-            ImmutableList.of(new WikiHandlers()));
+            ImmutableList.of(new WikiMainHandlers(), new WikiPageHandlers()),
+            "/static",
+            "src/main/resources/public");
         System.out.println("[ Started Spark ]");
 
+        // Setup websocket lobby server (which will use Spark)
+        Server server = new Server((serv, str) -> {
+          return new WikiLobby(serv, str);
+        }, new WikiInterpreter());
+        System.out.println("[ Started Main GUI ]");
       } finally {
-        SparkServer.stop();
+        // SparkServer.stop();
       }
-    }
-
-    if (options.has("gui")) {
-      Server server = new Server(
-          (int) options.valueOf("socket-port"),
-          (serv, str) -> {
-            return new WikiLobby(serv, str);
-          },
-          new WikiInterpreter());
-      server.start();
-      System.out.println("[ Started Main GUI ]");
-
     } else if (options.has("chat-test")) {
-      Spark.staticFileLocation("/public");
+
+      Server server = new Server((serv, str) -> {
+        return new ChatLobby(serv, str);
+      }, new ChatInterpreter());
+      Spark.webSocket("/websocket", server);
+
       SparkServer.runSparkServer(
           (int) options.valueOf("spark-port"),
           ImmutableList.of(new SparkHandlers() {
 
             @Override
             public void registerHandlers(FreeMarkerEngine freeMarker) {
-              Spark.staticFileLocation("/public");
               Spark.get("/", new Route() {
 
                 @Override
                 public Object handle(Request request, Response response)
                     throws Exception {
-                  response.redirect("/index.html");
+                  response.redirect("index.html");
                   return null;
                 }
 
               });
             }
-
-          }));
-
-      Server server = new Server(
-          (int) options.valueOf("socket-port"),
-          (serv, str) -> {
-            return new ChatLobby(serv, str);
-          },
-          new ChatInterpreter());
-      server.start();
+          }),
+          "/public-testing",
+          "src/main/resources/public-testing");
       System.out.println("[ Started Chat Test ]");
     }
   }

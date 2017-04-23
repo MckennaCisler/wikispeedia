@@ -5,7 +5,7 @@ function setId(cvalue) {
     let d = new Date();
     d.setTime(d.getTime() + (15 * 60 * 1000)); //15 minutes
     let expires = "expires="+d.toUTCString();
-    document.cookie = "client_id=" + cvalue + "," + expires;
+    document.cookie = "client_id=" + cvalue + ";" + expires;
 }
 
 function getId() {
@@ -63,11 +63,10 @@ $(document).ready(() => {
     console.log("WebSocket is supported by your Browser!");
 		$chatLog = $("#chatlog");
     // Let us open a web socket
-    ws = new WebSocket("ws://localhost:4568");
+    ws = new WebSocket("ws://localhost:4567/websocket");
 
     ws.onopen = function()
     {
-			setName(getId());
     };
 
     ws.onmessage = function (evt)

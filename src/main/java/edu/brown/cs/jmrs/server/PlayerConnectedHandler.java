@@ -1,13 +1,13 @@
 package edu.brown.cs.jmrs.server;
 
-import org.java_websocket.WebSocket;
+import org.eclipse.jetty.websocket.api.Session;
 
 class PlayerConnectedHandler implements Runnable {
 
   ServerWorker server;
-  WebSocket    conn;
+  Session      conn;
 
-  public PlayerConnectedHandler(ServerWorker server, WebSocket conn) {
+  public PlayerConnectedHandler(ServerWorker server, Session conn) {
     this.server = server;
     this.conn = conn;
   }
