@@ -54,7 +54,7 @@ $(document).ready(function () {
 			}, 1000);
 		} else {
 			// BE SURE TO ACTUALLY DO SOMETHING WITH THE ID
-			window.location.href = "waiting.html";
+			window.location.href = "waiting";
 		}
 	});
 });
