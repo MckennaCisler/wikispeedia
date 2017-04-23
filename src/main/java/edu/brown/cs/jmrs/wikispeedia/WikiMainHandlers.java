@@ -1,10 +1,13 @@
 package edu.brown.cs.jmrs.wikispeedia;
 
+import com.google.common.collect.ImmutableMap;
+
 import edu.brown.cs.jmrs.ui.SparkHandlers;
+import spark.ModelAndView;
 import spark.Request;
 import spark.Response;
-import spark.Route;
 import spark.Spark;
+import spark.TemplateViewRoute;
 import spark.template.freemarker.FreeMarkerEngine;
 
 /**
@@ -15,13 +18,12 @@ import spark.template.freemarker.FreeMarkerEngine;
  *
  */
 public class WikiMainHandlers implements SparkHandlers {
-
   @Override
   public void registerHandlers(FreeMarkerEngine freeMarker) {
-    Spark.get("/", new StaticHandler("index.html"));
-    Spark.get("/play", new StaticHandler("play.html"));
-    Spark.get("/waiting", new StaticHandler("waiting.html"));
-    Spark.get("/end", new StaticHandler("end.html"));
+    Spark.get("/", new StaticHandler("index.html"), freeMarker);
+    Spark.get("/play", new StaticHandler("play.html"), freeMarker);
+    Spark.get("/waiting", new StaticHandler("waiting.html"), freeMarker);
+    Spark.get("/end", new StaticHandler("end.html"), freeMarker);
   }
 
   /**
@@ -31,7 +33,7 @@ public class WikiMainHandlers implements SparkHandlers {
    * @author mcisler
    *
    */
-  public static final class StaticHandler implements Route {
+  public static final class StaticHandler implements TemplateViewRoute {
     private String filename;
 
     /**
@@ -43,9 +45,8 @@ public class WikiMainHandlers implements SparkHandlers {
     }
 
     @Override
-    public String handle(Request req, Response res) {
-      res.redirect(filename);
-      return "";
+    public ModelAndView handle(Request req, Response res) {
+      return new ModelAndView(ImmutableMap.of(), filename);
     }
   }
 }

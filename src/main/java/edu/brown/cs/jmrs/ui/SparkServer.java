@@ -39,14 +39,16 @@ public final class SparkServer {
    * @param staticFileLoc
    *          The location to server static files from, under
    *          src/main/resources/
+   * @param freemarkerLoc
+   *          Freemarker template loading location.
    */
   public static void runSparkServer(int port, List<SparkHandlers> handlers,
-      String staticFileLoc) {
+      String staticFileLoc, String freemarkerLoc) {
     Spark.port(port);
     Spark.staticFileLocation(staticFileLoc);
     Spark.exception(Exception.class, new ExceptionPrinter());
 
-    FreeMarkerEngine freeMarker = createEngine();
+    FreeMarkerEngine freeMarker = createEngine(freemarkerLoc);
 
     // Setup Routes
     for (SparkHandlers handler : handlers) {
@@ -57,9 +59,9 @@ public final class SparkServer {
   /**
    * Sets up a new FreeMarker engine.
    */
-  private static FreeMarkerEngine createEngine() {
+  private static FreeMarkerEngine createEngine(String freemarkerLoc) {
     Configuration config = new Configuration();
-    File templates = new File("src/main/resources/spark/template/freemarker");
+    File templates = new File(freemarkerLoc);
     try {
       config.setDirectoryForTemplateLoading(templates);
     } catch (IOException ioe) {

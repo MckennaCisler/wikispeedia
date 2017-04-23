@@ -71,7 +71,7 @@ function resize() {
 	} else {
 		$('#main_buttons').addClass("btn-group");
 	}
-	
+
 	if ($(window).width() <= 800) {
 		$('#row_div').removeClass("row");
 	} else {

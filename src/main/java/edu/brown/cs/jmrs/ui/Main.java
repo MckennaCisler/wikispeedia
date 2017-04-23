@@ -52,7 +52,7 @@ public final class Main {
         // Setup Spark for main page and extra serving
         SparkServer.runSparkServer((int) options.valueOf("spark-port"),
             ImmutableList.of(new WikiMainHandlers(), new WikiPageHandlers()),
-            "/public");
+            "/static", "src/main/resources/public");
         System.out.println("[ Started Spark ]");
 
         // Setup websocket lobby server (which will use Spark)
@@ -64,7 +64,7 @@ public final class Main {
         System.out.println("[ Started Main GUI ]");
 
       } finally {
-        SparkServer.stop();
+        // SparkServer.stop();
       }
 
     } else if (options.has("chat-test")) {
@@ -85,7 +85,7 @@ public final class Main {
               });
             }
 
-          }), "/public");
+          }), "/public", "src/main/resources/public");
 
       Server server =
           new Server((int) options.valueOf("socket-port"), (serv, str) -> {
