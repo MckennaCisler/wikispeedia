@@ -27,7 +27,7 @@ import spark.template.freemarker.FreeMarkerEngine;
  * @author mcisler
  *
  */
-public class WikiHandlers implements SparkHandlers {
+public class WikiPageHandlers implements SparkHandlers {
   private static LinkFinder<WikiPage> linkFinder =
       new WikiPageLinkFinder(Filter.DISAMBIGUATION);
   private static ContentFormatter<WikiPage> contentFormatter =

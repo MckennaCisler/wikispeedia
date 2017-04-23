@@ -36,10 +36,14 @@ public final class SparkServer {
    *          The port to bind the server to
    * @param handlers
    *          The handlers to ask for registrations.
+   * @param staticFileLoc
+   *          The location to server static files from, under
+   *          src/main/resources/
    */
-  public static void runSparkServer(int port, List<SparkHandlers> handlers) {
+  public static void runSparkServer(int port, List<SparkHandlers> handlers,
+      String staticFileLoc) {
     Spark.port(port);
-    Spark.externalStaticFileLocation("src/main/resources/static");
+    Spark.staticFileLocation(staticFileLoc);
     Spark.exception(Exception.class, new ExceptionPrinter());
 
     FreeMarkerEngine freeMarker = createEngine();
