@@ -58,17 +58,20 @@ public final class Main {
         System.out.println("[ Started Spark ]");
 
         // Setup websocket lobby server (which will use Spark)
-        Server server = new Server(
-            (int) options.valueOf("socket-port"),
-            (serv, str) -> {
-              return new WikiLobby(serv, str);
-            },
-            new WikiInterpreter());
+        Server server = new Server((serv, str) -> {
+          return new WikiLobby(serv, str);
+        }, new WikiInterpreter());
         System.out.println("[ Started Main GUI ]");
       } finally {
         // SparkServer.stop();
       }
     } else if (options.has("chat-test")) {
+
+      Server server = new Server((serv, str) -> {
+        return new ChatLobby(serv, str);
+      }, new ChatInterpreter());
+      Spark.webSocket("/websocket", server);
+
       SparkServer.runSparkServer(
           (int) options.valueOf("spark-port"),
           ImmutableList.of(new SparkHandlers() {
@@ -81,21 +84,14 @@ public final class Main {
                 public Object handle(Request request, Response response)
                     throws Exception {
                   response.redirect("index.html");
-                  return "";
+                  return null;
                 }
 
               });
             }
           }),
-          "/public",
-          "src/main/resources/public");
-
-      Server server = new Server(
-          (int) options.valueOf("socket-port"),
-          (serv, str) -> {
-            return new ChatLobby(serv, str);
-          },
-          new ChatInterpreter());
+          "/public-testing",
+          "src/main/resources/public-testing");
       System.out.println("[ Started Chat Test ]");
     }
   }

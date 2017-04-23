@@ -26,11 +26,10 @@ public class Server {
   protected CommandInterpreter interpreter;
 
   public Server(
-      int port,
       BiFunction<Server, String, ? extends Lobby> lobbyFactory,
       CommandInterpreter interpreter) {
     this.interpreter = interpreter;
-    server = new ServerWorker(this, port, lobbyFactory);
+    server = new ServerWorker(this, lobbyFactory);
   }
 
   public void sendToClient(String playerId, String message) {

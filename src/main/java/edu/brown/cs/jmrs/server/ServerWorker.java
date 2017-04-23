@@ -1,5 +1,6 @@
 package edu.brown.cs.jmrs.server;
 
+import java.net.HttpCookie;
 import java.util.List;
 import java.util.function.BiFunction;
 
@@ -16,7 +17,6 @@ class ServerWorker {
 
   public ServerWorker(
       Server server,
-      int port,
       BiFunction<Server, String, ? extends Lobby> lobbyFactory) {
     this.server = server;
     lobbies = new LobbyManager(lobbyFactory);
@@ -80,6 +80,13 @@ class ServerWorker {
   }
 
   public void playerConnected(Session conn) {
+    List<HttpCookie> cookies = conn.getUpgradeRequest().getCookies();
+    for (HttpCookie cookie : cookies) {
+      System.out.println(cookie.getName());
+      System.out.println(cookie.getValue());
+    }
+    conn.getUpgradeResponse().addHeader("Set-Cookie", "clientid=fuckifIknow");
+    conn.getUpgradeResponse().setHeader("Set-Cookie", "client__id=fuckifIknow");
     players.put(conn, new Player(""));
   }
 }
