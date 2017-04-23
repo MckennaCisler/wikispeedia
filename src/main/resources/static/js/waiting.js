@@ -21,7 +21,7 @@ $(document).ready(() => {
 	const decrement = (pid) => {
 		if ($("#counter").html() === "0") {
 			clearInterval(pid);
-			window.location.replace("end.html");
+			window.location.replace("end");
 		} else {
 			$("#counter").html($("#counter").html() - 1);
 			if ($("#counter").html() > 1) {
