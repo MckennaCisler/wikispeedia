@@ -1,39 +1,29 @@
 package edu.brown.cs.jmrs.server;
 
-import java.net.InetSocketAddress;
+import java.net.HttpCookie;
 import java.util.List;
 import java.util.function.BiFunction;
 
-import org.java_websocket.WebSocket;
-import org.java_websocket.handshake.ClientHandshake;
-import org.java_websocket.server.WebSocketServer;
+import org.eclipse.jetty.websocket.api.Session;
 
 import edu.brown.cs.jmrs.server.collections.ConcurrentBiMap;
-import edu.brown.cs.jmrs.server.customizable.CommandInterpreter;
 import edu.brown.cs.jmrs.server.customizable.Lobby;
-import edu.brown.cs.jmrs.server.threading.GlobalThreadManager;
 
-class ServerWorker extends WebSocketServer {
+class ServerWorker {
 
-  private Server                             server;
-  private LobbyManager                       lobbies;
-  private ConcurrentBiMap<WebSocket, Player> players;
-  private CommandInterpreter                 interpreter;
+  private Server                           server;
+  private LobbyManager                     lobbies;
+  private ConcurrentBiMap<Session, Player> players;
 
   public ServerWorker(
       Server server,
-      int port,
-      BiFunction<Server, String, ? extends Lobby> lobbyFactory,
-      CommandInterpreter interpreter) {
-    super(new InetSocketAddress(port));
-
+      BiFunction<Server, String, ? extends Lobby> lobbyFactory) {
     this.server = server;
-    this.interpreter = interpreter;
     lobbies = new LobbyManager(lobbyFactory);
     players = new ConcurrentBiMap<>();
   }
 
-  public String setPlayerId(WebSocket conn, String playerId) throws InputError {
+  public String setPlayerId(Session conn, String playerId) throws InputError {
     Lobby lobby = players.get(conn).getLobby();
     if (lobby == null) {
       if (playerId == null || playerId.length() == 0) {
@@ -55,11 +45,11 @@ class ServerWorker extends WebSocketServer {
     }
   }
 
-  public Player getPlayer(WebSocket conn) {
+  public Player getPlayer(Session conn) {
     return players.get(conn);
   }
 
-  public WebSocket getPlayer(String playerId) {
+  public Session getPlayer(String playerId) {
     return players.getReversed(new Player(playerId));
   }
 
@@ -80,7 +70,7 @@ class ServerWorker extends WebSocketServer {
     return lobbies.get(lobbyId);
   }
 
-  public void playerDisconnected(WebSocket conn) {
+  public void playerDisconnected(Session conn) {
     Player player = players.get(conn);
     if (player.getLobby() != null) {
       player.getLobby().removeClient(player.getId());
@@ -89,28 +79,14 @@ class ServerWorker extends WebSocketServer {
     players.remove(conn);
   }
 
-  public void playerConnected(WebSocket conn) {
+  public void playerConnected(Session conn) {
+    List<HttpCookie> cookies = conn.getUpgradeRequest().getCookies();
+    for (HttpCookie cookie : cookies) {
+      System.out.println(cookie.getName());
+      System.out.println(cookie.getValue());
+    }
+    conn.getUpgradeResponse().addHeader("Set-Cookie", "clientid=fuckifIknow");
+    conn.getUpgradeResponse().setHeader("Set-Cookie", "client__id=fuckifIknow");
     players.put(conn, new Player(""));
-  }
-
-  @Override
-  public void onClose(WebSocket conn, int code, String reason, boolean remote) {
-    GlobalThreadManager.submit(new PlayerDisconnectedHandler(this, conn));
-  }
-
-  @Override
-  public void onError(WebSocket conn, Exception ex) {
-    ex.printStackTrace();
-  }
-
-  @Override
-  public void onMessage(WebSocket conn, String message) {
-    GlobalThreadManager
-        .submit(new ServerCommandHandler(this, conn, message, interpreter));
-  }
-
-  @Override
-  public void onOpen(WebSocket conn, ClientHandshake handshake) {
-    GlobalThreadManager.submit(new PlayerConnectedHandler(this, conn));
   }
 }

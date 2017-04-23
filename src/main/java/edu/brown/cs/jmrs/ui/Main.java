@@ -27,7 +27,7 @@ import spark.template.freemarker.FreeMarkerEngine;
  *
  */
 public final class Main {
-  public static final int DEFAULT_SPARK_PORT = 4567;
+  public static final int DEFAULT_SPARK_PORT  = 4567;
   public static final int DEFAULT_SOCKET_PORT = 4568;
 
   private Main() {
@@ -63,25 +63,30 @@ public final class Main {
     if (options.has("gui")) {
       try {
         // Setup Spark for main page and extra serving
-        SparkServer.runSparkServer((int) options.valueOf("spark-port"),
+        SparkServer.runSparkServer(
+            (int) options.valueOf("spark-port"),
             ImmutableList.of(new WikiMainHandlers(), new WikiPageHandlers()),
-            "/static", "src/main/resources/public");
+            "/static",
+            "src/main/resources/public");
         System.out.println("[ Started Spark ]");
 
         // Setup websocket lobby server (which will use Spark)
-        Server server =
-            new Server((int) options.valueOf("socket-port"), (serv, str) -> {
-              return new WikiLobby(serv, str);
-            }, new WikiInterpreter());
-        server.start();
+        Server server = new Server((serv, str) -> {
+          return new WikiLobby(serv, str);
+        }, new WikiInterpreter());
         System.out.println("[ Started Main GUI ]");
-
       } finally {
         // SparkServer.stop(); // TODO: how to really stop it?
       }
-
     } else if (options.has("chat-test")) {
-      SparkServer.runSparkServer((int) options.valueOf("spark-port"),
+
+      Server server = new Server((serv, str) -> {
+        return new ChatLobby(serv, str);
+      }, new ChatInterpreter());
+      Spark.webSocket("/websocket", server);
+
+      SparkServer.runSparkServer(
+          (int) options.valueOf("spark-port"),
           ImmutableList.of(new SparkHandlers() {
 
             @Override
@@ -92,19 +97,14 @@ public final class Main {
                 public Object handle(Request request, Response response)
                     throws Exception {
                   response.redirect("index.html");
-                  return "";
+                  return null;
                 }
 
               });
             }
-
-          }), "/public", "src/main/resources/public");
-
-      Server server =
-          new Server((int) options.valueOf("socket-port"), (serv, str) -> {
-            return new ChatLobby(serv, str);
-          }, new ChatInterpreter());
-      server.start();
+          }),
+          "/public-testing",
+          "src/main/resources/public-testing");
       System.out.println("[ Started Chat Test ]");
     }
   }

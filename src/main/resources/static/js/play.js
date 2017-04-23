@@ -94,9 +94,23 @@ function cleanHtml() {
   $article.find("a").each(function(index, element) {
     // Adding a "" because attributes are not strings
     let link = "" + $(element).attr("href");
+    $(element).attr("id", "link");
     if (link.charAt(0) != "#") {
       $(element).attr("href", hrefHelper(link));
     }
+  });
+
+  $article.find("img").each(function(index, element) {
+    let src = "" + $(element).attr("src");
+    console.log(src);
+
+    if (!src.startsWith("https:")) {
+      $(element).attr("src", "https:" + src);
+    }
+
+    // Make sure this is rigorous
+    let srcset = "" + $(element).attr("srcset");
+    $(element).attr("srcset", replaceAll(srcset, "//", "https://"));
   });
 }
 
