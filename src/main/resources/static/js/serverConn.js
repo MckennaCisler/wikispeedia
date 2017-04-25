@@ -23,14 +23,6 @@ const Command = {
      /**
       * Default Server Commands
       */
-    SET_CLIENT_ID: {
-      name: "set_client_id",
-      responseName: "set_id_response",
-      type: COMMAND_TYPE.SERVER,
-      construct: (client_id) => {
-          return { "client_id": client_id };
-      }
-    },
     START_LOBBY: {
       name: "start_lobby",
       responseName: "start_lobby_response",
@@ -154,7 +146,8 @@ const Command = {
 class ServerConn {
     constructor(source) {
         // constants
-        this.COMMAND_TIMEOUT = 20000;
+        this.COMMAND_TIMEOUT = 5000;
+        this.CLIENT_ID_COOKIE_EXPIRATION = 60;
 
         this.clientId = "";
         this.ws = new WebSocket("ws://" + source);
@@ -165,28 +158,32 @@ class ServerConn {
         /**
          * Map from Command name to an object of
          * the callback to call when such a message is recieved (with the parsed results), the errCallback to call on error, and a timeout to cancel on call.
-         // TODO: What if the message returns with a DIFFERENT palyer id?
          */
-        this.pendingResponses = {
-					"set_id_response" : {
-            "command": Command.SET_CLIENT_ID,
+        this.pendingResponses = {};
+
+        // add initial callback for first ID set
+        this.pendingResponses["notify_id"] =  {
+            "command": { type: COMMAND_TYPE.SERVER }, // all we need
             "callback": (message) => {
-							let d = new Date();
-							d.setTime(d.getTime() + (60 * 60 * 1000)); //60 minutes
-							let expires = "expires="+d.toUTCString();
-							document.cookie = "client_id=" + message.client_id + ";" + expires;
-							this.clientId = message.client_id;
-						},
+                this._setId(message.client_id);
+            },
             "errCallback" : () => {}, // no reason
             "timeout" : null          // no reason
-        	}
-				};
+        }
 
 
         /**
          * callbacks called once websocket is ready
          */
-        this.readyCallbacks = []; // TODO: Figure this out!!!!
+        this.readyCallbacks = [];
+    }
+
+    _setId(id) {
+        let d = new Date();
+        d.setTime(d.getTime() + (this.CLIENT_ID_COOKIE_EXPIRATION * 60 * 1000)); //60 minutes
+        let expires = "expires="+d.toUTCString();
+        document.cookie = "client_id=" + id + ";" + expires;
+        this.clientId = id;
     }
 
     /**
@@ -223,11 +220,6 @@ class ServerConn {
     /**
      * default lobby SYSTEM commands
      */
-    // set player_id to null or undefined to generate a random one
-    setPlayerId(player_id, callback, errCallback) {
-        this._send(Command.SET_CLIENT_ID, callback, errCallback, [player_id]);
-    }
-
     // set lobby_id to null or undefined to generate a random one
     startLobby(lobby_id, callback, errCallback) {
         this._send(Command.START_LOBBY, callback, errCallback, [lobby_id]);
@@ -385,15 +377,15 @@ serverConn = new ServerConn("localhost:4567/websocket");
 /**
  * TESTING
  */
-serverConn.ready(() => {
-    serverConn.startLobby("CRAZY LIT TESTING LOBBY", () => {
-     serverConn.getPlayers("CRAZY LIT TESTING LOBBY",
-         (players) => {
-             console.log("SUCCESS: ");
-             console.log(players);
-         }, console.log);
-
-    }, console.log);
+// serverConn.ready(() => {
+//     serverConn.startLobby("CRAZY LIT TESTING LOBBY", () => {
+//      serverConn.getPlayers("CRAZY LIT TESTING LOBBY",
+//          (players) => {
+//              console.log("SUCCESS: ");
+//              console.log(players);
+//          }, console.log);
+//
+//     }, console.log);
 
     //
     // getTime(callback, errCallback) {
@@ -436,4 +428,4 @@ serverConn.ready(() => {
     // getLobbies(callback, errCallback) {
     //     this._send(Command.GET_LOBBIES, callback, errCallback, []);
     // }
-});
+// });

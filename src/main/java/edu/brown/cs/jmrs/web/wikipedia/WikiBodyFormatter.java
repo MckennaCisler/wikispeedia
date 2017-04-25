@@ -15,12 +15,7 @@ public class WikiBodyFormatter implements ContentFormatter<WikiPage> {
 
   @Override
   public Element format(Element input) {
-    // TODO : More efficent?
-    Element content = input.select("#bodyContent").first().clone();
-
-    // remove everything after mw-content-text
-    content.select("#bodyContent > #mw-content-text").nextAll().remove();
-
-    return content;
+    // TODO: Efficient?
+    return input.select("#mw-content-text").first().clone();
   }
 }

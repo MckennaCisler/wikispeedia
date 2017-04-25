@@ -86,12 +86,20 @@ serverConn.ready(() => {
 		} else if (lobbyName !== "") {
 			if (isMaking) {
 				serverConn.startLobby(lobbyName.trim(),
-				() => { window.location.href = "waiting"; },
-				(error) => { displayError(error.error_message); });
+				() => {
+					window.location.href = "waiting";
+				},
+				(error) => {
+					displayError(error.error_message);
+				});
 			} else {
 				serverConn.joinLobby(lobbyName.trim(),
-				() => { window.location.href = "waiting"; },
-				(error) => { displayError(error.error_message); });
+				() => {
+					window.location.href = "waiting";
+				},
+				(error) => {
+					displayError(error.error_message);
+				});
 			}
 		}
 	});
