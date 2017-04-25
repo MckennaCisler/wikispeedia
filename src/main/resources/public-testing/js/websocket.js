@@ -27,11 +27,6 @@ function send(obj) {
 	ws.send(JSON.stringify(obj));
 }
 
-function setName(newName) {
-	const payload = { "command":"set_client_id", "payload":{ "client_id":newName } };
-  send(payload);
-}
-
 function joinLobby(lobbyName) {
 	const payload = { "command":"join_lobby", "payload":{ "lobby_id":lobbyName } };
   send(payload);
@@ -86,7 +81,7 @@ $(document).ready(() => {
 				case "bounced_whisper":
 					displayBouncedWhisper(message.target);
 					break;
-				case "set_id_response":
+				case "notify_id":
 					setId(message.client_id);
 					break;
 				default:

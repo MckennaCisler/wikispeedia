@@ -1,5 +1,6 @@
 package edu.brown.cs.jmrs.server;
 
+import java.io.IOException;
 import java.net.HttpCookie;
 import java.util.List;
 import java.util.function.BiFunction;
@@ -28,37 +29,22 @@ class ServerWorker {
 
   public String setPlayerId(Session conn, String playerId) throws InputError {
     Player player = players.get(conn);
-    Lobby lobby = player == null ? null : player.getLobby();
-    if (player == null
-        || player.getLobby() == null
-        || (!player.isConnected()
-            && !(playerId == null || playerId.length() == 0))) {
-      // initial setting of id OR can change it freely if not in lobby OR can
-      // set id on reconnect
-      if (playerId == null || playerId.length() == 0) {
-        playerId = conn.hashCode() + "";
-        player = new Player(playerId);
-        while (!players.putNoOverwrite(conn, player)) {
-          playerId = Math.random() + "";
-          player = new Player(playerId);
-        }
-      } else if (players.containsValue(playerId)
-          && (player == null || player.isConnected())) {
-        throw new InputError("client id '" + playerId + "' already taken");
-      } else {
+    if (player == null) {
+      playerId = conn.hashCode() + "";
+      player = new Player(playerId);
+      while (!players.putNoOverwrite(conn, player)) {
+        playerId = Math.random() + "";
         player = new Player(playerId);
       }
-    } else if (player.isConnected()) { // trying to change id while in lobby:
-                                       // UNACCEPTABLE!!!!!
-      throw new InputError("Cannot change client id while in a lobby");
+    } else if (!player.isConnected()) {
+      Lobby lobby = player.getLobby();
+      player.setLobby(lobby);
+      players.put(conn, player);
+      if (lobby != null) {
+        lobby.playerReconnected(player.getId());
+      }
     } else {
-      throw new InputError("Cannot set a random id on reconnect");
-    }
-
-    player.setLobby(lobby);
-    players.put(conn, player);
-    if (lobby != null) {
-      lobby.playerReconnected(player.getId());
+      throw new InputError("Stop stealing identities");
     }
     return player.getId();
   }
@@ -94,31 +80,44 @@ class ServerWorker {
 
   public void playerDisconnected(Session conn) {
     Player player = players.get(conn);
-    if (player.getLobby() != null && player.isConnected()) {
+    assert player.toggleConnected();
+    if (player.getLobby() != null) {
       player.getLobby().playerDisconnected(player.getId());
-      player.toggleConnected();
-    } else {
-      players.remove(conn);
     }
   }
 
   public void playerConnected(Session conn) {
-    String id = "";
+    String clientId = "";
     List<HttpCookie> cookies = conn.getUpgradeRequest().getCookies();
     for (HttpCookie cookie : cookies) {
       if (cookie.getName().equals("client_id")) {
-        id = cookie.getValue();
+        clientId = cookie.getValue();
         break;
       }
     }
 
-    Gson gson = new Gson();
-    JsonObject payload = new JsonObject();
-    payload.addProperty("client_id", id);
-    JsonObject response = new JsonObject();
-    response.addProperty("command", "set_client_id");
-    response.add("payload", payload);
+    String toClient = "";
 
-    new ServerCommandHandler(this, conn, gson.toJson(response), null).run();
+    Gson gson = new Gson();
+    JsonObject jsonObject = new JsonObject();
+    jsonObject.addProperty("command", "notify_id");
+    try {
+      try {
+        String trueId = setPlayerId(conn, clientId);
+
+        jsonObject.addProperty("client_id", trueId);
+        jsonObject.addProperty("error_message", "");
+        toClient = gson.toJson(jsonObject);
+        conn.getRemote().sendString(toClient);
+
+      } catch (InputError e) {
+        jsonObject.addProperty("client_id", getPlayer(conn).getId());
+        jsonObject.addProperty("error_message", e.getMessage());
+        toClient = gson.toJson(jsonObject);
+        conn.getRemote().sendString(toClient);
+      }
+    } catch (IOException e) {
+      e.printStackTrace();
+    }
   }
 }

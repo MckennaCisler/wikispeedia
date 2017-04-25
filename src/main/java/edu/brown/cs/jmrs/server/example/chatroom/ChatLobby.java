@@ -116,7 +116,8 @@ public class ChatLobby implements Lobby {
 
   @Override
   public String toJson() {
-    // TODO Auto-generated method stub
-    return null;
+    JsonObject obj = new JsonObject();
+    obj.addProperty("id", id);
+    return new Gson().toJson(obj);
   }
 }

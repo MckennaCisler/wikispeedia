@@ -83,24 +83,7 @@ class ServerCommandHandler implements Runnable {
 
     try {
       if (commandMap.has("command")) {
-        if (Commands.SET_CLIENT_ID.is(commandString)) {
-          jsonObject.addProperty("command", "set_id_response");
-          String clientId = commandPayload.get("client_id").getAsString();
-          try {
-            String trueId = server.setPlayerId(conn, clientId);
-
-            jsonObject.addProperty("client_id", trueId);
-            jsonObject.addProperty("error_message", "");
-            toClient = gson.toJson(jsonObject);
-            conn.getRemote().sendString(toClient);
-
-          } catch (InputError e) {
-            jsonObject.addProperty("client_id", server.getPlayer(conn).getId());
-            jsonObject.addProperty("error_message", e.getMessage());
-            toClient = gson.toJson(jsonObject);
-            conn.getRemote().sendString(toClient);
-          }
-        } else if (server.getPlayer(conn).getId().length() > 0) {
+        if (server.getPlayer(conn).getId().length() > 0) {
           Player player = server.getPlayer(conn);
           // do server commands here
           try {
