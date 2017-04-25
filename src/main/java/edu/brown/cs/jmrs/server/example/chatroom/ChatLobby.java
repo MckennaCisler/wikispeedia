@@ -113,4 +113,10 @@ public class ChatLobby implements Lobby {
       connectedPlayers.remove(clientId);
     }
   }
+
+  @Override
+  public String toJson() {
+    // TODO Auto-generated method stub
+    return null;
+  }
 }

@@ -30,26 +30,27 @@ import edu.brown.cs.jmrs.web.wikipedia.WikiPageLinkFinder.Filter;
  *
  */
 public class WikiLobby implements Lobby {
-  private static final LinkFinder<WikiPage> DEFAULT_LINK_FINDER =
-      new WikiPageLinkFinder(Filter.DISAMBIGUATION);
-  private static final ContentFormatter<WikiPage> DEFAULT_CONTENT_FORMATTER =
-      new ContentFormatterChain<WikiPage>(
-          ImmutableList.of(new WikiBodyFormatter(), new WikiFooterRemover(),
-              new WikiAnnotationRemover()));
+  private static final LinkFinder<WikiPage>       DEFAULT_LINK_FINDER       = new WikiPageLinkFinder(
+      Filter.DISAMBIGUATION);
+  private static final ContentFormatter<WikiPage> DEFAULT_CONTENT_FORMATTER = new ContentFormatterChain<WikiPage>(
+      ImmutableList.of(
+          new WikiBodyFormatter(),
+          new WikiFooterRemover(),
+          new WikiAnnotationRemover()));
 
-  private transient Server server;
-  private final String id;
+  private transient Server                        server;
+  private final String                            id;
   // map from id to player
-  private transient Map<String, WikiPlayer> players;
-  private transient LinkFinder<WikiPage> linkFinder;
-  private transient ContentFormatter<WikiPage> contentFormatter;
-  private Instant startTime = null;
-  private Instant endTime = null;
+  private transient Map<String, WikiPlayer>       players;
+  private transient LinkFinder<WikiPage>          linkFinder;
+  private transient ContentFormatter<WikiPage>    contentFormatter;
+  private Instant                                 startTime                 = null;
+  private Instant                                 endTime                   = null;
 
-  private WikiPage startPage;
-  private WikiPage goalPage;
+  private WikiPage                                startPage;
+  private WikiPage                                goalPage;
 
-  private transient WikiPlayer winner;
+  private transient WikiPlayer                    winner;
 
   /**
    * Constructs a new WikiLobby (likely through a Factory in
@@ -91,7 +92,8 @@ public class WikiLobby implements Lobby {
       throw new IllegalStateException(
           "Game has already started, cannot add player.");
     }
-    this.players.put(playerId,
+    this.players.put(
+        playerId,
         new WikiPlayer(playerId, "TODO", this, startPage, goalPage)); // TODO:
   }
 
@@ -159,8 +161,9 @@ public class WikiLobby implements Lobby {
   public void start() {
     for (Entry<String, WikiPlayer> entry : players.entrySet()) {
       if (!entry.getValue().ready()) {
-        throw new IllegalStateException(String.format("Player %s is not ready",
-            entry.getValue().getName()));
+        throw new IllegalStateException(
+            String
+                .format("Player %s is not ready", entry.getValue().getName()));
       }
     }
     startTime = Instant.now(); // this is how we determine whether started
@@ -354,5 +357,11 @@ public class WikiLobby implements Lobby {
       throw new IllegalStateException("Lobby has not ended.");
     }
     return endTime;
+  }
+
+  @Override
+  public String toJson() {
+    // TODO Auto-generated method stub
+    return null;
   }
 }
