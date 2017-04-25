@@ -152,11 +152,11 @@ const Command = {
 }
 
 class ServerConn {
-    constructor(source, clientId) {
+    constructor(source) {
         // constants
         this.COMMAND_TIMEOUT = 20000;
 
-        this.clientId = clientId;
+        this.clientId = "";
         this.ws = new WebSocket("ws://" + source);
         this.ws.onopen = this.ws_onopen.bind(this);
         this.ws.onmessage = this.ws_onmessage.bind(this);
@@ -167,7 +167,20 @@ class ServerConn {
          * the callback to call when such a message is recieved (with the parsed results), the errCallback to call on error, and a timeout to cancel on call.
          // TODO: What if the message returns with a DIFFERENT palyer id?
          */
-        this.pendingResponses = {};
+        this.pendingResponses = {
+					"set_id_response" : {
+            "command": Command.SET_CLIENT_ID,
+            "callback": (message) => {
+							let d = new Date();
+							d.setTime(d.getTime() + (60 * 60 * 1000)); //60 minutes
+							let expires = "expires="+d.toUTCString();
+							document.cookie = "client_id=" + message.client_id + ";" + expires;
+							this.clientId = message.client_id;
+						},
+            "errCallback" : () => {}, // no reason
+            "timeout" : null          // no reason
+        	}
+				};
 
 
         /**
@@ -273,12 +286,6 @@ class ServerConn {
         for (let i = 0; i < this.readyCallbacks.length; i++) {
             this.readyCallbacks[i]();
         }
-
-		// This will set an initial client ID to a random value, it can be overwritten by sending a new ID later
-        this.setPlayerId("", (parsedMsg) => {
-            this.clientId = parsedMsg.client_id
-        }, () => {});
-        // TODO: What about sessions?
 
         // TODO: This
         // TODO: is just
