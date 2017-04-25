@@ -262,8 +262,7 @@ class ServerConn {
 
 
     ready(callback) {
-        // this.readyCallbacks.append(callback);
-        window.setTimeout(callback, 1000); // TODO
+        this.readyCallbacks.push(callback);
     }
 
     /**
