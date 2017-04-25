@@ -2,7 +2,10 @@ package edu.brown.cs.jmrs.server;
 
 import java.io.IOException;
 import java.net.HttpCookie;
+import java.util.Date;
 import java.util.List;
+import java.util.Queue;
+import java.util.concurrent.PriorityBlockingQueue;
 import java.util.function.BiFunction;
 
 import org.eclipse.jetty.websocket.api.Session;
@@ -18,6 +21,7 @@ class ServerWorker {
   private Server                           server;
   private LobbyManager                     lobbies;
   private ConcurrentBiMap<Session, Player> players;
+  private Queue<Player>                    disconnectedPlayers;
 
   public ServerWorker(
       Server server,
@@ -25,6 +29,7 @@ class ServerWorker {
     this.server = server;
     lobbies = new LobbyManager(lobbyFactory);
     players = new ConcurrentBiMap<>();
+    disconnectedPlayers = new PriorityBlockingQueue<>();
   }
 
   public String setPlayerId(Session conn, String playerId) throws InputError {
@@ -79,14 +84,42 @@ class ServerWorker {
   }
 
   public void playerDisconnected(Session conn) {
-    Player player = players.get(conn);
-    assert player.toggleConnected();
-    if (player.getLobby() != null) {
-      player.getLobby().playerDisconnected(player.getId());
+    Date expiration = null;
+    List<HttpCookie> cookies = conn.getUpgradeRequest().getCookies();
+    for (HttpCookie cookie : cookies) {
+      if (cookie.getName().equals("client_id")) {
+        System.out.println(cookie.getMaxAge());
+        expiration = new Date(cookie.getMaxAge());
+        break;
+      }
+    }
+
+    if (expiration != null) {
+      Player player = players.get(conn);
+      assert player.toggleConnected();
+
+      player.setCookieExpiration(expiration);
+      disconnectedPlayers.add(player);
+
+      if (player.getLobby() != null) {
+        player.getLobby().playerDisconnected(player.getId());
+      }
+    } else {
+      players.remove(conn);
+    }
+  }
+
+  private void checkDisconnectedPlayers() {
+    Player p = disconnectedPlayers.poll();
+    while (p.getCookieExpiration().compareTo(new Date()) < 0) {
+      players.remove(players.getReversed(p));
+      p = disconnectedPlayers.poll();
     }
   }
 
   public void playerConnected(Session conn) {
+    checkDisconnectedPlayers();
+
     String clientId = "";
     List<HttpCookie> cookies = conn.getUpgradeRequest().getCookies();
     for (HttpCookie cookie : cookies) {
