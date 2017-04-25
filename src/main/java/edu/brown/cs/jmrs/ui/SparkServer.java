@@ -22,6 +22,8 @@ import spark.template.freemarker.FreeMarkerEngine;
  *
  */
 public final class SparkServer {
+  private static boolean debug = false;
+
   /**
    * Overrides (and thus restricts) default constructor.
    */
@@ -45,7 +47,16 @@ public final class SparkServer {
   public static void runSparkServer(int port, List<SparkHandlers> handlers,
       String staticFileLoc, String freemarkerLoc) {
     Spark.port(port);
-    Spark.staticFileLocation(staticFileLoc);
+
+    if (debug) {
+      String projectDir =
+          System.getProperty("user.dir") + "/src/main/resources";
+      System.out.println(projectDir + staticFileLoc);
+      Spark.externalStaticFileLocation(projectDir + staticFileLoc);
+    } else {
+      Spark.staticFileLocation(staticFileLoc);
+    }
+
     Spark.exception(Exception.class, new ExceptionPrinter());
 
     FreeMarkerEngine freeMarker = createEngine(freemarkerLoc);
@@ -126,16 +137,12 @@ public final class SparkServer {
   }
 
   /**
-   * Sets up static files to automatically refresh.
+   * Sets the debug state, i.e. whether to cache or auto-update static files.
+   *
+   * @param val
+   *          The new debug state.
    */
-  public static void configureStaticFiles() {
-    if (true) { // TODO
-      String projectDir = System.getProperty("user.dir");
-      String staticDir = "/src/main/resources/public";
-      Spark.staticFiles.externalLocation(projectDir + staticDir);
-    } else {
-      Spark.staticFiles.location("/public");
-    }
-
+  public static void setDebug(boolean val) {
+    debug = val;
   }
 }

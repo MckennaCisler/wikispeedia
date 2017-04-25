@@ -68,7 +68,7 @@ public final class Main {
         System.out.println("[ Started Websocket ]");
 
         // Setup Spark for main page and extra serving
-        SparkServer.configureStaticFiles();
+        SparkServer.setDebug(true);
         SparkServer.runSparkServer((int) options.valueOf("spark-port"),
             ImmutableList.of(new WikiMainHandlers(), new WikiPageHandlers()),
             "/static", "src/main/resources/public");
