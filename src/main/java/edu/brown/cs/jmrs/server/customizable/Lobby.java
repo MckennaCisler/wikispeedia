@@ -11,4 +11,8 @@ public interface Lobby {
   void addClient(String clientId);
 
   void removeClient(String clientId);
+
+  void playerReconnected(String clientId);
+
+  void playerDisconnected(String clientId);
 }

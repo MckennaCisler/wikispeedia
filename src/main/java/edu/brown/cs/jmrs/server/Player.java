@@ -4,11 +4,13 @@ import edu.brown.cs.jmrs.server.customizable.Lobby;
 
 class Player {
 
-  private String id;
-  private Lobby  lobby;
+  private String  id;
+  private Lobby   lobby;
+  private boolean connected;
 
   public Player(String id) {
     this.id = id;
+    connected = true;
   }
 
   public void setLobby(Lobby lobby) {
@@ -38,5 +40,14 @@ class Player {
   @Override
   public int hashCode() {
     return id.hashCode();
+  }
+
+  public boolean toggleConnected() {
+    connected = !connected;
+    return !connected;
+  }
+
+  public boolean isConnected() {
+    return connected;
   }
 }

@@ -11,22 +11,26 @@ import edu.brown.cs.jmrs.server.customizable.Lobby;
 
 public class ChatLobby implements Lobby {
 
-  private String id;
-  private List<String> playerIds;
-  private Server server;
-  private boolean closed;
+  private String       id;
+  private List<String> connectedPlayers;
+  private List<String> disconnectedPlayers;
+  private Server       server;
+  private boolean      closed;
 
   public ChatLobby(Server server, String id) {
     this.server = server;
     this.id = id;
-    this.playerIds = new CopyOnWriteArrayList<>();
+    this.connectedPlayers = new CopyOnWriteArrayList<>();
+    this.disconnectedPlayers = new CopyOnWriteArrayList<>();
     this.closed = false;
   }
 
   public void close() {
+    server.closeLobby(id);
     closed = true;
     id = null;
-    playerIds = null;
+    disconnectedPlayers = null;
+    connectedPlayers = null;
     server = null;
   }
 
@@ -37,22 +41,20 @@ public class ChatLobby implements Lobby {
 
   @Override
   public void addClient(String playerId) {
-    playerIds.add(playerId);
+    connectedPlayers.add(playerId);
   }
 
   public void sendMessage(String fromId, String message) {
-
-    System.out.println(fromId + ": " + message);
     Gson gson = new Gson();
     JsonObject jsonObject = new JsonObject();
-    jsonObject.addProperty("type", "message");
-    jsonObject.addProperty("error", "");
+    jsonObject.addProperty("command", "message");
+    jsonObject.addProperty("error_message", "");
     jsonObject.addProperty("sender", fromId);
     jsonObject.addProperty("message", message);
 
     String toClient = gson.toJson(jsonObject);
 
-    for (String playerId : playerIds) {
+    for (String playerId : connectedPlayers) {
       if (!playerId.equals(fromId)) {
         server.sendToClient(playerId, toClient);
       }
@@ -62,11 +64,11 @@ public class ChatLobby implements Lobby {
   public void sendMessage(String recipientId, String fromId, String message) {
     Gson gson = new Gson();
 
-    for (String playerId : playerIds) {
+    for (String playerId : connectedPlayers) {
       if (playerId.equals(recipientId)) {
         JsonObject jsonObject = new JsonObject();
-        jsonObject.addProperty("type", "whisper");
-        jsonObject.addProperty("error", "");
+        jsonObject.addProperty("command", "whisper");
+        jsonObject.addProperty("error_message", "");
         jsonObject.addProperty("sender", fromId);
         jsonObject.addProperty("message", message);
 
@@ -77,8 +79,9 @@ public class ChatLobby implements Lobby {
     }
 
     JsonObject jsonObject = new JsonObject();
-    jsonObject.addProperty("type", "bounced_whisper");
-    jsonObject.addProperty("error",
+    jsonObject.addProperty("command", "bounced_whisper");
+    jsonObject.addProperty(
+        "error_message",
         "No client with specified ID exists in this lobby");
     jsonObject.addProperty("target", recipientId);
 
@@ -88,10 +91,26 @@ public class ChatLobby implements Lobby {
 
   @Override
   public void removeClient(String playerId) {
-    playerIds.remove(playerId);
+    connectedPlayers.remove(playerId);
   }
 
   @Override
   public void init(JsonObject arguments) {
+  }
+
+  @Override
+  public void playerReconnected(String clientId) {
+    if (disconnectedPlayers.contains(clientId)) {
+      connectedPlayers.add(clientId);
+      disconnectedPlayers.remove(clientId);
+    }
+  }
+
+  @Override
+  public void playerDisconnected(String clientId) {
+    if (connectedPlayers.contains(clientId)) {
+      disconnectedPlayers.add(clientId);
+      connectedPlayers.remove(clientId);
+    }
   }
 }

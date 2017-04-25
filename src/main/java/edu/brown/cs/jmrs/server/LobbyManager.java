@@ -46,6 +46,12 @@ public class LobbyManager {
     return lobbyIds;
   }
 
+  public void remove(String lobbyId) {
+    w.lock();
+    lobbies.remove(lobbyId);
+    w.unlock();
+  }
+
   public Lobby get(String lobbyId) {
     r.lock();
     Lobby lobby = lobbies.get(lobbyId);

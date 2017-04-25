@@ -40,6 +40,10 @@ public class Server {
     }
   }
 
+  public void closeLobby(String lobbyId) {
+    server.closeLobby(lobbyId);
+  }
+
   @OnWebSocketClose
   public void onClose(Session conn, int code, String reason) {
     GlobalThreadManager.submit(new PlayerDisconnectedHandler(server, conn));
