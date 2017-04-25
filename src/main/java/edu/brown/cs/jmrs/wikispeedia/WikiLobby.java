@@ -95,10 +95,21 @@ public class WikiLobby implements Lobby {
         new WikiPlayer(playerId, "TODO", this, startPage, goalPage)); // TODO:
   }
 
-  // @Override
   @Override
   public void removeClient(String playerId) {
     this.players.remove(playerId);
+  }
+
+  @Override
+  public void playerReconnected(String clientId) {
+    // TODO Auto-generated method stub
+
+  }
+
+  @Override
+  public void playerDisconnected(String clientId) {
+    // TODO Auto-generated method stub
+
   }
 
   /****************************************/
@@ -344,5 +355,4 @@ public class WikiLobby implements Lobby {
     }
     return endTime;
   }
-
 }

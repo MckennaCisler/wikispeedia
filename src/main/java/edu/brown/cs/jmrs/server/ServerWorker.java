@@ -14,12 +14,11 @@ import edu.brown.cs.jmrs.server.customizable.Lobby;
 
 class ServerWorker {
 
-  private Server                           server;
-  private LobbyManager                     lobbies;
+  private Server server;
+  private LobbyManager lobbies;
   private ConcurrentBiMap<Session, Player> players;
 
-  public ServerWorker(
-      Server server,
+  public ServerWorker(Server server,
       BiFunction<Server, String, ? extends Lobby> lobbyFactory) {
     this.server = server;
     lobbies = new LobbyManager(lobbyFactory);
@@ -29,10 +28,8 @@ class ServerWorker {
   public String setPlayerId(Session conn, String playerId) throws InputError {
     Player player = players.get(conn);
     Lobby lobby = player == null ? null : player.getLobby();
-    if (player == null
-        || player.getLobby() == null
-        || (!player.isConnected()
-            && !(playerId == null || playerId.length() == 0))) {
+    if (player == null || player.getLobby() == null || (!player.isConnected()
+        && !(playerId == null || playerId.length() == 0))) {
       // initial setting of id OR can change it freely if not in lobby OR can
       // set id on reconnect
       if (playerId == null || playerId.length() == 0) {
@@ -106,6 +103,7 @@ class ServerWorker {
     String id = "";
     List<HttpCookie> cookies = conn.getUpgradeRequest().getCookies();
     for (HttpCookie cookie : cookies) {
+      System.out.println(cookie.getName());
       if (cookie.getName().equals("client_id")) {
         id = cookie.getValue();
         break;
