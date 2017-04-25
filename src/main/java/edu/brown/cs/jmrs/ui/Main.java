@@ -27,7 +27,7 @@ import spark.template.freemarker.FreeMarkerEngine;
  *
  */
 public final class Main {
-  public static final int DEFAULT_SPARK_PORT  = 4567;
+  public static final int DEFAULT_SPARK_PORT = 4567;
   public static final int DEFAULT_SOCKET_PORT = 4568;
 
   private Main() {
@@ -68,11 +68,10 @@ public final class Main {
         System.out.println("[ Started Websocket ]");
 
         // Setup Spark for main page and extra serving
-        SparkServer.runSparkServer(
-            (int) options.valueOf("spark-port"),
+        SparkServer.configureStaticFiles();
+        SparkServer.runSparkServer((int) options.valueOf("spark-port"),
             ImmutableList.of(new WikiMainHandlers(), new WikiPageHandlers()),
-            "/static",
-            "src/main/resources/public");
+            "/static", "src/main/resources/public");
         System.out.println("[ Started Spark ]");
 
       } finally {
@@ -85,8 +84,7 @@ public final class Main {
       }, new ChatInterpreter());
       Spark.webSocket("/websocket", server);
 
-      SparkServer.runSparkServer(
-          (int) options.valueOf("spark-port"),
+      SparkServer.runSparkServer((int) options.valueOf("spark-port"),
           ImmutableList.of(new SparkHandlers() {
 
             @Override
@@ -102,9 +100,7 @@ public final class Main {
 
               });
             }
-          }),
-          "/public-testing",
-          "src/main/resources/public-testing");
+          }), "/public-testing", "src/main/resources/public-testing");
       System.out.println("[ Started Chat Test ]");
     }
   }

@@ -1,8 +1,8 @@
 package edu.brown.cs.jmrs.web;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Iterator;
+import java.util.List;
 
 import org.jsoup.nodes.Element;
 
@@ -22,10 +22,10 @@ public class ContentFormatterChain<T extends Page>
    * Constructs a ContentFormatterChain which applies formatters in order.
    *
    * @param formatters
-   *          A Collection of ContentFormatters, ordered from first call to last
-   *          (on the input object to .format())
+   *          A List of ContentFormatters, ordered from first call to last (on
+   *          the input object to .format())
    */
-  public ContentFormatterChain(Collection<ContentFormatter<T>> formatters) {
+  public ContentFormatterChain(List<ContentFormatter<T>> formatters) {
     super(formatters);
   }
 

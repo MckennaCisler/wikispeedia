@@ -124,4 +124,18 @@ public final class SparkServer {
     Spark.halt(400, fullMsg);
     return fullMsg;
   }
+
+  /**
+   * Sets up static files to automatically refresh.
+   */
+  public static void configureStaticFiles() {
+    if (true) { // TODO
+      String projectDir = System.getProperty("user.dir");
+      String staticDir = "/src/main/resources/public";
+      Spark.staticFiles.externalLocation(projectDir + staticDir);
+    } else {
+      Spark.staticFiles.location("/public");
+    }
+
+  }
 }
