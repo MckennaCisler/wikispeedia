@@ -3,7 +3,6 @@
 // globals for use in game logic
 let isMaking;
 let lobbyName;
-let servConn = new ServerConn(window.location.host + "/websocket", "");
 
 $(document).ready(function () {
 	"use strict";
@@ -75,10 +74,10 @@ function resize() {
 }
 
 // game logic handlers
-servConn.ready(() => {
+serverConn.ready(() => {
 	"use strict";
 	// setup lobbies
-	servConn.registerAllLobbies(drawLobbies);
+	serverConn.registerAllLobbies(drawLobbies);
 
 	$("#launch").on('click', () => {
 		if ($("#uname").val() === "") {
@@ -87,7 +86,7 @@ servConn.ready(() => {
 			}, 1000);
 		} else if (lobbyName !== "") {
 			if (isMaking) {
-				servConn.startLobby(lobbyName.trim(),
+				serverConn.startLobby(lobbyName.trim(),
 				() => {
 					window.location.href = "waiting";
 				},
@@ -95,7 +94,7 @@ servConn.ready(() => {
 					displayError(error.error_message);
 				});
 			} else {
-				servConn.joinLobby(lobbyName.trim(),
+				serverConn.joinLobby(lobbyName.trim(),
 				() => {
 					window.location.href = "waiting";
 				},

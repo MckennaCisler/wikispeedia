@@ -1,4 +1,4 @@
-package edu.brown.cs.jmrs.server.collections;
+package edu.brown.cs.jmrs.collect;
 
 import java.util.Collection;
 import java.util.HashMap;

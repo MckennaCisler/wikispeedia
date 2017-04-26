@@ -190,6 +190,7 @@ class ServerConn {
     /**
      * Exposed functions; callbacks are called with relevant payload
      */
+    // set lobby_id to "" for the current one
     getPlayers(lobby_id, callback, errCallback) {
         this._send(Command.GET_PLAYERS, callback, errCallback, [lobby_id]);
     }
@@ -198,6 +199,7 @@ class ServerConn {
         this._send(Command.GET_TIME, callback, errCallback, []);
     }
 
+    // set lobby_id to "" for the current one
     getSettings(lobby_id, callback, errCallback) {
         this._send(Command.GET_SETTINGS, callback, errCallback, [lobby_id]);
     }
@@ -371,7 +373,7 @@ class ServerConn {
  * Create global server. NOTE THat it is done outside a doc.ready because it is needed everywhere at doc.ready().
  * And also does not need the DOM
  */
-serverConn = new ServerConn("localhost:4567/websocket");
+serverConn = new ServerConn(window.location.host + "/websocket");
 
 
 

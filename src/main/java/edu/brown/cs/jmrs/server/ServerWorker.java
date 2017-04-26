@@ -12,7 +12,7 @@ import org.eclipse.jetty.websocket.api.Session;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 
-import edu.brown.cs.jmrs.server.collections.ConcurrentBiMap;
+import edu.brown.cs.jmrs.collect.ConcurrentBiMap;
 import edu.brown.cs.jmrs.server.customizable.Lobby;
 
 class ServerWorker {
