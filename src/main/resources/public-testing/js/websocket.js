@@ -4,7 +4,7 @@ let $chatLog;
 function setId(cvalue) {
 	let expireTime = (15 * 60 * 1000);
     let expires = "max-age="+ expireTime; //15 minutes
-    document.cookie = "client_id=" + cvalue + ":" + expireTime + ";" + expires + ";";
+    document.cookie = "client_id=" + cvalue + ":" + (expireTime + new Date().getTime()) + ";" + expires + ";";
 }
 
 function getId() {
@@ -32,7 +32,7 @@ function joinLobby(lobbyName) {
 }
 
 function leaveLobby() {
-	const payload = { "command":"leave_lobby" };
+	const payload = { "command":"leave_lobby", "payload":{} };
   send(payload);
 }
 

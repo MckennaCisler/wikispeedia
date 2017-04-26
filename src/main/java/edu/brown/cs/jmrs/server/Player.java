@@ -1,13 +1,15 @@
 package edu.brown.cs.jmrs.server;
 
+import java.util.Date;
+
 import edu.brown.cs.jmrs.server.customizable.Lobby;
 
 class Player implements Comparable<Player> {
 
-  private String id;
-  private Lobby lobby;
+  private String  id;
+  private Lobby   lobby;
   private boolean connected;
-  private int cookieExpiration;
+  private Date    cookieExpiration;
 
   public Player(String id) {
     this.id = id;
@@ -57,22 +59,27 @@ class Player implements Comparable<Player> {
     return connected;
   }
 
-  public void setCookieExpiration(int date) {
+  public void setCookieExpiration(Date date) {
     this.cookieExpiration = date;
   }
 
-  public int getCookieExpiration() {
+  public Date getCookieExpiration() {
     return cookieExpiration;
   }
 
   @Override
   public int compareTo(Player p) {
-    return cookieExpiration - p.getCookieExpiration();
+    return cookieExpiration.compareTo(p.getCookieExpiration());
   }
 
   @Override
   public String toString() {
-    return "Player [id=" + id + ", lobby=" + lobby + ", connected=" + connected
+    return "Player [id="
+        + id
+        + ", lobby="
+        + lobby
+        + ", connected="
+        + connected
         + "]";
   }
 }

@@ -199,7 +199,7 @@ class ServerConn {
         let d = new Date();
         d.setTime(d.getTime() + (this.CLIENT_ID_COOKIE_EXPIRATION * 60 * 1000)); //60 minutes
         let expires = "expires="+d.toUTCString();
-        document.cookie = "client_id=" + id + ";" + expires;
+        document.cookie = "client_id=" + id + d.getTime() + ";" + expires;
         this.clientId = id;
     }
 

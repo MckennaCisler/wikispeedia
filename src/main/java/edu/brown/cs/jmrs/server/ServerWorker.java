@@ -2,6 +2,8 @@ package edu.brown.cs.jmrs.server;
 
 import java.io.IOException;
 import java.net.HttpCookie;
+import java.time.Instant;
+import java.util.Date;
 import java.util.List;
 import java.util.Queue;
 import java.util.concurrent.PriorityBlockingQueue;
@@ -87,19 +89,22 @@ class ServerWorker {
   }
 
   public void playerDisconnected(Session conn) {
-    int expiration = 0;
+    Date expiration = new Date();
     List<HttpCookie> cookies = conn.getUpgradeRequest().getCookies();
     for (HttpCookie cookie : cookies) {
       if (cookie.getName().equals("client_id")) {
         String cookieVal = cookie.getValue();
-        expiration = Integer
-            .parseInt(cookieVal.substring(cookieVal.indexOf(":") + 1));
+        expiration = Date.from(
+            Instant.ofEpochMilli(
+                Long.parseLong(
+                    cookieVal.substring(cookieVal.indexOf(":") + 1))));
         break;
       }
     }
 
-    if (expiration > 0) { // TODO: Do you mean greater than the current UNIX
-                          // timestamp?
+    if (expiration.after(new Date())) { // TODO: Do you mean greater than the
+                                        // current UNIX
+      // timestamp?
       Player player = players.get(conn);
       assert player.isConnected();
       player.toggleConnected();
@@ -119,12 +124,14 @@ class ServerWorker {
                                             // removes a player that has expired
                                             // in the above function?
     if (!disconnectedPlayers.isEmpty()) {
+      Date now = new Date();
       Player p = disconnectedPlayers.poll();
-      while (p.getCookieExpiration() <= 0) { // TODO: Is cookie expiration
-                                             // somehow updated (subtracted from
-                                             // as time goes on)? How does it
-                                             // expire?
-                                             // Sean: lol whoops no i forgot
+      while (p.getCookieExpiration().before(now)) { // TODO: Is cookie
+                                                    // expiration
+        // somehow updated (subtracted from
+        // as time goes on)? How does it
+        // expire?
+        // Sean: lol whoops no i forgot
         players.remove(players.getReversed(p));
         if (!disconnectedPlayers.isEmpty()) {
           p = disconnectedPlayers.poll();
@@ -162,7 +169,7 @@ class ServerWorker {
         conn.getRemote().sendString(toClient);
 
       } catch (InputError e) {
-        jsonObject.addProperty("client_id", getPlayer(conn).getId());
+        jsonObject.addProperty("client_id", "");
         jsonObject.addProperty("error_message", e.getMessage());
         toClient = gson.toJson(jsonObject);
         conn.getRemote().sendString(toClient);
