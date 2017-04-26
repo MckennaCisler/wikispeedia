@@ -94,7 +94,8 @@ class ServerWorker {
 
     if (expiration > 0) {
       Player player = players.get(conn);
-      assert player.toggleConnected();
+      assert player.isConnected();
+      player.toggleConnected();
 
       player.setCookieExpiration(expiration);
       disconnectedPlayers.add(player);

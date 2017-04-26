@@ -75,6 +75,7 @@ public class ConcurrentBiMap<E, T> implements Map<E, T> {
 
       for (T val : vals) {
         if (val.equals(key)) {
+          r.unlock();
           return val;
         }
       }
