@@ -40,6 +40,9 @@ class ServerWorker {
         playerId = Math.random() + "";
         player = new Player(playerId);
       }
+
+      players.put(conn, player);
+
     } else if (!player.isConnected()) {
       players.put(conn, player);
       if (player.getLobby() != null) {
@@ -129,7 +132,7 @@ class ServerWorker {
       if (cookie.getName().equals("client_id")) {
         String cookieString = cookie.getValue();
 
-        clientId = cookieString.substring(0, cookieString.indexOf(":"));
+        clientId = cookieString;
         break;
       }
     }
