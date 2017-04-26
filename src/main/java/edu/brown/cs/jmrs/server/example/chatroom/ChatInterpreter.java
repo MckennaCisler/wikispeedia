@@ -15,7 +15,9 @@ public class ChatInterpreter implements CommandInterpreter {
   }
 
   @Override
-  public void interpret(Lobby uncastLobby, String clientId,
+  public void interpret(
+      Lobby uncastLobby,
+      String clientId,
       JsonObject command) {
     ChatLobby lobby = (ChatLobby) uncastLobby;
 
@@ -26,7 +28,9 @@ public class ChatInterpreter implements CommandInterpreter {
         lobby.sendMessage(clientId, command.get("message").getAsString());
         return;
       case WHISPER:
-        lobby.sendMessage(command.get("recipient").getAsString(), clientId,
+        lobby.sendMessage(
+            command.get("recipient").getAsString(),
+            clientId,
             command.get("message").getAsString());
         return;
     }

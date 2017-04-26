@@ -2,7 +2,6 @@ package edu.brown.cs.jmrs.server;
 
 import java.io.IOException;
 import java.net.HttpCookie;
-import java.util.Date;
 import java.util.List;
 import java.util.Queue;
 import java.util.concurrent.PriorityBlockingQueue;
@@ -33,7 +32,7 @@ class ServerWorker {
   }
 
   public String setPlayerId(Session conn, String playerId) throws InputError {
-    Player player = players.get(conn);
+    Player player = players.getBack(new Player(playerId));
     if (player == null) {
       playerId = conn.hashCode() + "";
       player = new Player(playerId);
@@ -42,11 +41,9 @@ class ServerWorker {
         player = new Player(playerId);
       }
     } else if (!player.isConnected()) {
-      Lobby lobby = player.getLobby();
-      player.setLobby(lobby);
       players.put(conn, player);
-      if (lobby != null) {
-        lobby.playerReconnected(player.getId());
+      if (player.getLobby() != null) {
+        player.getLobby().playerReconnected(player.getId());
       }
     } else {
       throw new InputError("Stop stealing identities");
@@ -84,17 +81,18 @@ class ServerWorker {
   }
 
   public void playerDisconnected(Session conn) {
-    Date expiration = null;
+    int expiration = 0;
     List<HttpCookie> cookies = conn.getUpgradeRequest().getCookies();
     for (HttpCookie cookie : cookies) {
       if (cookie.getName().equals("client_id")) {
-        System.out.println(cookie.getMaxAge());
-        expiration = new Date(cookie.getMaxAge());
+        String cookieVal = cookie.getValue();
+        expiration = Integer
+            .parseInt(cookieVal.substring(cookieVal.indexOf(":") + 1));
         break;
       }
     }
 
-    if (expiration != null) {
+    if (expiration > 0) {
       Player player = players.get(conn);
       assert player.toggleConnected();
 
@@ -110,10 +108,14 @@ class ServerWorker {
   }
 
   private void checkDisconnectedPlayers() {
-    Player p = disconnectedPlayers.poll();
-    while (p.getCookieExpiration().compareTo(new Date()) < 0) {
-      players.remove(players.getReversed(p));
-      p = disconnectedPlayers.poll();
+    if (!disconnectedPlayers.isEmpty()) {
+      Player p = disconnectedPlayers.poll();
+      while (p.getCookieExpiration() <= 0) {
+        players.remove(players.getReversed(p));
+        if (!disconnectedPlayers.isEmpty()) {
+          p = disconnectedPlayers.poll();
+        }
+      }
     }
   }
 
@@ -124,7 +126,9 @@ class ServerWorker {
     List<HttpCookie> cookies = conn.getUpgradeRequest().getCookies();
     for (HttpCookie cookie : cookies) {
       if (cookie.getName().equals("client_id")) {
-        clientId = cookie.getValue();
+        String cookieString = cookie.getValue();
+
+        clientId = cookieString.substring(0, cookieString.indexOf(":"));
         break;
       }
     }

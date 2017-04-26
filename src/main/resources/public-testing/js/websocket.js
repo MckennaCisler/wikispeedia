@@ -2,10 +2,9 @@ let ws;
 let $chatLog;
 
 function setId(cvalue) {
-    let d = new Date();
-    d.setTime(d.getTime() + (15 * 60 * 1000)); //15 minutes
-    let expires = "expires="+d.toUTCString();
-    document.cookie = "client_id=" + cvalue + ";" + expires;
+	let expireTime = (15 * 60 * 1000);
+    let expires = "max-age="+ expireTime; //15 minutes
+    document.cookie = "client_id=" + cvalue + ":" + expireTime + ";" + expires + ";";
 }
 
 function getId() {

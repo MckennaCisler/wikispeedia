@@ -68,6 +68,21 @@ public class ConcurrentBiMap<E, T> implements Map<E, T> {
     return value;
   }
 
+  public T getBack(Object key) {
+    r.lock();
+    if (containsValue(key)) {
+      Set<T> vals = back.keySet();
+
+      for (T val : vals) {
+        if (val.equals(key)) {
+          return val;
+        }
+      }
+    }
+    r.unlock();
+    return null;
+  }
+
   @Override
   public T put(E key, T value) {
     w.lock();
