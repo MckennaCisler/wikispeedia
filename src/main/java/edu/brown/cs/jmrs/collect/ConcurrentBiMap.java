@@ -10,11 +10,11 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 public class ConcurrentBiMap<E, T> implements Map<E, T> {
 
   private final ReentrantReadWriteLock rwl = new ReentrantReadWriteLock();
-  private final Lock                   r   = rwl.readLock();
-  private final Lock                   w   = rwl.writeLock();
+  private final Lock r = rwl.readLock();
+  private final Lock w = rwl.writeLock();
 
-  private Map<E, T>                    fore;
-  private Map<T, E>                    back;
+  private Map<E, T> fore;
+  private Map<T, E> back;
 
   public ConcurrentBiMap() {
     fore = new HashMap<>();
@@ -156,5 +156,10 @@ public class ConcurrentBiMap<E, T> implements Map<E, T> {
     Set<Entry<E, T>> entries = fore.entrySet();
     r.unlock();
     return entries;
+  }
+
+  @Override
+  public String toString() {
+    return fore.toString();
   }
 }

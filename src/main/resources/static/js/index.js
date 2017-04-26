@@ -19,22 +19,6 @@ $(document).ready(function () {
 		}
 	});
 
-	$("#start_game").on('click', () => {
-		if ($("#game_name").val() === "") {
-			$("#game_name").effect("highlight", {
-				"color": "red"
-			}, 1000);
-		} else {
-			isMaking = true;
-			lobbyName = $("#game_name").val();
-			$("#main").hide();
-			$("#rules").hide();
-			$("#uname_picker").show();
-			$("#u_header").html(lobbyName);
-			console.log(lobbyName);
-		}
-	});
-
 	$("#open_games").on('click', (event) => {
 		isMaking = false;
 		lobbyName = $(event.target).html();
@@ -73,27 +57,59 @@ function resize() {
 	}
 }
 
+function startLobby(callback, errCallback) {
+	serverConn.startLobby(lobbyName.trim(),
+		() => {
+			callback();
+		},
+		(error) => {
+			errCallback(error.error_message);
+			displayServerConnError(error);
+		});
+}
+
 // game logic handlers
 serverConn.ready(() => {
 	"use strict";
 	// setup lobbies
 	serverConn.registerAllLobbies(drawLobbies);
 
+	$("#start_game").on('click', () => {
+		if ($("#game_name").val() === "") {
+			$("#game_name").effect("highlight", {
+				"color": "red"
+			}, 1000);
+		} else {
+			isMaking = true;
+			lobbyName = $("#game_name").val();
+
+			serverConn.startLobby(lobbyName.trim(),
+				() => {
+					$("#main").hide();
+					$("#rules").hide();
+					$("#uname_picker").show();
+					$("#u_header").html(lobbyName);
+				},
+				(error) => {
+					displayServerConnError(error);
+			});
+			console.log(lobbyName);
+		}
+	});
+
 	$("#launch").on('click', () => {
 		if ($("#uname").val() === "") {
 			$("#uname").effect("highlight", {
 				"color": "red"
 			}, 1000);
-			
+
 		} else if (lobbyName !== "") {
 			if (isMaking) {
-				serverConn.startLobby(lobbyName.trim(),
-				() => {
-					serverConn.setUsername($("#uname").val(), () => {
-						window.location.href = "waiting";
-					}, displayServerConnError);
-				},
-				displayServerConnError);
+				// only have to do this, lobby was created & joined earlier
+				serverConn.setUsername($("#uname").val(), () => {
+					window.location.href = "waiting";
+				}, displayServerConnError);
+
 			} else {
 				serverConn.joinLobby(lobbyName.trim(),
 				() => {

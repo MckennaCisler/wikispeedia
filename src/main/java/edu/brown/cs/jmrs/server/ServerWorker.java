@@ -35,7 +35,8 @@ class ServerWorker {
     if (player == null) {
       playerId = conn.hashCode() + "";
       player = new Player(playerId);
-      while (!players.putNoOverwrite(conn, player)) {
+      while (!players.putNoOverwrite(conn, player)) { // TODO: NOT ADDING TO
+                                                      // PLAYERS HERE
         playerId = Math.random() + "";
         player = new Player(playerId);
       }

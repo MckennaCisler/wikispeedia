@@ -2,7 +2,7 @@
 /**
  * Globals (created at bottom)
  */
- var serverConn;
+var serverConn;
 
 // Note that "INCOMING" and "OUTGOING" refer to the server perspective
 const COMMAND_TYPE = {
@@ -101,7 +101,7 @@ const Command = {
     SET_USERNAME : {
 		name: "set_username",
         responseName: "return_set_username",
-		type: CommandType.INCOMING,
+		type: COMMAND_TYPE.INCOMING,
 		construct: (username) => {
             return {"username" : username };
         }
@@ -109,7 +109,7 @@ const Command = {
     SET_PLAYER_STATE : {
 		name: "set_player_state",
         responseName: "return_set_player_state",
-		type: CommandType.INCOMING,
+		type: COMMAND_TYPE.INCOMING,
 		construct: (state) => {
             return {"state" : state };
         }
