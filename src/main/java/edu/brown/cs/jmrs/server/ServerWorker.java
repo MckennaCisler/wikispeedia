@@ -17,13 +17,12 @@ import edu.brown.cs.jmrs.server.customizable.Lobby;
 
 class ServerWorker {
 
-  private Server                           server;
-  private LobbyManager                     lobbies;
+  private Server server;
+  private LobbyManager lobbies;
   private ConcurrentBiMap<Session, Player> players;
-  private Queue<Player>                    disconnectedPlayers;
+  private Queue<Player> disconnectedPlayers;
 
-  public ServerWorker(
-      Server server,
+  public ServerWorker(Server server,
       BiFunction<Server, String, ? extends Lobby> lobbyFactory) {
     this.server = server;
     lobbies = new LobbyManager(lobbyFactory);
@@ -86,15 +85,16 @@ class ServerWorker {
     for (HttpCookie cookie : cookies) {
       if (cookie.getName().equals("client_id")) {
         String cookieVal = cookie.getValue();
-        expiration = Integer
-            .parseInt(cookieVal.substring(cookieVal.indexOf(":") + 1));
+        expiration =
+            Integer.parseInt(cookieVal.substring(cookieVal.indexOf(":") + 1));
         break;
       }
     }
 
     if (expiration > 0) {
       Player player = players.get(conn);
-      assert player.toggleConnected();
+      assert player.isConnected();
+      player.toggleConnected();
 
       player.setCookieExpiration(expiration);
       disconnectedPlayers.add(player);

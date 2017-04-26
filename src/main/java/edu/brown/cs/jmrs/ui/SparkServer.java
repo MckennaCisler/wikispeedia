@@ -51,7 +51,6 @@ public final class SparkServer {
     if (debug) {
       String projectDir =
           System.getProperty("user.dir") + "/src/main/resources";
-      System.out.println(projectDir + staticFileLoc);
       Spark.externalStaticFileLocation(projectDir + staticFileLoc);
     } else {
       Spark.staticFileLocation(staticFileLoc);

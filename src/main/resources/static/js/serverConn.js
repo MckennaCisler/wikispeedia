@@ -15,7 +15,7 @@ const COMMAND_TYPE = {
 const Command = {
     /**
      * Helpful regex:
-     * ([A-Z_]+)\((\".*\")\, (COMMAND_TYPE\.\w+)\, \"(.*)\"\)(,//|;)
+     * ([A-Z_]+)\((\".*\")\, (CommandType\.\w+)\, \"(.*)\"\)(, //|;)
      * ->
      * $1 : { \n\t\tname: $2, \n\t\ttype: $3,\n\t\tconstruct: ($4) => {}\n\t},
      * (You'll need to do some manual changes... it's not the same on both sides)
@@ -98,6 +98,22 @@ const Command = {
         }
 	},
     // Player-specific commands
+    SET_USERNAME : {
+		name: "set_username",
+        responseName: "return_set_username",
+		type: CommandType.INCOMING,
+		construct: (username) => {
+            return {"username" : username };
+        }
+	},
+    SET_PLAYER_STATE : {
+		name: "set_player_state",
+        responseName: "return_set_player_state",
+		type: CommandType.INCOMING,
+		construct: (state) => {
+            return {"state" : state };
+        }
+	},
     GOTO_PAGE : {
 		name: "goto_page",
         responseName: "return_goto_page",
@@ -204,6 +220,14 @@ class ServerConn {
         this._send(Command.GET_SETTINGS, callback, errCallback, [lobby_id]);
     }
 
+    setUsername(callback, errCallback) {
+        this._send(Command.SET_USERNAME, callback, errCallback, []);
+    }
+
+    setPlayerState(callback, errCallback) {
+        this._send(Command.SET_PLAYER_STATE, callback, errCallback, []);
+    }
+
     gotoPage(page_name, callback, errCallback) {
         this._send(Command.GOTO_PAGE, callback, errCallback, [page_name]);
     }
@@ -211,7 +235,7 @@ class ServerConn {
     getPage(page_name, callback, errCallback) {
         this._send(Command.GET_PAGE, callback, errCallback, [page_name]);
     }
-
+    // DEPRECATED
     getPath(player_id, callback, errCallback) {
         this._send(Command.GET_PATH, callback, errCallback, [player_id]);
     }

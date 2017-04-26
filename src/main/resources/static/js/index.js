@@ -84,23 +84,24 @@ serverConn.ready(() => {
 			$("#uname").effect("highlight", {
 				"color": "red"
 			}, 1000);
+			
 		} else if (lobbyName !== "") {
 			if (isMaking) {
 				serverConn.startLobby(lobbyName.trim(),
 				() => {
-					window.location.href = "waiting";
+					serverConn.setUsername($("#uname").val(), () => {
+						window.location.href = "waiting";
+					}, displayServerConnError);
 				},
-				(error) => {
-					displayError(error.error_message);
-				});
+				displayServerConnError);
 			} else {
 				serverConn.joinLobby(lobbyName.trim(),
 				() => {
-					window.location.href = "waiting";
+					serverConn.setUsername($("#uname").val(), () => {
+						window.location.href = "waiting";
+					}, displayServerConnError);
 				},
-				(error) => {
-					displayError(error.error_message);
-				});
+				displayServerConnError);
 			}
 		}
 	});

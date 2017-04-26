@@ -9,6 +9,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import com.google.common.collect.ImmutableList;
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 
 import edu.brown.cs.jmrs.server.Server;
@@ -30,8 +31,10 @@ import edu.brown.cs.jmrs.web.wikipedia.WikiPageLinkFinder.Filter;
  *
  */
 public class WikiLobby implements Lobby {
+
   private static final LinkFinder<WikiPage> DEFAULT_LINK_FINDER =
       new WikiPageLinkFinder(Filter.DISAMBIGUATION);
+
   private static final ContentFormatter<WikiPage> DEFAULT_CONTENT_FORMATTER =
       new ContentFormatterChain<WikiPage>(
           ImmutableList.of(new WikiBodyFormatter(), new WikiFooterRemover(),
@@ -49,7 +52,7 @@ public class WikiLobby implements Lobby {
   private WikiPage startPage;
   private WikiPage goalPage;
 
-  private transient WikiPlayer winner;
+  private WikiPlayer winner;
 
   /**
    * Constructs a new WikiLobby (likely through a Factory in
@@ -92,7 +95,7 @@ public class WikiLobby implements Lobby {
           "Game has already started, cannot add player.");
     }
     this.players.put(playerId,
-        new WikiPlayer(playerId, "TODO", this, startPage, goalPage)); // TODO:
+        new WikiPlayer(playerId, this, startPage, goalPage));
   }
 
   @Override
@@ -102,14 +105,12 @@ public class WikiLobby implements Lobby {
 
   @Override
   public void playerReconnected(String clientId) {
-    // TODO Auto-generated method stub
-
+    players.get(clientId).setConnected(true);
   }
 
   @Override
   public void playerDisconnected(String clientId) {
-    // TODO Auto-generated method stub
-
+    players.get(clientId).setConnected(false);
   }
 
   /****************************************/
@@ -139,6 +140,16 @@ public class WikiLobby implements Lobby {
    */
   public void setLinkFinder(LinkFinder<WikiPage> linkFinder) {
     this.linkFinder = linkFinder;
+  }
+
+  /**
+   * @param playerId
+   *          The id of the player to set the name of.
+   * @param name
+   *          The name to set.
+   */
+  public void setPlayerName(String playerId, String name) {
+    players.get(playerId).setName(name);
   }
 
   /**
@@ -172,7 +183,7 @@ public class WikiLobby implements Lobby {
   public void stop() {
     endTime = Instant.now();
     for (Entry<String, WikiPlayer> entry : players.entrySet()) {
-      if (!entry.getValue().isDone()) {
+      if (!entry.getValue().done()) {
         entry.getValue().setEndTime(endTime);
       }
     }
@@ -196,10 +207,10 @@ public class WikiLobby implements Lobby {
     }
 
     // notify with new states (state)
-    Command.allPlayers(this);
+    Command.sendAllPlayers(this);
 
     if (allReady) {
-      Command.beginGame(this);
+      Command.sendBeginGame(this);
     }
 
     return allReady;
@@ -215,7 +226,7 @@ public class WikiLobby implements Lobby {
   public boolean checkForWinner() {
     List<WikiPlayer> done = new ArrayList<>(1);
     for (Entry<String, WikiPlayer> entry : players.entrySet()) {
-      if (entry.getValue().isDone()) {
+      if (entry.getValue().done()) {
         done.add(entry.getValue());
       }
     }
@@ -229,7 +240,7 @@ public class WikiLobby implements Lobby {
       winner = done.get(0);
       stop();
 
-      Command.endGame(this);
+      Command.sendEndGame(this);
       return true;
     }
     return false;
@@ -358,7 +369,14 @@ public class WikiLobby implements Lobby {
 
   @Override
   public String toJson() {
-    // TODO Auto-generated method stub
-    return null;
+    JsonElement obj = WikiInterpreter.GSON.toJsonTree(this);
+    assert obj.isJsonObject();
+
+    JsonObject lobby = obj.getAsJsonObject();
+    lobby.addProperty("playTime", getPlayTime().toMinutes());
+    lobby.addProperty("started", started());
+    lobby.addProperty("ended", ended());
+
+    return WikiInterpreter.GSON.toJson(lobby);
   }
 }
