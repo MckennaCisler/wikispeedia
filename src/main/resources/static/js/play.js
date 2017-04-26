@@ -146,7 +146,7 @@ function drawHistoryCallback(players) {
       playerPaths.set(player.id, player.path);
     }
 
-    drawHistory;
+    drawHistory();
 }
 
 function drawHistory() {
