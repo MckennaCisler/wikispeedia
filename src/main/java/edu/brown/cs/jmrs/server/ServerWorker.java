@@ -17,12 +17,13 @@ import edu.brown.cs.jmrs.server.customizable.Lobby;
 
 class ServerWorker {
 
-  private Server server;
-  private LobbyManager lobbies;
+  private Server                           server;
+  private LobbyManager                     lobbies;
   private ConcurrentBiMap<Session, Player> players;
-  private Queue<Player> disconnectedPlayers;
+  private Queue<Player>                    disconnectedPlayers;
 
-  public ServerWorker(Server server,
+  public ServerWorker(
+      Server server,
       BiFunction<Server, String, ? extends Lobby> lobbyFactory) {
     this.server = server;
     lobbies = new LobbyManager(lobbyFactory);
@@ -46,6 +47,7 @@ class ServerWorker {
 
     } else if (!player.isConnected()) {
       players.put(conn, player);
+      player.toggleConnected();
       if (player.getLobby() != null) {
         player.getLobby().playerReconnected(player.getId());
       }
@@ -90,8 +92,8 @@ class ServerWorker {
     for (HttpCookie cookie : cookies) {
       if (cookie.getName().equals("client_id")) {
         String cookieVal = cookie.getValue();
-        expiration =
-            Integer.parseInt(cookieVal.substring(cookieVal.indexOf(":") + 1));
+        expiration = Integer
+            .parseInt(cookieVal.substring(cookieVal.indexOf(":") + 1));
         break;
       }
     }
@@ -122,6 +124,7 @@ class ServerWorker {
                                              // somehow updated (subtracted from
                                              // as time goes on)? How does it
                                              // expire?
+                                             // Sean: lol whoops no i forgot
         players.remove(players.getReversed(p));
         if (!disconnectedPlayers.isEmpty()) {
           p = disconnectedPlayers.poll();
@@ -139,7 +142,7 @@ class ServerWorker {
       if (cookie.getName().equals("client_id")) {
         String cookieString = cookie.getValue();
 
-        clientId = cookieString;
+        clientId = cookieString.substring(0, cookieString.indexOf(":"));
         break;
       }
     }
