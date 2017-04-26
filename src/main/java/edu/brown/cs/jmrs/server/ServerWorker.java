@@ -36,12 +36,13 @@ class ServerWorker {
       playerId = conn.hashCode() + "";
       player = new Player(playerId);
       while (!players.putNoOverwrite(conn, player)) { // TODO: NOT ADDING TO
-                                                      // PLAYERS HERE
+                                                      // PLAYERS HERE???
         playerId = Math.random() + "";
         player = new Player(playerId);
       }
 
-      players.put(conn, player);
+      players.put(conn, player); // I seemed to have to add this here for some
+                                 // reason...
 
     } else if (!player.isConnected()) {
       players.put(conn, player);
@@ -95,7 +96,8 @@ class ServerWorker {
       }
     }
 
-    if (expiration > 0) {
+    if (expiration > 0) { // TODO: Do you mean greater than the current UNIX
+                          // timestamp?
       Player player = players.get(conn);
       assert player.isConnected();
       player.toggleConnected();
@@ -111,10 +113,15 @@ class ServerWorker {
     }
   }
 
-  private void checkDisconnectedPlayers() {
+  private void checkDisconnectedPlayers() { // TODO: Why do you need this if is
+                                            // removes a player that has expired
+                                            // in the above function?
     if (!disconnectedPlayers.isEmpty()) {
       Player p = disconnectedPlayers.poll();
-      while (p.getCookieExpiration() <= 0) {
+      while (p.getCookieExpiration() <= 0) { // TODO: Is cookie expiration
+                                             // somehow updated (subtracted from
+                                             // as time goes on)? How does it
+                                             // expire?
         players.remove(players.getReversed(p));
         if (!disconnectedPlayers.isEmpty()) {
           p = disconnectedPlayers.poll();

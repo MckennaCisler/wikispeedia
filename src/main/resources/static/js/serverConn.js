@@ -220,8 +220,8 @@ class ServerConn {
         this._send(Command.GET_SETTINGS, callback, errCallback, [lobby_id]);
     }
 
-    setUsername(callback, errCallback) {
-        this._send(Command.SET_USERNAME, callback, errCallback, []);
+    setUsername(username, callback, errCallback) {
+        this._send(Command.SET_USERNAME, callback, errCallback, [username]);
     }
 
     setPlayerState(callback, errCallback) {

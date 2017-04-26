@@ -4,10 +4,10 @@ import edu.brown.cs.jmrs.server.customizable.Lobby;
 
 class Player implements Comparable<Player> {
 
-  private String  id;
-  private Lobby   lobby;
+  private String id;
+  private Lobby lobby;
   private boolean connected;
-  private int     cookieExpiration;
+  private int cookieExpiration;
 
   public Player(String id) {
     this.id = id;
@@ -68,5 +68,11 @@ class Player implements Comparable<Player> {
   @Override
   public int compareTo(Player p) {
     return cookieExpiration - p.getCookieExpiration();
+  }
+
+  @Override
+  public String toString() {
+    return "Player [id=" + id + ", lobby=" + lobby + ", connected=" + connected
+        + "]";
   }
 }
