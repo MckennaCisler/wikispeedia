@@ -8,6 +8,7 @@ const $history = $("#history");
 const $destination = $("#destination");
 const $timer = $("#timer");
 const $historyDropdown = $("#history-dropdown");
+const $historyDropdownList = $("#player-history-list");
 
 const $title = $("#title");
 const $article = $("#article");
@@ -15,14 +16,15 @@ const $article = $("#article");
 let ding = new Audio('lib/assets/ding.mp3');
 
 // Player info
-let username = "Player 1";
-let history = [];
+let myId;
+let playerPaths = new Map();
 
 // Game info
-let currHistory = username; // the player whose history is currently displayed
+let currHistory = myId; // the player whose history is currently displayed
 let startHref = "https://en.wikipedia.org/wiki/Cat"; // the start article
 let currHref; // the current article
 let destHref = "https://en.wikipedia.org/wiki/Dog"; // the end article
+let hasDrawnPlayerList = false;
 
 // Time
 let startTime = new Date().getTime();
@@ -30,12 +32,13 @@ let startTime = new Date().getTime();
 // TODO: Wait for server to be ready
 // TODO: Create a page run script that runs earlier
 $(document).ready(() => {
+  console.log("something");
+
   $timer.text("0:00");
   $title.html("<b>Loading...</b>");
 
   $destination.html("<b>" + titleFromHref(destHref) + "</b>");
   setInterval(updateTimer, 200);
-
 });
 
 serverConn.ready(() => {
@@ -43,15 +46,10 @@ serverConn.ready(() => {
         window.location.href = "end";
     });
 
-    serverConn.registerAllPlayers(drawPlayers);
-
+    myId = serverConn.clientId;
+    serverConn.registerAllPlayers(drawHistoryCallback);
     goToPage(startHref);
 });
-
-function drawPlayers(players) {
-    // TODO: Display player paths in sidebar
-}
-
 
 ///
 // Links
@@ -75,7 +73,7 @@ function drawPage(page) {
     cleanHtml();
 
     history.push(title);
-    if (currHistory == username) {
+    if (currHistory == myId) {
       drawHistory();
     }
 
@@ -95,7 +93,7 @@ function cleanHtml() {
     let link = "" + $(element).attr("href");
     $(element).attr("id", "link");
     if (link.charAt(0) != "#") {
-      $(element).attr("href", hrefHelper(link));
+      $(element).attr("href", hrefHelper("goToPage", link));
     }
   });
 
@@ -109,13 +107,10 @@ function cleanHtml() {
 
     // Make sure this is rigorous
     let srcset = "" + $(element).attr("srcset");
-    $(element).attr("srcset", replaceAll(srcset, "//", "https://"));
+    if (typeof srcset != typeof undefined && srcset != false) {
+      $(element).attr("srcset", replaceAll(srcset, "//", "https://"));
+    }
   });
-}
-
-// Helper to get callback
-function hrefHelper(href) {
-  return "javascript:goToPage('" + href + "')";
 }
 
 ///
@@ -127,10 +122,53 @@ function historyChange(newHistory) {
   drawHistory();
 }
 
-function drawHistory() {
-  $history.html(getPlayerHistory(currHistory));
+function drawHistoryCallback(players) {
+    console.log("Made it here");
 
-  if (currHistory != username) {
+    if (!hasDrawnPlayerList) {
+      for (player of players) {
+        // Something like this: <li><a href="javascript:historyChange('Player 1')"><b>Me</b></a></li>
+        playerHtml = player.id;
+        if (myId == player.id) {
+          playerHtml = "<b>" + playerHtml + "</b>";
+        }
+
+        $historyDropdownList.append(
+          "<li><a"
+          + hrefHelper("historyChange", player.id)
+          + ">" + playerHtml + "</a></li>");
+      }
+
+      hasDrawnPlayerList = true;
+    }
+
+    for (player of players) {
+      playerPaths.set(player.id, player.path);
+    }
+
+    drawHistory;
+}
+
+function drawHistory() {
+  history = playersPaths.get(currHistory);
+  html = "";
+  if (history.length > 0) {
+    startIndex = 0;
+    if (history.length > 8) {
+      startIndex = history.length - 6;
+      html = html + "<i>(" + startIndex + " articles before)</i><br>";
+    }
+
+    for (i = startIndex; i < history.length - 1; i++) {
+      html = html + history[i] + "<br>";
+    }
+
+    html = html + "<b>" + history[history.length - 1] + "</b>";
+  }
+
+  $history.html(html);
+
+  if (currHistory != myId) {
     $historyDropdown.html(currHistory + "'s progress");
   } else {
     $historyDropdown.html("<b>My progress</b>");
