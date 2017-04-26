@@ -12,18 +12,17 @@ import org.eclipse.jetty.websocket.api.Session;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 
-import edu.brown.cs.jmrs.server.collections.ConcurrentBiMap;
+import edu.brown.cs.jmrs.collect.ConcurrentBiMap;
 import edu.brown.cs.jmrs.server.customizable.Lobby;
 
 class ServerWorker {
 
-  private Server                           server;
-  private LobbyManager                     lobbies;
+  private Server server;
+  private LobbyManager lobbies;
   private ConcurrentBiMap<Session, Player> players;
-  private Queue<Player>                    disconnectedPlayers;
+  private Queue<Player> disconnectedPlayers;
 
-  public ServerWorker(
-      Server server,
+  public ServerWorker(Server server,
       BiFunction<Server, String, ? extends Lobby> lobbyFactory) {
     this.server = server;
     lobbies = new LobbyManager(lobbyFactory);
@@ -36,10 +35,15 @@ class ServerWorker {
     if (player == null) {
       playerId = conn.hashCode() + "";
       player = new Player(playerId);
-      while (!players.putNoOverwrite(conn, player)) {
+      while (!players.putNoOverwrite(conn, player)) { // TODO: NOT ADDING TO
+                                                      // PLAYERS HERE???
         playerId = Math.random() + "";
         player = new Player(playerId);
       }
+
+      players.put(conn, player); // I seemed to have to add this here for some
+                                 // reason...
+
     } else if (!player.isConnected()) {
       players.put(conn, player);
       if (player.getLobby() != null) {
@@ -86,13 +90,14 @@ class ServerWorker {
     for (HttpCookie cookie : cookies) {
       if (cookie.getName().equals("client_id")) {
         String cookieVal = cookie.getValue();
-        expiration = Integer
-            .parseInt(cookieVal.substring(cookieVal.indexOf(":") + 1));
+        expiration =
+            Integer.parseInt(cookieVal.substring(cookieVal.indexOf(":") + 1));
         break;
       }
     }
 
-    if (expiration > 0) {
+    if (expiration > 0) { // TODO: Do you mean greater than the current UNIX
+                          // timestamp?
       Player player = players.get(conn);
       assert player.isConnected();
       player.toggleConnected();
@@ -108,10 +113,15 @@ class ServerWorker {
     }
   }
 
-  private void checkDisconnectedPlayers() {
+  private void checkDisconnectedPlayers() { // TODO: Why do you need this if is
+                                            // removes a player that has expired
+                                            // in the above function?
     if (!disconnectedPlayers.isEmpty()) {
       Player p = disconnectedPlayers.poll();
-      while (p.getCookieExpiration() <= 0) {
+      while (p.getCookieExpiration() <= 0) { // TODO: Is cookie expiration
+                                             // somehow updated (subtracted from
+                                             // as time goes on)? How does it
+                                             // expire?
         players.remove(players.getReversed(p));
         if (!disconnectedPlayers.isEmpty()) {
           p = disconnectedPlayers.poll();
@@ -129,7 +139,7 @@ class ServerWorker {
       if (cookie.getName().equals("client_id")) {
         String cookieString = cookie.getValue();
 
-        clientId = cookieString.substring(0, cookieString.indexOf(":"));
+        clientId = cookieString;
         break;
       }
     }

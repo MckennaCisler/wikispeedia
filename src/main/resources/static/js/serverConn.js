@@ -1,7 +1,8 @@
+/* jshint esversion: 6 */
 /**
  * Globals (created at bottom)
  */
- var serverConn;
+var serverConn;
 
 // Note that "INCOMING" and "OUTGOING" refer to the server perspective
 const COMMAND_TYPE = {
@@ -14,7 +15,7 @@ const COMMAND_TYPE = {
 const Command = {
     /**
      * Helpful regex:
-     * ([A-Z_]+)\((\".*\")\, (COMMAND_TYPE\.\w+)\, \"(.*)\"\)(,//|;)
+     * ([A-Z_]+)\((\".*\")\, (CommandType\.\w+)\, \"(.*)\"\)(, //|;)
      * ->
      * $1 : { \n\t\tname: $2, \n\t\ttype: $3,\n\t\tconstruct: ($4) => {}\n\t},
      * (You'll need to do some manual changes... it's not the same on both sides)
@@ -97,6 +98,22 @@ const Command = {
         }
 	},
     // Player-specific commands
+    SET_USERNAME : {
+		name: "set_username",
+        responseName: "return_set_username",
+		type: COMMAND_TYPE.INCOMING,
+		construct: (username) => {
+            return {"username" : username };
+        }
+	},
+    SET_PLAYER_STATE : {
+		name: "set_player_state",
+        responseName: "return_set_player_state",
+		type: COMMAND_TYPE.INCOMING,
+		construct: (state) => {
+            return {"state" : state };
+        }
+	},
     GOTO_PAGE : {
 		name: "goto_page",
         responseName: "return_goto_page",
@@ -189,6 +206,7 @@ class ServerConn {
     /**
      * Exposed functions; callbacks are called with relevant payload
      */
+    // set lobby_id to "" for the current one
     getPlayers(lobby_id, callback, errCallback) {
         this._send(Command.GET_PLAYERS, callback, errCallback, [lobby_id]);
     }
@@ -197,8 +215,17 @@ class ServerConn {
         this._send(Command.GET_TIME, callback, errCallback, []);
     }
 
+    // set lobby_id to "" for the current one
     getSettings(lobby_id, callback, errCallback) {
         this._send(Command.GET_SETTINGS, callback, errCallback, [lobby_id]);
+    }
+
+    setUsername(username, callback, errCallback) {
+        this._send(Command.SET_USERNAME, callback, errCallback, [username]);
+    }
+
+    setPlayerState(callback, errCallback) {
+        this._send(Command.SET_PLAYER_STATE, callback, errCallback, []);
     }
 
     gotoPage(page_name, callback, errCallback) {
@@ -208,7 +235,7 @@ class ServerConn {
     getPage(page_name, callback, errCallback) {
         this._send(Command.GET_PAGE, callback, errCallback, [page_name]);
     }
-
+    // DEPRECATED
     getPath(player_id, callback, errCallback) {
         this._send(Command.GET_PATH, callback, errCallback, [player_id]);
     }
@@ -370,7 +397,7 @@ class ServerConn {
  * Create global server. NOTE THat it is done outside a doc.ready because it is needed everywhere at doc.ready().
  * And also does not need the DOM
  */
-serverConn = new ServerConn("localhost:4567/websocket");
+serverConn = new ServerConn(window.location.host + "/websocket");
 
 
 

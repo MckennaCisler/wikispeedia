@@ -23,6 +23,7 @@ enum Command {
   FORCE_BEGIN_GAME("force_begin_game", CommandType.INCOMING), //
   GET_PAGE("get_page", CommandType.INCOMING, "page_name"), //
   // Player-specific commands
+  SET_USERNAME("set_username", CommandType.INCOMING, "username"), //
   SET_PLAYER_STATE("set_player_state", CommandType.INCOMING, "state"), //
   GOTO_PAGE("goto_page", CommandType.INCOMING, "page_name"), //
   GET_PATH("get_path", CommandType.INCOMING), //
@@ -33,8 +34,9 @@ enum Command {
   // Lobby-specific commands
   RETURN_TIME("return_time", CommandType.RESPONSE), //
   RETURN_SETTINGS("return_settings", CommandType.RESPONSE), //
-  RETURN_GET_PAGE("return_get_page", CommandType.RESPONSE, "page_name"), //
-  RETURN_GOTO_PAGE("return_goto_page", CommandType.RESPONSE, "page_name"), //
+  RETURN_GET_PAGE("return_get_page", CommandType.RESPONSE), //
+  RETURN_SET_USERNAME("return_set_username", CommandType.RESPONSE), //
+  RETURN_GOTO_PAGE("return_goto_page", CommandType.RESPONSE), //
   RETURN_PATH("return_path", CommandType.RESPONSE), //
   ERROR("error", CommandType.RESPONSE), //
 
@@ -159,19 +161,19 @@ enum Command {
   /*
    * Java functions to actually send Commands.
    */
-  static void allPlayers(WikiLobby lobby) {
+  static void sendAllPlayers(WikiLobby lobby) {
     Command.ALL_PLAYERS.sendToAll(lobby, lobby.getPlayers());
   }
 
-  static void endGame(WikiLobby lobby) {
+  static void sendEndGame(WikiLobby lobby) {
     Command.END_GAME.sendToAll(lobby, lobby.getWinner());
   }
 
-  static void beginGame(WikiLobby lobby) {
-    beginGame(lobby, "");
+  static void sendBeginGame(WikiLobby lobby) {
+    sendBeginGame(lobby, "");
   }
 
-  static void beginGame(WikiLobby lobby, String error) {
+  static void sendBeginGame(WikiLobby lobby, String error) {
     Command.BEGIN_GAME.sendToAll(lobby, ImmutableMap.of(), error);
   }
 }

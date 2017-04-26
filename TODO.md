@@ -5,7 +5,7 @@
 - Styling of ul
 - & in links (i.e. R&B)
 - Geographic coordinates system
-- Make videos work
+- Make videos work?
 
 
 
@@ -16,6 +16,8 @@
 
 # Mckenna
 Core Functionality
+  Create ERROR struct to give all errors consistent error codes for frontend to use
+
     Write Serializers
         Replace JsonSerializable with https://github.com/google/gson/blob/master/UserGuide.md#TOC-Custom-Serialization-and-Deserialization
     Core

@@ -219,12 +219,6 @@ h3.card-header {
   }
 }
 
-@media(min-width: 500px) {
-	.title-a {
-		font-size: 1.2em;
-	}
-}
-
 @media(min-width: 900px) {
 	#row_div {
 		margin-left: 2em;

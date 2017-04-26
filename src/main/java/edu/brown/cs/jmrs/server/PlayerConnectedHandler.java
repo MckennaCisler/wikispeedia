@@ -4,8 +4,8 @@ import org.eclipse.jetty.websocket.api.Session;
 
 class PlayerConnectedHandler implements Runnable {
 
-  ServerWorker server;
-  Session      conn;
+  private final ServerWorker server;
+  private final Session conn;
 
   public PlayerConnectedHandler(ServerWorker server, Session conn) {
     this.server = server;
@@ -14,6 +14,15 @@ class PlayerConnectedHandler implements Runnable {
 
   @Override
   public void run() {
-    server.playerConnected(conn);
+    try {
+      server.playerConnected(conn);
+    } catch (Throwable e) {
+      // solely for debugging purposes, as threads do not display exceptions
+      // except when calling the value of an associated future:
+      // http://stackoverflow.com/questions/2248131/
+      // handling-exceptions-from-java-executorservice-tasks
+      e.printStackTrace();
+      throw e;
+    }
   }
 }

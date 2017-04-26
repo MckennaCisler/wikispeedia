@@ -19,22 +19,6 @@ $(document).ready(function () {
 		}
 	});
 
-	$("#start_game").on('click', () => {
-		if ($("#game_name").val() === "") {
-			$("#game_name").effect("highlight", {
-				"color": "red"
-			}, 1000);
-		} else {
-			isMaking = true;
-			lobbyName = $("#game_name").val();
-			$("#main").hide();
-			$("#rules").hide();
-			$("#uname_picker").show();
-			$("#u_header").html(lobbyName);
-			console.log(lobbyName);
-		}
-	});
-
 	$("#open_games").on('click', (event) => {
 		isMaking = false;
 		lobbyName = $(event.target).html();
@@ -73,41 +57,81 @@ function resize() {
 	}
 }
 
+function startLobby(callback, errCallback) {
+	serverConn.startLobby(lobbyName.trim(),
+		() => {
+			callback();
+		},
+		(error) => {
+			errCallback(error.error_message);
+			displayServerConnError(error);
+		});
+}
+
 // game logic handlers
 serverConn.ready(() => {
+	"use strict";
 	// setup lobbies
 	serverConn.registerAllLobbies(drawLobbies);
+
+	$("#start_game").on('click', () => {
+		if ($("#game_name").val() === "") {
+			$("#game_name").effect("highlight", {
+				"color": "red"
+			}, 1000);
+		} else {
+			isMaking = true;
+			lobbyName = $("#game_name").val();
+
+			serverConn.startLobby(lobbyName.trim(),
+				() => {
+					$("#main").hide();
+					$("#rules").hide();
+					$("#uname_picker").show();
+					$("#u_header").html(lobbyName);
+				},
+				(error) => {
+					displayServerConnError(error);
+			});
+			console.log(lobbyName);
+		}
+	});
 
 	$("#launch").on('click', () => {
 		if ($("#uname").val() === "") {
 			$("#uname").effect("highlight", {
 				"color": "red"
 			}, 1000);
+
 		} else if (lobbyName !== "") {
 			if (isMaking) {
-				serverConn.startLobby(lobbyName.trim(),
-				() => {
+				// only have to do this, lobby was created & joined earlier
+				serverConn.setUsername($("#uname").val(), () => {
 					window.location.href = "waiting";
-				},
-				(error) => {
-					displayError(error.error_message);
-				});
+				}, displayServerConnError);
+
 			} else {
 				serverConn.joinLobby(lobbyName.trim(),
 				() => {
-					window.location.href = "waiting";
+					serverConn.setUsername($("#uname").val(), () => {
+						window.location.href = "waiting";
+					}, displayServerConnError);
 				},
-				(error) => {
-					displayError(error.error_message);
-				});
+				displayServerConnError);
 			}
 		}
 	});
 });
 
 function drawLobbies(lobbies) {
-	for (let i = 0; i < lobbies.length; i++) {
-		$("#open_games").append('<li class="alobby list-group-item list-group-item-action" id="' +
-		 	lobbies[i].id + '">' + lobbies[i].id + '</li>');
+	"use strict";
+	$("#open_games").html("");
+	if (lobbies.length === 0) {
+		$("#open_games").append("<p>No games were found, you'll have to make your own!</p>");
+	} else {
+		for (let i = 0; i < lobbies.length; i++) {
+			$("#open_games").append('<li class="alobby list-group-item list-group-item-action" id="' +
+				lobbies[i].id + '">' + lobbies[i].id + '</li>');
+		}
 	}
 }

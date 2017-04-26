@@ -25,6 +25,12 @@ function assert(statement, ifFalse, ifTrue) {
     }
 }
 
+
+// Helper to get callback
+function hrefHelper(f, href) {
+  return "javascript:" + f + "('" + href + "')";
+}
+
 function displayError(msg) {
     // TODO
     alert(msg);

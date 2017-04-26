@@ -46,7 +46,7 @@ public class WikiInterpreter implements CommandInterpreter {
     // switch > if/else
     switch (Command.safeValueOf(cname.toUpperCase())) {
       case GET_PLAYERS:
-        Command.allPlayers(lobby);
+        Command.sendAllPlayers(lobby);
         break;
 
       case GET_TIME:
@@ -66,10 +66,17 @@ public class WikiInterpreter implements CommandInterpreter {
       case FORCE_BEGIN_GAME:
         try {
           lobby.start();
-          Command.beginGame(lobby);
+          Command.sendBeginGame(lobby);
         } catch (IllegalStateException e) {
-          Command.beginGame(lobby, e.getMessage());
+          Command.sendBeginGame(lobby, e.getMessage());
         }
+        break;
+
+      case SET_USERNAME:
+        lobby.setPlayerName(clientId, command.get("payload").getAsJsonObject()
+            .get("username").getAsString());
+        Command.RETURN_SET_USERNAME.send(lobby.getServer(), clientId,
+            ImmutableMap.of());
         break;
 
       case SET_PLAYER_STATE:
@@ -95,7 +102,6 @@ public class WikiInterpreter implements CommandInterpreter {
     }
   }
 
-  // TODO: Too crude...
   private void setPlayerStateHandler(WikiLobby lobby, String clientId,
       JsonObject command) {
     boolean state =
@@ -142,7 +148,7 @@ public class WikiInterpreter implements CommandInterpreter {
         if (!lobby.checkForWinner()) {
           // if there wasn't a winner, update all player's on eachother's status
           // (i.e. when one moves)
-          Command.allPlayers(lobby);
+          Command.sendAllPlayers(lobby);
         }
 
       } else {
