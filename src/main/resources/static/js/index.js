@@ -3,6 +3,7 @@
 // globals for use in game logic
 let isMaking;
 let lobbyName;
+let servConn = new ServerConn(window.location.host + "/websocket", "");
 
 $(document).ready(function () {
 	"use strict";
@@ -74,9 +75,10 @@ function resize() {
 }
 
 // game logic handlers
-serverConn.ready(() => {
+servConn.ready(() => {
+	"use strict";
 	// setup lobbies
-	serverConn.registerAllLobbies(drawLobbies);
+	servConn.registerAllLobbies(drawLobbies);
 
 	$("#launch").on('click', () => {
 		if ($("#uname").val() === "") {
@@ -85,7 +87,7 @@ serverConn.ready(() => {
 			}, 1000);
 		} else if (lobbyName !== "") {
 			if (isMaking) {
-				serverConn.startLobby(lobbyName.trim(),
+				servConn.startLobby(lobbyName.trim(),
 				() => {
 					window.location.href = "waiting";
 				},
@@ -93,7 +95,7 @@ serverConn.ready(() => {
 					displayError(error.error_message);
 				});
 			} else {
-				serverConn.joinLobby(lobbyName.trim(),
+				servConn.joinLobby(lobbyName.trim(),
 				() => {
 					window.location.href = "waiting";
 				},
@@ -106,8 +108,14 @@ serverConn.ready(() => {
 });
 
 function drawLobbies(lobbies) {
-	for (let i = 0; i < lobbies.length; i++) {
-		$("#open_games").append('<li class="alobby list-group-item list-group-item-action" id="' +
-		 	lobbies[i].id + '">' + lobbies[i].id + '</li>');
+	"use strict";
+	$("#open_games").html("");
+	if (lobbies.length === 0) {
+		$("#open_games").append("<p>No games were found, you'll have to make your own!</p>");
+	} else {
+		for (let i = 0; i < lobbies.length; i++) {
+			$("#open_games").append('<li class="alobby list-group-item list-group-item-action" id="' +
+				lobbies[i].id + '">' + lobbies[i].id + '</li>');
+		}
 	}
 }
