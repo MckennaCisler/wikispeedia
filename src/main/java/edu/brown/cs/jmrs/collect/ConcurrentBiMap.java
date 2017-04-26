@@ -1,4 +1,4 @@
-package edu.brown.cs.jmrs.server.collections;
+package edu.brown.cs.jmrs.collect;
 
 import java.util.Collection;
 import java.util.HashMap;
@@ -66,6 +66,21 @@ public class ConcurrentBiMap<E, T> implements Map<E, T> {
     E value = back.get(key);
     r.unlock();
     return value;
+  }
+
+  public T getBack(Object key) {
+    r.lock();
+    if (containsValue(key)) {
+      Set<T> vals = back.keySet();
+
+      for (T val : vals) {
+        if (val.equals(key)) {
+          return val;
+        }
+      }
+    }
+    r.unlock();
+    return null;
   }
 
   @Override

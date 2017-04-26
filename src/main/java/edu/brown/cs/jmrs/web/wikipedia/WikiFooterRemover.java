@@ -17,11 +17,10 @@ public class WikiFooterRemover implements ContentFormatter<WikiPage> {
   @Override
   public Element format(Element input) {
     // remove everything after "See Also" (inclusive)
-    Elements seeAlso =
-        input.select(
-            "#content > #bodyContent > #mw-content-text > *:has(#See_also)");
+    Elements seeAlso = input.select("#mw-content-text > *:has(#See_also)");
     seeAlso.nextAll().remove();
     seeAlso.remove();
-    return seeAlso.first(); // there should only be one.
+    assert input.select("#mw-content-text > *:has(#See_also)").size() == 0;
+    return input;
   }
 }

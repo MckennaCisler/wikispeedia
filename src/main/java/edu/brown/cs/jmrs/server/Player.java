@@ -2,11 +2,12 @@ package edu.brown.cs.jmrs.server;
 
 import edu.brown.cs.jmrs.server.customizable.Lobby;
 
-class Player {
+class Player implements Comparable<Player> {
 
   private String  id;
   private Lobby   lobby;
   private boolean connected;
+  private int     cookieExpiration;
 
   public Player(String id) {
     this.id = id;
@@ -43,11 +44,29 @@ class Player {
   }
 
   public boolean toggleConnected() {
-    connected = !connected;
-    return !connected;
+    if (connected) {
+      connected = false;
+      return true;
+    } else {
+      connected = true;
+      return false;
+    }
   }
 
   public boolean isConnected() {
     return connected;
+  }
+
+  public void setCookieExpiration(int date) {
+    this.cookieExpiration = date;
+  }
+
+  public int getCookieExpiration() {
+    return cookieExpiration;
+  }
+
+  @Override
+  public int compareTo(Player p) {
+    return cookieExpiration - p.getCookieExpiration();
   }
 }

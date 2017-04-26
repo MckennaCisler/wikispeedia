@@ -22,7 +22,7 @@ public class WikiPlayer {
    * Identifiers.
    */
   private final String id;
-  private final String name;
+  private String name;
 
   private transient WikiLobby lobby;
 
@@ -30,10 +30,12 @@ public class WikiPlayer {
    * State variables (endTime is only set upon completion).
    */
   private transient Instant endTime;
-  private boolean ready;
+  private boolean ready; // for match starting
+  private boolean connected;
 
   /**
-   * Path and location data.
+   * Path and location data (in case where start and end page are different for
+   * each player in lobby).
    */
   private final List<WikiPage> path; // curPage is last page in here
   private final WikiPage startPage;
@@ -42,8 +44,6 @@ public class WikiPlayer {
   /**
    * @param id
    *          This player's unique ID.
-   * @param name
-   *          This player's name.
    * @param lobby
    *          The lobby this player is in.
    * @param startPage
@@ -51,17 +51,26 @@ public class WikiPlayer {
    * @param goalPage
    *          The page this player is trying to get to.
    */
-  public WikiPlayer(String id, String name, WikiLobby lobby, WikiPage startPage,
+  public WikiPlayer(String id, WikiLobby lobby, WikiPage startPage,
       WikiPage goalPage) {
     super();
     ready = false;
+    connected = true;
     this.id = id;
-    this.name = name;
+    this.name = "";
     this.lobby = lobby;
     this.startPage = startPage;
     this.goalPage = goalPage;
     this.path = new ArrayList<>();
     this.path.add(startPage);
+  }
+
+  /**
+   * @param n
+   *          This player's name.
+   */
+  public void setName(String n) {
+    name = n;
   }
 
   /****************************************/
@@ -93,8 +102,15 @@ public class WikiPlayer {
    * @return Whether the player has finished a game. Indicated internally by the
    *         state of endTime.
    */
-  public boolean isDone() {
+  public boolean done() {
     return endTime != null;
+  }
+
+  /**
+   * @return Whether the player client is currently connected.
+   */
+  public boolean connected() {
+    return connected;
   }
 
   /**
@@ -131,7 +147,7 @@ public class WikiPlayer {
    * @return The length of this player's path, adjusted for reversals, etc.
    */
   public final int getPathLength() {
-    return path.size(); // TODO
+    return path.size(); // TODO:
   }
 
   /**
@@ -155,6 +171,14 @@ public class WikiPlayer {
   /****************************************/
 
   /**
+   * @param state
+   *          The connected state to set the player to.
+   */
+  public void setConnected(boolean state) {
+    connected = state;
+  }
+
+  /**
    * @param ready
    *          The ready state to set this player to.
    */
@@ -171,7 +195,7 @@ public class WikiPlayer {
    * @return Whether the player was done after checking.
    */
   private synchronized boolean checkIfDone(Instant endTimeIfSo) {
-    if (isDone()) {
+    if (done()) {
       throw new IllegalStateException(
           String.format("Player %s has already reached the goal", name));
     }
@@ -206,14 +230,14 @@ public class WikiPlayer {
    *           If the curPage page cannot be accessed.
    */
   public synchronized boolean goToPage(WikiPage page) throws IOException {
-    // if (!lobby.started()) {
+    // if (!lobby.started()) { // TODO:
     // throw new IllegalStateException(
     // String.format("Player %s's lobby has not started", name));
     // } else
     if (lobby.ended()) {
       throw new IllegalStateException(
           String.format("Player %s's lobby has ended", name));
-    } else if (isDone()) {
+    } else if (done()) {
       throw new IllegalStateException(
           String.format("Player %s has already reached the goal", name));
     }
@@ -253,5 +277,4 @@ public class WikiPlayer {
     return "Player " + id + " named '" + name + "' in lobby " + lobby + " at "
         + getCurPage().url();
   }
-
 }

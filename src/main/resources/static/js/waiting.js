@@ -58,19 +58,23 @@ function startGame() {
 serverConn.ready(() => {
 	// Get player states
 	serverConn.registerAllPlayers(drawPlayers);
-
 	serverConn.registerBeginGame(startGame); // TODO: Game will be 5s off in time!!!!
 
 	// Get current lobby settings
 	serverConn.getSettings("", (settings) => {
  		// Get articles
-		serverConn.getPage(settings.start.name, drawArticle, displayServerConnError);
-		serverConn.getPage(settings.goal.name, drawArticle, displayServerConnError);
+		serverConn.getPage(settings.start.name, drawFirstPage, displayServerConnError);
+		serverConn.getPage(settings.goal.name, drawSecondPage, displayServerConnError);
 	}, displayServerConnError);
 
 });
 
-function drawArticle(article) {
+function drawFirstPage(article) {
+	// TODO
+	console.log(article);
+}
+
+function drawSecondPage(article) {
 	// TODO
 	console.log(article);
 }

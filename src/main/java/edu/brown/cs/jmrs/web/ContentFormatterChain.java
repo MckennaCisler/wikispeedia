@@ -39,7 +39,7 @@ public class ContentFormatterChain<T extends Page>
     Element curElement = input;
     Iterator<ContentFormatter<T>> iterator = super.iterator();
     while (iterator.hasNext()) {
-      curElement = iterator.next().format(input);
+      curElement = iterator.next().format(curElement);
     }
     return curElement;
   }

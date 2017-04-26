@@ -9,6 +9,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import com.google.common.collect.ImmutableList;
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 
 import edu.brown.cs.jmrs.server.Server;
@@ -30,27 +31,28 @@ import edu.brown.cs.jmrs.web.wikipedia.WikiPageLinkFinder.Filter;
  *
  */
 public class WikiLobby implements Lobby {
-  private static final LinkFinder<WikiPage>       DEFAULT_LINK_FINDER       = new WikiPageLinkFinder(
-      Filter.DISAMBIGUATION);
-  private static final ContentFormatter<WikiPage> DEFAULT_CONTENT_FORMATTER = new ContentFormatterChain<WikiPage>(
-      ImmutableList.of(
-          new WikiBodyFormatter(),
-          new WikiFooterRemover(),
-          new WikiAnnotationRemover()));
 
-  private transient Server                        server;
-  private final String                            id;
+  private static final LinkFinder<WikiPage> DEFAULT_LINK_FINDER =
+      new WikiPageLinkFinder(Filter.DISAMBIGUATION);
+
+  private static final ContentFormatter<WikiPage> DEFAULT_CONTENT_FORMATTER =
+      new ContentFormatterChain<WikiPage>(
+          ImmutableList.of(new WikiBodyFormatter(), new WikiFooterRemover(),
+              new WikiAnnotationRemover()));
+
+  private transient Server server;
+  private final String id;
   // map from id to player
-  private transient Map<String, WikiPlayer>       players;
-  private transient LinkFinder<WikiPage>          linkFinder;
-  private transient ContentFormatter<WikiPage>    contentFormatter;
-  private Instant                                 startTime                 = null;
-  private Instant                                 endTime                   = null;
+  private transient Map<String, WikiPlayer> players;
+  private transient LinkFinder<WikiPage> linkFinder;
+  private transient ContentFormatter<WikiPage> contentFormatter;
+  private Instant startTime = null;
+  private Instant endTime = null;
 
-  private WikiPage                                startPage;
-  private WikiPage                                goalPage;
+  private WikiPage startPage;
+  private WikiPage goalPage;
 
-  private transient WikiPlayer                    winner;
+  private WikiPlayer winner;
 
   /**
    * Constructs a new WikiLobby (likely through a Factory in
@@ -67,8 +69,6 @@ public class WikiLobby implements Lobby {
     players = new HashMap<>();
     this.linkFinder = DEFAULT_LINK_FINDER;
     this.contentFormatter = DEFAULT_CONTENT_FORMATTER;
-    this.startPage = WikiPage.fromName("Cat"); // TODO
-    this.goalPage = WikiPage.fromName("Brown University"); // TODO
   }
 
   /****************************************/
@@ -77,7 +77,9 @@ public class WikiLobby implements Lobby {
 
   @Override
   public void init(JsonObject arguments) {
-    // TODO Auto-generated method stub
+    WikiGame game = GameGenerator.ofDist(10); // TODO
+    this.startPage = game.getStart();
+    this.goalPage = game.getGoal();
   }
 
   @Override
@@ -92,9 +94,8 @@ public class WikiLobby implements Lobby {
       throw new IllegalStateException(
           "Game has already started, cannot add player.");
     }
-    this.players.put(
-        playerId,
-        new WikiPlayer(playerId, "TODO", this, startPage, goalPage)); // TODO:
+    this.players.put(playerId,
+        new WikiPlayer(playerId, this, startPage, goalPage));
   }
 
   @Override
@@ -104,14 +105,12 @@ public class WikiLobby implements Lobby {
 
   @Override
   public void playerReconnected(String clientId) {
-    // TODO Auto-generated method stub
-
+    players.get(clientId).setConnected(true);
   }
 
   @Override
   public void playerDisconnected(String clientId) {
-    // TODO Auto-generated method stub
-
+    players.get(clientId).setConnected(false);
   }
 
   /****************************************/
@@ -144,6 +143,16 @@ public class WikiLobby implements Lobby {
   }
 
   /**
+   * @param playerId
+   *          The id of the player to set the name of.
+   * @param name
+   *          The name to set.
+   */
+  public void setPlayerName(String playerId, String name) {
+    players.get(playerId).setName(name);
+  }
+
+  /**
    * @param contentFormatter
    *          The ContentFormatter associated with this lobby, used to reformat
    *          the parsedContent() of player's Wikipages.
@@ -161,9 +170,8 @@ public class WikiLobby implements Lobby {
   public void start() {
     for (Entry<String, WikiPlayer> entry : players.entrySet()) {
       if (!entry.getValue().ready()) {
-        throw new IllegalStateException(
-            String
-                .format("Player %s is not ready", entry.getValue().getName()));
+        throw new IllegalStateException(String.format("Player %s is not ready",
+            entry.getValue().getName()));
       }
     }
     startTime = Instant.now(); // this is how we determine whether started
@@ -175,7 +183,7 @@ public class WikiLobby implements Lobby {
   public void stop() {
     endTime = Instant.now();
     for (Entry<String, WikiPlayer> entry : players.entrySet()) {
-      if (!entry.getValue().isDone()) {
+      if (!entry.getValue().done()) {
         entry.getValue().setEndTime(endTime);
       }
     }
@@ -199,10 +207,10 @@ public class WikiLobby implements Lobby {
     }
 
     // notify with new states (state)
-    Command.allPlayers(this);
+    Command.sendAllPlayers(this);
 
     if (allReady) {
-      Command.beginGame(this);
+      Command.sendBeginGame(this);
     }
 
     return allReady;
@@ -218,7 +226,7 @@ public class WikiLobby implements Lobby {
   public boolean checkForWinner() {
     List<WikiPlayer> done = new ArrayList<>(1);
     for (Entry<String, WikiPlayer> entry : players.entrySet()) {
-      if (entry.getValue().isDone()) {
+      if (entry.getValue().done()) {
         done.add(entry.getValue());
       }
     }
@@ -232,7 +240,7 @@ public class WikiLobby implements Lobby {
       winner = done.get(0);
       stop();
 
-      Command.endGame(this);
+      Command.sendEndGame(this);
       return true;
     }
     return false;
@@ -361,7 +369,14 @@ public class WikiLobby implements Lobby {
 
   @Override
   public String toJson() {
-    // TODO Auto-generated method stub
-    return null;
+    JsonElement obj = WikiInterpreter.GSON.toJsonTree(this);
+    assert obj.isJsonObject();
+
+    JsonObject lobby = obj.getAsJsonObject();
+    lobby.addProperty("playTime", getPlayTime().toMinutes());
+    lobby.addProperty("started", started());
+    lobby.addProperty("ended", ended());
+
+    return WikiInterpreter.GSON.toJson(lobby);
   }
 }

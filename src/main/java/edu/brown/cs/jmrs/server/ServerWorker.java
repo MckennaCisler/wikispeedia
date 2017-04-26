@@ -3,6 +3,8 @@ package edu.brown.cs.jmrs.server;
 import java.io.IOException;
 import java.net.HttpCookie;
 import java.util.List;
+import java.util.Queue;
+import java.util.concurrent.PriorityBlockingQueue;
 import java.util.function.BiFunction;
 
 import org.eclipse.jetty.websocket.api.Session;
@@ -10,25 +12,26 @@ import org.eclipse.jetty.websocket.api.Session;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 
-import edu.brown.cs.jmrs.server.collections.ConcurrentBiMap;
+import edu.brown.cs.jmrs.collect.ConcurrentBiMap;
 import edu.brown.cs.jmrs.server.customizable.Lobby;
 
 class ServerWorker {
 
-  private Server                           server;
-  private LobbyManager                     lobbies;
+  private Server server;
+  private LobbyManager lobbies;
   private ConcurrentBiMap<Session, Player> players;
+  private Queue<Player> disconnectedPlayers;
 
-  public ServerWorker(
-      Server server,
+  public ServerWorker(Server server,
       BiFunction<Server, String, ? extends Lobby> lobbyFactory) {
     this.server = server;
     lobbies = new LobbyManager(lobbyFactory);
     players = new ConcurrentBiMap<>();
+    disconnectedPlayers = new PriorityBlockingQueue<>();
   }
 
   public String setPlayerId(Session conn, String playerId) throws InputError {
-    Player player = players.get(conn);
+    Player player = players.getBack(new Player(playerId));
     if (player == null) {
       playerId = conn.hashCode() + "";
       player = new Player(playerId);
@@ -37,11 +40,9 @@ class ServerWorker {
         player = new Player(playerId);
       }
     } else if (!player.isConnected()) {
-      Lobby lobby = player.getLobby();
-      player.setLobby(lobby);
       players.put(conn, player);
-      if (lobby != null) {
-        lobby.playerReconnected(player.getId());
+      if (player.getLobby() != null) {
+        player.getLobby().playerReconnected(player.getId());
       }
     } else {
       throw new InputError("Stop stealing identities");
@@ -79,19 +80,55 @@ class ServerWorker {
   }
 
   public void playerDisconnected(Session conn) {
-    Player player = players.get(conn);
-    assert player.toggleConnected();
-    if (player.getLobby() != null) {
-      player.getLobby().playerDisconnected(player.getId());
+    int expiration = 0;
+    List<HttpCookie> cookies = conn.getUpgradeRequest().getCookies();
+    for (HttpCookie cookie : cookies) {
+      if (cookie.getName().equals("client_id")) {
+        String cookieVal = cookie.getValue();
+        expiration =
+            Integer.parseInt(cookieVal.substring(cookieVal.indexOf(":") + 1));
+        break;
+      }
+    }
+
+    if (expiration > 0) {
+      Player player = players.get(conn);
+      assert player.isConnected();
+      player.toggleConnected();
+
+      player.setCookieExpiration(expiration);
+      disconnectedPlayers.add(player);
+
+      if (player.getLobby() != null) {
+        player.getLobby().playerDisconnected(player.getId());
+      }
+    } else {
+      players.remove(conn);
+    }
+  }
+
+  private void checkDisconnectedPlayers() {
+    if (!disconnectedPlayers.isEmpty()) {
+      Player p = disconnectedPlayers.poll();
+      while (p.getCookieExpiration() <= 0) {
+        players.remove(players.getReversed(p));
+        if (!disconnectedPlayers.isEmpty()) {
+          p = disconnectedPlayers.poll();
+        }
+      }
     }
   }
 
   public void playerConnected(Session conn) {
+    checkDisconnectedPlayers();
+
     String clientId = "";
     List<HttpCookie> cookies = conn.getUpgradeRequest().getCookies();
     for (HttpCookie cookie : cookies) {
       if (cookie.getName().equals("client_id")) {
-        clientId = cookie.getValue();
+        String cookieString = cookie.getValue();
+
+        clientId = cookieString.substring(0, cookieString.indexOf(":"));
         break;
       }
     }

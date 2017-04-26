@@ -75,6 +75,7 @@ function resize() {
 
 // game logic handlers
 serverConn.ready(() => {
+	"use strict";
 	// setup lobbies
 	serverConn.registerAllLobbies(drawLobbies);
 
@@ -83,23 +84,38 @@ serverConn.ready(() => {
 			$("#uname").effect("highlight", {
 				"color": "red"
 			}, 1000);
+			
 		} else if (lobbyName !== "") {
 			if (isMaking) {
 				serverConn.startLobby(lobbyName.trim(),
-				() => { window.location.href = "waiting"; },
-				(error) => { displayError(error.error_message); });
+				() => {
+					serverConn.setUsername($("#uname").val(), () => {
+						window.location.href = "waiting";
+					}, displayServerConnError);
+				},
+				displayServerConnError);
 			} else {
 				serverConn.joinLobby(lobbyName.trim(),
-				() => { window.location.href = "waiting"; },
-				(error) => { displayError(error.error_message); });
+				() => {
+					serverConn.setUsername($("#uname").val(), () => {
+						window.location.href = "waiting";
+					}, displayServerConnError);
+				},
+				displayServerConnError);
 			}
 		}
 	});
 });
 
 function drawLobbies(lobbies) {
-	for (let i = 0; i < lobbies.length; i++) {
-		$("#open_games").append('<li class="alobby list-group-item list-group-item-action" id="' +
-		 	lobbies[i].id + '">' + lobbies[i].id + '</li>');
+	"use strict";
+	$("#open_games").html("");
+	if (lobbies.length === 0) {
+		$("#open_games").append("<p>No games were found, you'll have to make your own!</p>");
+	} else {
+		for (let i = 0; i < lobbies.length; i++) {
+			$("#open_games").append('<li class="alobby list-group-item list-group-item-action" id="' +
+				lobbies[i].id + '">' + lobbies[i].id + '</li>');
+		}
 	}
 }
