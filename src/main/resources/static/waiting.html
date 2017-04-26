@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<title>Waiting</title>
+	<link href="css/main.css" rel="stylesheet" type="text/css">
+	<link href="lib/css/bootstrap-alt.min.css" rel="stylesheet" type="text/css">
+	<script src="lib/js/jquery.min.js"></script>
+	<script src="lib/js/tether.min.js"></script>
+	<script src="lib/js/bootstrap.min.js"></script>
+	<link href="https://fonts.googleapis.com/css?family=Heebo:400,900|Rubik+Mono+One" rel="stylesheet">
+	<script src="js/waiting.js"></script>
+</head>
+<body>
+	<div class="top">
+		<h1 style="margin-left: 5px; margin-top: 10px; display: inline-block;" title="Go back to the main screen"><a class="title-a" href="/">Wikispeedia</a></h1>
+		<div class="loader"></div>
+		<h1 id="counter">5</h1>
+	</div>
+	<div class="main_content container-fluid">
+		<div class="row">
+			<div class="col-2"></div>
+			<div class="col-8">
+				<div class="card card-default">
+					<h3 class="text-center card-header">Waiting for the game to start</h3>
+					<div class="card-block text-center">
+						<div class="row">
+							<ul class="list-group col-4" id="players">
+								<li class="list-group-item"><input type="checkbox" id="u0" checked disabled> You</li>
+								<li class="list-group-item"><input type="checkbox" id="u1" checked disabled> Player 1</li>
+								<li class="list-group-item"><input type="checkbox" id="u2" disabled> Player 2</li>
+								<li class="list-group-item"><input type="checkbox" id="u3" checked disabled> And so on</li>
+							</ul>
+							<div class="col text-center">
+								<h4 id="a1_title">First Article</h4>
+								<p id="a1_blurb">Lorem ipsum sit dolorem et</p>
+								<img src="lib/assets/down-arrow.jpg" height="20" style="text-align: center;">
+								<br><br>
+								<h4 id="a2_title">End Article</h4>
+								<p id="a2_blurb">Lorem ipsum sit dolorem et</p>
+							</div>
+						</div>
+						<button id="force" class="btn my_success" title="Leave 'em all behind, start the game even though not everyone may have joined">Force the game to start</button> <!-- Only visible for the game owner -->
+					</div>
+				</div>
+			</div>
+			<div class="col-2"></div>
+		</div>
+	</div>
+</body>
+</html>

@@ -5,7 +5,7 @@
 - Styling of ul
 - & in links (i.e. R&B)
 - Geographic coordinates system
-- Make videos work
+- Make videos work?
 
 
 
