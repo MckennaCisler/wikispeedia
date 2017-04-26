@@ -30,9 +30,16 @@ $(document).ready(() => {
 
 
 serverConn.ready(() => {
+	"use stirct";
 	// get the info and display it
 
-	serverConn.registerAllPlayers(() => {
+	serverConn.registerAllPlayers("", (players) => {
 		// update player info as they move through pages
-	});
+		$("#players").html("");
+		for (let i = 0; i < players.length; i++) {
+			let listr = '<li class="list-group-item end_row';
+			//ok so sorry I didn't have time to finish this but I don't know the commands and I'm leaving so hopefully this gives you enough direction to start
+			$("#players").append(listr);
+		}
+	}, (e) => {alert(e);});
 });
