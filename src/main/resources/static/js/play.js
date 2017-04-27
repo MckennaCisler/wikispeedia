@@ -8,7 +8,7 @@ const $history = $("#history");
 const $destination = $("#destination");
 const $timer = $("#timer");
 const $historyDropdown = $("#history-dropdown");
-const $historyDropdownList = $("#player-history-list");
+const $historyDropdownList = $("#history-dropdown-list");
 
 const $title = $("#title");
 const $article = $("#article");
@@ -20,11 +20,11 @@ let myId;
 let playerPaths = new Map();
 
 // Game info
-let currHistory = myId; // the player whose history is currently displayed
+let currHistory; // the player whose history is currently displayed
 let startHref = "https://en.wikipedia.org/wiki/Cat"; // the start article
 let currHref; // the current article
 let destHref = "https://en.wikipedia.org/wiki/Dog"; // the end article
-let hasDrawnPlayerList = false;
+let hasDrawnPlayerList;
 
 // Time
 let startTime = new Date().getTime();
@@ -32,8 +32,6 @@ let startTime = new Date().getTime();
 // TODO: Wait for server to be ready
 // TODO: Create a page run script that runs earlier
 $(document).ready(() => {
-  console.log("something");
-
   $timer.text("0:00");
   $title.html("<b>Loading...</b>");
 
@@ -46,7 +44,9 @@ serverConn.ready(() => {
         window.location.href = "end";
     });
 
+    hasDrawnPlayerList = false;
     myId = serverConn.clientId;
+    currHistory = myId;
     serverConn.registerAllPlayers(drawHistoryCallback);
     serverConn.getPlayers(drawHistoryCallback);
     goToPage(startHref);
@@ -73,7 +73,6 @@ function drawPage(page) {
     $article.scrollTop(0);
     cleanHtml();
 
-    history.push(title);
     if (currHistory == myId) {
       drawHistory();
     }
@@ -124,34 +123,31 @@ function historyChange(newHistory) {
 }
 
 function drawHistoryCallback(players) {
-    console.log("Made it here");
+  for (let i = 0; i < players.length; i++) {
+    player = players[i];
+    console.log(player);
+    playerPaths.set(player.id, player.path);
 
     if (!hasDrawnPlayerList) {
-      for (player of players) {
-        // Something like this: <li><a href="javascript:historyChange('Player 1')"><b>Me</b></a></li>
-        playerHtml = player.id;
-        if (myId == player.id) {
-          playerHtml = "<b>" + playerHtml + "</b>";
-        }
-
-        $historyDropdownList.append(
-          "<li><a"
-          + hrefHelper("historyChange", player.id)
-          + ">" + playerHtml + "</a></li>");
+      // Something like this: <li><a href="javascript:historyChange('Player 1')"><b>Me</b></a></li>
+      playerHtml = "" + player.id;
+      if (myId == "" + player.id) {
+        playerHtml = "<b>" + playerHtml + "</b>";
       }
 
+      $historyDropdownList.append(
+        "<li><a"
+        + hrefHelper("historyChange", player.id)
+        + ">" + playerHtml + "</a></li>");
       hasDrawnPlayerList = true;
     }
+  }
 
-    for (player of players) {
-      playerPaths.set(player.id, player.path);
-    }
-
-    drawHistory();
+  drawHistory();
 }
 
 function drawHistory() {
-  history = playersPaths.get(currHistory);
+  history = playerPaths.get(currHistory);
   html = "";
   if (history.length > 0) {
     startIndex = 0;

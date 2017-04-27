@@ -25,12 +25,6 @@ let ddd = window.setInterval(() => {
 
 $(document).ready(() => {
 	"use strict";
-	$players = $("#players");
-	$title1 = $("#a1_title");
-	$blurb1 = $("#a1_blurb");
-	$title2 = $("#a2_title");
-	$blurb2 = $("#a2_blurb");
-
 	let keepGoing = true;
 
 	$("#force").on('click', () => {
@@ -67,6 +61,12 @@ function startGame() {
 
 // game logic handlers
 serverConn.ready(() => {
+	$players = $("#players");
+	$title1 = $("#a1_title");
+	$blurb1 = $("#a1_blurb");
+	$title2 = $("#a2_title");
+	$blurb2 = $("#a2_blurb");
+
 	// Get player states
 	serverConn.registerAllPlayers(drawPlayers);
 	serverConn.getPlayers(drawPlayers);
@@ -96,7 +96,7 @@ function drawSecondPage(article) {
 let playersFake = [{name : "Rohan", id : "a"}, {name : "McKenna", id : "b"}, {name : "Jacob", id : "c"}, {name : "Sean", id : "d"}];
 function drawPlayers(players) {
 	// example line: <li class="list-group-item"><input type="checkbox" id="u0" checked disabled> You</li>
-	$players.html();
+	$players.html("");
 	for (let i = 0; i < players.length; i++) {
 		if (players[i].id == serverConn.clientId) {
 			$("<li class=\"list-group-item\"><input type=\"checkbox\">&nbsp<b>Me</b></li>")
