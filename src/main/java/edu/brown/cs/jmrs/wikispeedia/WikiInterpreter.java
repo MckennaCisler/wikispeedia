@@ -126,6 +126,9 @@ public class WikiInterpreter implements CommandInterpreter {
     String reqPage =
         command.get("payload").getAsJsonObject().get("page_name").getAsString();
     String curPage = player.getCurPage().getName();
+
+    System.out.println(reqPage);
+
     try {
       WikiPage reqWikiPage = WikiPage.fromAny(reqPage);
       if (player.goToPage(reqWikiPage)) {

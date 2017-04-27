@@ -7,6 +7,7 @@ let $title1;
 let $blurb1;
 let $title2;
 let $blurb2;
+let keepGoing = true;
 
 // Maybe do this with the title instead
 let dots = 0;
@@ -25,7 +26,7 @@ let ddd = window.setInterval(() => {
 
 $(document).ready(() => {
 	"use strict";
-	let keepGoing = true;
+	keepGoing = true;
 
 	$("#force").on('click', () => {
 		$(".loader").hide();
@@ -84,12 +85,12 @@ serverConn.ready(() => {
 });
 
 function drawFirstPage(article) {
-	$title1.text(article.title);
+	$title1.html("<a href=\"" + article.href + "\">" + article.title + "</a>");
 	// $blurb1.text(firstSentence(article.blurb));
 }
 
 function drawSecondPage(article) {
-	$title2.text(article.title);
+	$title2.html("<a href=\"" + article.href + "\">" + article.title + "</a>");
 	// $blurb2.text(firstSentence(article.blurb));
 }
 

@@ -146,7 +146,7 @@ public class Page implements Node<Page, Link> {
   protected static String cleanUrl(String u) {
     return u.replaceAll("\\#.*$", "") // remove anchor tags
         .replaceAll("\\?.*$", "") // remove query strings (after tags)
-        .replaceAll("'|\"", ""); // remove quotes
+        .replaceAll("\"", ""); // remove quotes (NOT apostrophes)
   }
 
   @Override

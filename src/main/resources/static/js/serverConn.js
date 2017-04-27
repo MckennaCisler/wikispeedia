@@ -193,6 +193,11 @@ class ServerConn {
             "command": { type: COMMAND_TYPE.SERVER }, // all we need
             "callback": (message) => {
                 this._setId(message.client_id);
+
+                // call ready callbacks
+                for (let i = 0; i < this.readyCallbacks.length; i++) {
+                    this.readyCallbacks[i]();
+                }
             },
             "errCallback" : () => {}, // no reason
             "timeout" : null          // no reason
@@ -311,10 +316,7 @@ class ServerConn {
      * Primary WebSocket interpreters
      */
     ws_onopen() {
-        // call ready callbacks
-        for (let i = 0; i < this.readyCallbacks.length; i++) {
-            this.readyCallbacks[i]();
-        }
+
 
         // TODO: This
         // TODO: is just
