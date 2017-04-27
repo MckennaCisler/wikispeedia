@@ -31,7 +31,6 @@ $(document).ready(() => {
 	$title2 = $("#a2_title");
 	$blurb2 = $("#a2_blurb");
 
-	drawPlayersFake(playersFake);
 	let keepGoing = true;
 
 	$("#force").on('click', () => {
@@ -44,7 +43,7 @@ $(document).ready(() => {
 function decrement(pid) {
 	if ($("#counter").html() === "0") {
 		clearInterval(pid);
-		window.location.replace("end");
+		window.location.replace("play");
 	} else {
 		$("#counter").html($("#counter").html() - 1);
 		if ($("#counter").html() > 1) {
@@ -94,23 +93,16 @@ function drawSecondPage(article) {
 	// $blurb2.text(firstSentence(article.blurb));
 }
 
-function drawPlayers(players) {
-	// TODO: Replace with drawPlayersFake
-
-	for (let i = 0; i < players.length; i++) {
-		console.log(player[i]);
-	}
-}
-
 let playersFake = [{name : "Rohan", id : "a"}, {name : "McKenna", id : "b"}, {name : "Jacob", id : "c"}, {name : "Sean", id : "d"}];
-function drawPlayersFake(players) {
+function drawPlayers(players) {
 	// example line: <li class="list-group-item"><input type="checkbox" id="u0" checked disabled> You</li>
+	$players.html();
 	for (let i = 0; i < players.length; i++) {
-		if (players[i].id == fakeId) {
+		if (players[i].id == serverConn.clientId) {
 			$("<li class=\"list-group-item\"><input type=\"checkbox\">&nbsp<b>Me</b></li>")
 				.appendTo($players)
 				.click(function() {
-					console.log(players[i].id, $(this).children()[0].checked);
+					serverConn.setPlayerState($(this).children()[0].checked);
 				});
 		} else {
 			$("<li class=\"list-group-item\"><input type=\"checkbox\" disabled>&nbsp" + players[i].name + "</li>")
