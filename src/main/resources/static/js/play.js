@@ -14,13 +14,12 @@ const $title = $("#title");
 const $article = $("#article");
 
 let ding = new Audio('lib/assets/ding.mp3');
+let currHistory;
 
 // Player info
-let myId;
 let playerPaths = new Map();
 
 // Game info
-let currHistory; // the player whose history is currently displayed
 let startHref = "https://en.wikipedia.org/wiki/Cat"; // the start article
 let currHref; // the current article
 let destHref = "https://en.wikipedia.org/wiki/Dog"; // the end article
@@ -45,8 +44,7 @@ serverConn.ready(() => {
     });
 
     hasDrawnPlayerList = false;
-    myId = serverConn.clientId;
-    currHistory = myId;
+    currHistory = serverConn.clientId; // the player whose history is currently displayed
     serverConn.registerAllPlayers(drawHistoryCallback);
     serverConn.getPlayers(drawHistoryCallback);
     goToPage(startHref);
@@ -73,7 +71,7 @@ function drawPage(page) {
     $article.scrollTop(0);
     cleanHtml();
 
-    if (currHistory == myId) {
+    if (currHistory == serverConn.clientId) {
       drawHistory();
     }
 
@@ -125,13 +123,12 @@ function historyChange(newHistory) {
 function drawHistoryCallback(players) {
   for (let i = 0; i < players.length; i++) {
     player = players[i];
-    console.log(player);
     playerPaths.set(player.id, player.path);
 
     if (!hasDrawnPlayerList) {
       // Something like this: <li><a href="javascript:historyChange('Player 1')"><b>Me</b></a></li>
       playerHtml = "" + player.id;
-      if (myId == "" + player.id) {
+      if (player.id == serverConn.clientId) {
         playerHtml = "<b>" + playerHtml + "</b>";
       }
 
@@ -139,6 +136,7 @@ function drawHistoryCallback(players) {
         "<li><a"
         + hrefHelper("historyChange", player.id)
         + ">" + playerHtml + "</a></li>");
+
       hasDrawnPlayerList = true;
     }
   }
@@ -147,25 +145,26 @@ function drawHistoryCallback(players) {
 }
 
 function drawHistory() {
-  history = playerPaths.get(currHistory);
+  playerHistory = playerPaths.get(currHistory);
+  console.log(playerHistory);
   html = "";
-  if (history.length > 0) {
+  if (playerHistory.length > 0) {
     startIndex = 0;
-    if (history.length > 8) {
-      startIndex = history.length - 6;
+    if (playerHistory.length > 8) {
+      startIndex = playerHistory.length - 6;
       html = html + "<i>(" + startIndex + " articles before)</i><br>";
     }
 
-    for (i = startIndex; i < history.length - 1; i++) {
-      html = html + history[i] + "<br>";
+    for (i = startIndex; i < playerHistory.length - 1; i++) {
+      html = html + playerHistory[i] + "<br>";
     }
 
-    html = html + "<b>" + history[history.length - 1] + "</b>";
+    html = html + "<b>" + playerHistory[playerHistory.length - 1] + "</b>";
   }
 
   $history.html(html);
 
-  if (currHistory != myId) {
+  if (currHistory != serverConn.clientId) {
     $historyDropdown.html(currHistory + "'s progress");
   } else {
     $historyDropdown.html("<b>My progress</b>");
