@@ -81,7 +81,6 @@ public class WikiLobby implements Lobby {
 
   @Override
   public void init(JsonObject arguments) {
-    System.out.println("Generating...");
     WikiGame game = GameGenerator.ofDist(10); // TODO
     this.startPage = game.getStart();
     this.goalPage = game.getGoal();
@@ -405,5 +404,11 @@ public class WikiLobby implements Lobby {
 
       return lobby;
     }
+  }
+
+  @Override
+  public String toString() {
+    return String.format("%s (%s)", id,
+        started() ? (ended() ? "ended" : "started") : "not started");
   }
 }

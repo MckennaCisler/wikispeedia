@@ -21,11 +21,14 @@ $(document).ready(function () {
 
 	$("#open_games").on('click', (event) => {
 		isMaking = false;
-		lobbyName = $(event.target).html();
-		$("#main").hide();
-		$("#rules").hide();
-		$("#uname_picker").show();
-		$("#u_header").html(lobbyName);
+		const $target = $(event.target);
+		if ($target.attr('id') !== "none-found") {
+			lobbyName = $target.html();
+			$("#main").hide();
+			$("#rules").hide();
+			$("#uname_picker").show();
+			$("#u_header").html(lobbyName);
+		}
 	});
 
 	$("#back_main").on('click', () => {
@@ -72,8 +75,15 @@ function startLobby(callback, errCallback) {
 serverConn.ready(() => {
 	"use strict";
 	// setup lobbies
-	serverConn.registerAllLobbies(drawLobbies);
-	serverConn.getLobbies(drawLobbies);
+	serverConn.getLobbies((lobbies) => {
+		console.log(lobbies)
+		drawLobbies(lobbies);
+		serverConn.registerAllLobbies(drawLobbies);
+	}, (error) => {
+		displayServerConnError(error);
+		serverConn.registerAllLobbies(drawLobbies);
+	});
+
 
 	$("#start_game").on('click', () => {
 		if ($("#game_name").val() === "") {
@@ -131,7 +141,7 @@ function drawLobbies(lobbies) {
 	"use strict";
 	$("#open_games").html("");
 	if (lobbies.length === 0) {
-		$("#open_games").append("<p>No games were found, you'll have to make your own!</p>");
+		$("#open_games").append("<p id='none-found'>No games were found, you'll have to make your own!</p>");
 	} else {
 		for (let i = 0; i < lobbies.length; i++) {
 			$("#open_games").append('<li class="alobby list-group-item list-group-item-action" id="' +

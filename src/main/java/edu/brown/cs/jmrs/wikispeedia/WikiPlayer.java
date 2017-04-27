@@ -274,7 +274,7 @@ public class WikiPlayer {
 
   @Override
   public String toString() {
-    return "Player " + id + " named '" + name + "' in lobby " + lobby + " at "
-        + getCurPage().url();
+    return String.format("Player %s named '%s' in lobby %s at %s", id, name,
+        lobby, getCurPage().url());
   }
 }

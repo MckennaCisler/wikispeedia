@@ -171,8 +171,10 @@ enum Command {
    * Java functions to actually send Commands.
    */
   static void sendAllPlayers(WikiLobby lobby) {
+    System.out.println("All: " + lobby.getPlayers());
     List<WikiPlayer> connectedPlayers =
         Functional.filter(lobby.getPlayers(), WikiPlayer::connected);
+    System.out.println("Connected: " + connectedPlayers);
     Command.ALL_PLAYERS.sendToAll(lobby, connectedPlayers);
   }
 

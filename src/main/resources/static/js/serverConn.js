@@ -59,7 +59,7 @@ const Command = {
     GET_LOBBIES: {
       name: "get_lobbies",
       responseName: "all_lobbies",
-      type: COMMAND_TYPE.SERVER,
+      type: COMMAND_TYPE.INCOMING, // explicitly label as not SERVER bcs. we want it to return with the list
       construct: () => { return {} }
     },
     COMMAND_ERROR: {
