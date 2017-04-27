@@ -25,6 +25,9 @@ function assert(statement, ifFalse, ifTrue) {
     }
 }
 
+function firstSentence(paragraph) {
+  return paragraph.split(".")[0];
+}
 
 // Helper to get callback
 function hrefHelper(f, href) {
