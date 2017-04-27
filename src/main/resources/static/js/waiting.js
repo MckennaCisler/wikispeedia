@@ -102,8 +102,9 @@ function drawPlayers(players) {
 		if (players[i].id == serverConn.clientId) {
 			$("<li class=\"list-group-item\"><input type=\"checkbox\">&nbsp<b>Me</b></li>")
 				.appendTo($players)
+				.children("input").prop('checked', players[i].ready)
 				.click(function() {
-					serverConn.setPlayerState($(this).children()[0].checked);
+					serverConn.setPlayerState($(this).prop('checked'));
 				});
 		} else {
 			$("<li class=\"list-group-item\"><input type=\"checkbox\" disabled>&nbsp" + players[i].name + "</li>")
