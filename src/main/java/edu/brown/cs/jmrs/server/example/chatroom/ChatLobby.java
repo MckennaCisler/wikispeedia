@@ -11,11 +11,11 @@ import edu.brown.cs.jmrs.server.customizable.Lobby;
 
 public class ChatLobby implements Lobby {
 
-  private String       id;
+  private String id;
   private List<String> connectedPlayers;
   private List<String> disconnectedPlayers;
-  private Server       server;
-  private boolean      closed;
+  private Server server;
+  private boolean closed;
 
   public ChatLobby(Server server, String id) {
     this.server = server;
@@ -80,8 +80,7 @@ public class ChatLobby implements Lobby {
 
     JsonObject jsonObject = new JsonObject();
     jsonObject.addProperty("command", "bounced_whisper");
-    jsonObject.addProperty(
-        "error_message",
+    jsonObject.addProperty("error_message",
         "No client with specified ID exists in this lobby");
     jsonObject.addProperty("target", recipientId);
 
@@ -113,11 +112,12 @@ public class ChatLobby implements Lobby {
       connectedPlayers.remove(clientId);
     }
   }
-
-  @Override
-  public String toJson() {
-    JsonObject obj = new JsonObject();
-    obj.addProperty("id", id);
-    return new Gson().toJson(obj);
-  }
+  // @Deprecated in favor of passing a GSON with a registered serialzier around
+  // - see Main.java
+  // @Override
+  // public String toJson() {
+  // JsonObject obj = new JsonObject();
+  // obj.addProperty("id", id);
+  // return new Gson().toJson(obj);
+  // }
 }

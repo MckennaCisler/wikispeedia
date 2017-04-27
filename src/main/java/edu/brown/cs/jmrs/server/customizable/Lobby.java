@@ -16,5 +16,4 @@ public interface Lobby {
 
   void playerDisconnected(String clientId);
 
-  String toJson();
 }

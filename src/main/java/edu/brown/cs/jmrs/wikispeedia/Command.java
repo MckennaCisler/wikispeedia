@@ -1,9 +1,13 @@
 package edu.brown.cs.jmrs.wikispeedia;
 
+import java.util.List;
+
 import com.google.common.collect.ImmutableMap;
 import com.google.gson.JsonObject;
 
+import edu.brown.cs.jmrs.collect.Functional;
 import edu.brown.cs.jmrs.server.Server;
+import edu.brown.cs.jmrs.ui.Main;
 
 /**
  * All possible incoming and outgoing commands for the WikiInterpreter. Also
@@ -117,8 +121,8 @@ enum Command {
     JsonObject root = new JsonObject();
     root.addProperty("command", command);
     root.addProperty("error_message", errorMessage);
-    root.add("payload", WikiInterpreter.GSON.toJsonTree(data));
-    return WikiInterpreter.GSON.toJson(root);
+    root.add("payload", Main.GSON.toJsonTree(data));
+    return Main.GSON.toJson(root);
   }
 
   /**
@@ -167,7 +171,9 @@ enum Command {
    * Java functions to actually send Commands.
    */
   static void sendAllPlayers(WikiLobby lobby) {
-    Command.ALL_PLAYERS.sendToAll(lobby, lobby.getPlayers());
+    List<WikiPlayer> connectedPlayers =
+        Functional.filter(lobby.getPlayers(), WikiPlayer::connected);
+    Command.ALL_PLAYERS.sendToAll(lobby, connectedPlayers);
   }
 
   static void sendEndGame(WikiLobby lobby) {

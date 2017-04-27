@@ -9,6 +9,8 @@ import org.eclipse.jetty.websocket.api.annotations.OnWebSocketConnect;
 import org.eclipse.jetty.websocket.api.annotations.OnWebSocketMessage;
 import org.eclipse.jetty.websocket.api.annotations.WebSocket;
 
+import com.google.gson.Gson;
+
 import edu.brown.cs.jmrs.server.customizable.CommandInterpreter;
 import edu.brown.cs.jmrs.server.customizable.Lobby;
 import edu.brown.cs.jmrs.server.threading.GlobalThreadManager;
@@ -22,14 +24,15 @@ import edu.brown.cs.jmrs.server.threading.GlobalThreadManager;
 @WebSocket
 public class Server {
 
-  protected ServerWorker       server;
+  protected ServerWorker server;
   protected CommandInterpreter interpreter;
+  protected final Gson gson;
 
-  public Server(
-      BiFunction<Server, String, ? extends Lobby> lobbyFactory,
-      CommandInterpreter interpreter) {
+  public Server(BiFunction<Server, String, ? extends Lobby> lobbyFactory,
+      CommandInterpreter interpreter, Gson gson) {
     this.interpreter = interpreter;
-    server = new ServerWorker(this, lobbyFactory);
+    server = new ServerWorker(this, lobbyFactory, gson);
+    this.gson = gson;
   }
 
   public void sendToClient(String playerId, String message) {
@@ -51,8 +54,8 @@ public class Server {
 
   @OnWebSocketMessage
   public void onMessage(Session conn, String message) {
-    GlobalThreadManager
-        .submit(new ServerCommandHandler(server, conn, message, interpreter));
+    GlobalThreadManager.submit(
+        new ServerCommandHandler(server, conn, message, interpreter, gson));
   }
 
   @OnWebSocketConnect

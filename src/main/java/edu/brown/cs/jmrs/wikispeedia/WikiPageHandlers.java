@@ -4,6 +4,7 @@ import java.io.IOException;
 
 import com.google.common.collect.ImmutableList;
 
+import edu.brown.cs.jmrs.ui.Main;
 import edu.brown.cs.jmrs.ui.SparkHandlers;
 import edu.brown.cs.jmrs.ui.SparkServer;
 import edu.brown.cs.jmrs.web.ContentFormatter;
@@ -73,7 +74,7 @@ public class WikiPageHandlers implements SparkHandlers {
     public String handle(Request req, Response res) {
       try {
         // TODO
-        return WikiInterpreter.GSON.toJson(
+        return Main.GSON.toJson(
             linkFinder.linkedPages(WikiPage.fromName(req.params(":name"))));
       } catch (IOException | IllegalArgumentException e) {
         e.printStackTrace();

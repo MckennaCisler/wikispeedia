@@ -18,6 +18,7 @@ class ServerCommandHandler implements Runnable {
   private final Session conn;
   private final String unformattedCommand;
   private final CommandInterpreter interpreter;
+  private final Gson gson;
 
   private enum Commands {
     SET_CLIENT_ID, START_LOBBY, LEAVE_LOBBY, JOIN_LOBBY, GET_LOBBIES,
@@ -49,11 +50,12 @@ class ServerCommandHandler implements Runnable {
   }
 
   public ServerCommandHandler(ServerWorker server, Session conn, String command,
-      CommandInterpreter interpreter) {
+      CommandInterpreter interpreter, Gson gson) {
     this.server = server;
     this.conn = conn;
     this.unformattedCommand = command;
     this.interpreter = interpreter;
+    this.gson = gson;
   }
 
   @Override
@@ -66,7 +68,6 @@ class ServerCommandHandler implements Runnable {
       JsonObject commandPayload = commandMap.get("payload").getAsJsonObject();
 
       // objects for return message
-      Gson gson = new Gson();
       JsonObject jsonObject = new JsonObject();
       String toClient;
 
@@ -96,6 +97,7 @@ class ServerCommandHandler implements Runnable {
                   jsonObject.addProperty("error_message", "");
                   toClient = gson.toJson(jsonObject);
                   conn.getRemote().sendString(toClient);
+                  conn.getRemote().sendString(gson.toJson(allLobbies()));
                   return;
 
                 case LEAVE_LOBBY:
@@ -130,18 +132,10 @@ class ServerCommandHandler implements Runnable {
                   jsonObject.addProperty("error_message", "");
                   toClient = gson.toJson(jsonObject);
                   conn.getRemote().sendString(toClient);
+                  conn.getRemote().sendString(gson.toJson(allLobbies()));
                   return;
                 case GET_LOBBIES:
-                  jsonObject.addProperty("command", "get_lobbies_response");
-                  List<String> lobbies = server.getOpenLobbies();
-                  jsonObject.addProperty("error_message", "");
-
-                  JsonArray lobbyArray = new JsonArray();
-                  for (String id : lobbies) {
-                    lobbyArray.add(id);
-                  }
-
-                  jsonObject.add("lobbies", lobbyArray);
+                  conn.getRemote().sendString(gson.toJson(allLobbies()));
                   return;
                 default: // equivalent to NULL, i.e. that the command type was
                          // not
@@ -188,6 +182,21 @@ class ServerCommandHandler implements Runnable {
       e.printStackTrace();
       throw e;
     }
+  }
+
+  private JsonObject allLobbies() {
+    JsonObject jsonObject = new JsonObject();
+    jsonObject.addProperty("command", "all_lobbies");
+    List<String> lobbies = server.getOpenLobbies();
+    jsonObject.addProperty("error_message", "");
+
+    JsonArray lobbyArray = new JsonArray();
+    for (String id : lobbies) {
+      lobbyArray.add(gson.toJsonTree(server.getLobby(id)));
+    }
+
+    jsonObject.add("payload", lobbyArray);
+    return jsonObject;
   }
 
   /**

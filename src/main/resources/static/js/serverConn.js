@@ -46,7 +46,7 @@ const Command = {
       name: "leave_lobby",
       responseName: "leave_lobby_response",
       type: COMMAND_TYPE.SERVER,
-      construct: () => { return "" }
+      construct: () => { return {} }
     },
     JOIN_LOBBY: {
       name: "join_lobby",
@@ -60,7 +60,7 @@ const Command = {
       name: "get_lobbies",
       responseName: "all_lobbies",
       type: COMMAND_TYPE.SERVER,
-      construct: () => { return "" }
+      construct: () => { return {} }
     },
     COMMAND_ERROR: {
         name: "command_error",
@@ -83,7 +83,7 @@ const Command = {
         name: "get_time",
         responseName: "return_time",
         type: COMMAND_TYPE.INCOMING,
-        construct: () => { return "" }
+        construct: () => { return {} }
     },
     GET_SETTINGS : {
 		name: "get_settings",
@@ -97,7 +97,7 @@ const Command = {
         name: "force_begin_game",
         responseName: "begin_game",
         type: COMMAND_TYPE.INCOMING,
-        construct: () => { return "" }
+        construct: () => { return {} }
     },
     GET_PAGE : {
 		name: "get_page",
@@ -234,8 +234,8 @@ class ServerConn {
         this._send(Command.SET_USERNAME, callback, errCallback, [username]);
     }
 
-    setPlayerState(callback, errCallback) {
-        this._send(Command.SET_PLAYER_STATE, callback, errCallback, []);
+    setPlayerState(state, callback, errCallback) {
+        this._send(Command.SET_PLAYER_STATE, callback, errCallback, [state]);
     }
 
     gotoPage(page_name, callback, errCallback) {

@@ -1,5 +1,6 @@
 package edu.brown.cs.jmrs.wikispeedia;
 
+import java.lang.reflect.Type;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.ArrayList;
@@ -11,9 +12,12 @@ import java.util.Map.Entry;
 import com.google.common.collect.ImmutableList;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import com.google.gson.JsonSerializationContext;
+import com.google.gson.JsonSerializer;
 
 import edu.brown.cs.jmrs.server.Server;
 import edu.brown.cs.jmrs.server.customizable.Lobby;
+import edu.brown.cs.jmrs.ui.Main;
 import edu.brown.cs.jmrs.web.ContentFormatter;
 import edu.brown.cs.jmrs.web.ContentFormatterChain;
 import edu.brown.cs.jmrs.web.LinkFinder;
@@ -97,21 +101,25 @@ public class WikiLobby implements Lobby {
     }
     this.players.put(playerId,
         new WikiPlayer(playerId, this, startPage, goalPage));
+    Command.sendAllPlayers(this);
   }
 
   @Override
   public void removeClient(String playerId) {
     this.players.remove(playerId);
+    Command.sendAllPlayers(this);
   }
 
   @Override
   public void playerReconnected(String clientId) {
     players.get(clientId).setConnected(true);
+    Command.sendAllPlayers(this);
   }
 
   @Override
   public void playerDisconnected(String clientId) {
     players.get(clientId).setConnected(false);
+    Command.sendAllPlayers(this);
   }
 
   /****************************************/
@@ -368,16 +376,34 @@ public class WikiLobby implements Lobby {
     return endTime;
   }
 
-  @Override
-  public String toJson() {
-    JsonElement obj = WikiInterpreter.GSON.toJsonTree(this);
-    assert obj.isJsonObject();
+  /**
+   * Custom serializer for use with GSON.
+   *
+   * @author mcisler
+   *
+   */
+  public static class Serializer implements JsonSerializer<WikiLobby> {
 
-    JsonObject lobby = obj.getAsJsonObject();
-    lobby.addProperty("playTime", getPlayTime().toMinutes());
-    lobby.addProperty("started", started());
-    lobby.addProperty("ended", ended());
+    @Override
+    public JsonElement serialize(WikiLobby src, Type typeOfSrc,
+        JsonSerializationContext context) {
+      JsonObject lobby = new JsonObject();
 
-    return WikiInterpreter.GSON.toJson(lobby);
+      lobby.addProperty("id", src.id);
+      lobby.add("startPage", Main.GSON.toJsonTree(src.getStartPage()));
+      lobby.add("goalPage", Main.GSON.toJsonTree(src.getGoalPage()));
+      lobby.addProperty("started", src.started());
+      lobby.addProperty("ended", src.ended());
+      if (src.started()) {
+        lobby.addProperty("startTime", src.getStartTime().toEpochMilli());
+        lobby.addProperty("playTime", src.getPlayTime().toMinutes());
+      }
+      if (src.ended()) {
+        lobby.addProperty("endTime", src.getEndTime().toEpochMilli());
+        lobby.add("winner", Main.GSON.toJsonTree(src.getWinner()));
+      }
+
+      return lobby;
+    }
   }
 }
