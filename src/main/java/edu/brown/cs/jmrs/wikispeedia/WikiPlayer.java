@@ -244,7 +244,9 @@ public class WikiPlayer {
 
     // we assume that the curPage page has been cached already (speed issue)
     if (lobby.getLinkFinder().linkedPages(getCurPage()).contains(page)) {
-      path.add(page);
+      if (!page.equals(getCurPage())) {
+        path.add(page);
+      }
       checkIfDone(Instant.now());
       return true;
     }
