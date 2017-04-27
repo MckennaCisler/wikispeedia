@@ -70,6 +70,7 @@ function startGame() {
 serverConn.ready(() => {
 	// Get player states
 	serverConn.registerAllPlayers(drawPlayers);
+	serverConn.getPlayers(drawPlayers);
 	serverConn.registerBeginGame(startGame); // TODO: Game will be 5s off in time!!!!
 
 	// Get current lobby settings

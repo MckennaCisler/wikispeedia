@@ -3,10 +3,13 @@ package edu.brown.cs.jmrs.ui;
 import java.io.IOException;
 
 import com.google.common.collect.ImmutableList;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 
 import edu.brown.cs.jmrs.server.Server;
 import edu.brown.cs.jmrs.server.example.chatroom.ChatInterpreter;
 import edu.brown.cs.jmrs.server.example.chatroom.ChatLobby;
+import edu.brown.cs.jmrs.web.wikipedia.WikiPage;
 import edu.brown.cs.jmrs.wikispeedia.WikiInterpreter;
 import edu.brown.cs.jmrs.wikispeedia.WikiLobby;
 import edu.brown.cs.jmrs.wikispeedia.WikiMainHandlers;
@@ -29,6 +32,24 @@ import spark.template.freemarker.FreeMarkerEngine;
 public final class Main {
   public static final int DEFAULT_SPARK_PORT = 4567;
   public static final int DEFAULT_SOCKET_PORT = 4568;
+
+  public static final Gson GSON = registerSerializers();
+
+  /**
+   * Registers custom Json (Gson) serializers for this project.
+   *
+   * https://github.com/google/gson/blob/master/
+   * UserGuide.md#TOC-Custom-Serialization-and-Deserialization
+   *
+   * @return A Gson Object with the register Serializers.
+   */
+  private static Gson registerSerializers() {
+    GsonBuilder builder = new GsonBuilder();
+    builder.registerTypeAdapter(WikiPage.class, new WikiPage.Serializer());
+    builder.registerTypeAdapter(WikiLobby.class, new WikiLobby.Serializer());
+
+    return builder.create();
+  }
 
   private Main() {
     // override default constructor
@@ -63,7 +84,7 @@ public final class Main {
         // Setup websocket lobby server (which will use Spark)
         Server server = new Server((serv, str) -> {
           return new WikiLobby(serv, str);
-        }, new WikiInterpreter());
+        }, new WikiInterpreter(), GSON);
         Spark.webSocket("/websocket", server);
         System.out.println("[ Started Websocket ]");
 
@@ -81,7 +102,7 @@ public final class Main {
 
       Server server = new Server((serv, str) -> {
         return new ChatLobby(serv, str);
-      }, new ChatInterpreter());
+      }, new ChatInterpreter(), new Gson());
       Spark.webSocket("/websocket", server);
 
       SparkServer.runSparkServer((int) options.valueOf("spark-port"),

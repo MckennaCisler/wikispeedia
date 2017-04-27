@@ -5,8 +5,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 import com.google.common.collect.ImmutableMap;
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import com.google.gson.JsonObject;
 
 import edu.brown.cs.jmrs.server.customizable.CommandInterpreter;
@@ -20,23 +18,6 @@ import edu.brown.cs.jmrs.web.wikipedia.WikiPage;
  *
  */
 public class WikiInterpreter implements CommandInterpreter {
-  static final Gson GSON = registerSerializers(); // TODO
-
-  /**
-   * Registers custom Json (Gson) serializers for this project.
-   *
-   * https://github.com/google/gson/blob/master/
-   * UserGuide.md#TOC-Custom-Serialization-and-Deserialization
-   *
-   * @return A Gson Object with the register Serializers.
-   */
-  private static Gson registerSerializers() {
-    GsonBuilder builder = new GsonBuilder();
-    builder.registerTypeAdapter(WikiPage.class, new WikiPage.Serializer());
-
-    return builder.create();
-  }
-
   @Override
   public void interpret(Lobby uncastLobby, String clientId,
       JsonObject command) {

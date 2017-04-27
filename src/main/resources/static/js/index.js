@@ -73,6 +73,7 @@ serverConn.ready(() => {
 	"use strict";
 	// setup lobbies
 	serverConn.registerAllLobbies(drawLobbies);
+	serverConn.getLobbies(drawLobbies);
 
 	$("#start_game").on('click', () => {
 		if ($("#game_name").val() === "") {

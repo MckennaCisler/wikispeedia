@@ -48,6 +48,7 @@ serverConn.ready(() => {
 
     myId = serverConn.clientId;
     serverConn.registerAllPlayers(drawHistoryCallback);
+    serverConn.getPlayers(drawHistoryCallback);
     goToPage(startHref);
 });
 
