@@ -84,6 +84,9 @@ serverConn.ready(() => {
 			lobbyName = $("#game_name").val();
 
 			serverConn.startLobby(lobbyName.trim(),
+				{
+					"TODO": "lobby_args" // TODO
+				},
 				() => {
 					$("#main").hide();
 					$("#rules").hide();

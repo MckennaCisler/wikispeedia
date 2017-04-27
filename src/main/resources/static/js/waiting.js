@@ -61,7 +61,7 @@ serverConn.ready(() => {
 	serverConn.registerBeginGame(startGame); // TODO: Game will be 5s off in time!!!!
 
 	// Get current lobby settings
-	serverConn.getSettings("", (settings) => {
+	serverConn.getSettings("", GameState.WAITING, (settings) => {
  		// Get articles
 		serverConn.getPage(settings.start.name, drawFirstPage, displayServerConnError);
 		serverConn.getPage(settings.goal.name, drawSecondPage, displayServerConnError);

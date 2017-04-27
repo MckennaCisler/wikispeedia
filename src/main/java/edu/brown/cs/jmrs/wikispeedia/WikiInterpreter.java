@@ -1,6 +1,7 @@
 package edu.brown.cs.jmrs.wikispeedia;
 
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.Map;
 
 import com.google.common.collect.ImmutableMap;
@@ -41,6 +42,7 @@ public class WikiInterpreter implements CommandInterpreter {
       JsonObject command) {
     WikiLobby lobby = (WikiLobby) uncastLobby;
     String cname = command.get("command").getAsString();
+    JsonObject commandPayload = command.get("payload").getAsJsonObject();
     // note that Server will have asserted that command has a command & payload
 
     // switch > if/else
@@ -55,11 +57,18 @@ public class WikiInterpreter implements CommandInterpreter {
         break;
 
       case GET_SETTINGS:
-        Map<Object, Object> settings =
-            ImmutableMap.builder().put("start", lobby.getStartPage())
-                .put("goal", lobby.getGoalPage())
-                .put("start_time", lobby.getStartTime()).build();
-
+        Map<Object, Object> settings = new HashMap<>();
+        settings.put("start", lobby.getStartPage());
+        settings.put("goal", lobby.getGoalPage());
+        if (commandPayload.get("state").getAsInt() == Command.GameState.ENDED
+            .ordinal()) {
+          settings.put("start_time", lobby.getStartTime());
+          settings.put("end_time", lobby.getStartTime());
+          settings.put("winner", lobby.getWinner());
+        } else if (commandPayload.get("state")
+            .getAsInt() == Command.GameState.STARTED.ordinal()) {
+          settings.put("start_time", lobby.getStartTime());
+        }
         Command.RETURN_SETTINGS.send(lobby.getServer(), clientId, settings);
         break;
 
@@ -73,8 +82,8 @@ public class WikiInterpreter implements CommandInterpreter {
         break;
 
       case SET_USERNAME:
-        lobby.setPlayerName(clientId, command.get("payload").getAsJsonObject()
-            .get("username").getAsString());
+        lobby.setPlayerName(clientId,
+            commandPayload.get("username").getAsString());
         Command.RETURN_SET_USERNAME.send(lobby.getServer(), clientId,
             ImmutableMap.of());
         break;

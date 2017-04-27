@@ -19,7 +19,7 @@ enum Command {
   // Lobby-specific commands
   GET_PLAYERS("get_players", CommandType.INCOMING, "lobby_id"), //
   GET_TIME("get_time", CommandType.INCOMING, "lobby_id"), //
-  GET_SETTINGS("get_settings", CommandType.INCOMING, "lobby_id"), //
+  GET_SETTINGS("get_settings", CommandType.INCOMING, "lobby_id", "state"), //
   FORCE_BEGIN_GAME("force_begin_game", CommandType.INCOMING), //
   GET_PAGE("get_page", CommandType.INCOMING, "page_name"), //
   // Player-specific commands
@@ -58,6 +58,13 @@ enum Command {
     INCOMING, // incoming commands for RESPONSEs
     RESPONSE, // responses to INCOMING commands
     OUTGOING; // server event-based commands
+  }
+
+  /**
+   * A specific enum for game states.
+   */
+  enum GameState {
+    WAITING, STARTED, ENDED
   }
 
   private final String command;
@@ -136,8 +143,6 @@ enum Command {
    * Sends a JSONified version of data to the client with clientId.
    */
   void send(Server server, String clientId, Object data, String errorMessage) {
-    System.out.println(data);
-    System.out.println(errorMessage);
     server.sendToClient(clientId, build(data));
   }
 

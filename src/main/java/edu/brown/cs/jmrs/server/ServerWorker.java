@@ -19,13 +19,12 @@ import edu.brown.cs.jmrs.server.customizable.Lobby;
 
 class ServerWorker {
 
-  private Server                           server;
-  private LobbyManager                     lobbies;
+  private Server server;
+  private LobbyManager lobbies;
   private ConcurrentBiMap<Session, Player> players;
-  private Queue<Player>                    disconnectedPlayers;
+  private Queue<Player> disconnectedPlayers;
 
-  public ServerWorker(
-      Server server,
+  public ServerWorker(Server server,
       BiFunction<Server, String, ? extends Lobby> lobbyFactory) {
     this.server = server;
     lobbies = new LobbyManager(lobbyFactory);
@@ -94,17 +93,14 @@ class ServerWorker {
     for (HttpCookie cookie : cookies) {
       if (cookie.getName().equals("client_id")) {
         String cookieVal = cookie.getValue();
-        expiration = Date.from(
-            Instant.ofEpochMilli(
-                Long.parseLong(
-                    cookieVal.substring(cookieVal.indexOf(":") + 1))));
+        expiration =
+            Date.from(Instant.ofEpochMilli(Long
+                .parseLong(cookieVal.substring(cookieVal.indexOf(":") + 1))));
         break;
       }
     }
 
-    if (expiration.after(new Date())) { // TODO: Do you mean greater than the
-                                        // current UNIX
-      // timestamp?
+    if (expiration.after(new Date())) {
       Player player = players.get(conn);
       assert player.isConnected();
       player.toggleConnected();
@@ -126,12 +122,7 @@ class ServerWorker {
     if (!disconnectedPlayers.isEmpty()) {
       Date now = new Date();
       Player p = disconnectedPlayers.poll();
-      while (p.getCookieExpiration().before(now)) { // TODO: Is cookie
-                                                    // expiration
-        // somehow updated (subtracted from
-        // as time goes on)? How does it
-        // expire?
-        // Sean: lol whoops no i forgot
+      while (p.getCookieExpiration().before(now)) {
         players.remove(players.getReversed(p));
         if (!disconnectedPlayers.isEmpty()) {
           p = disconnectedPlayers.poll();

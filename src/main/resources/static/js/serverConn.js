@@ -12,6 +12,16 @@ const COMMAND_TYPE = {
   SERVER: 3
 };
 
+
+/**
+ * A specific enum for game states.
+ */
+const GameState = {
+  WAITING: 0,
+  STARTED: 1,
+  ENDED: 2
+};
+
 const Command = {
     /**
      * Helpful regex:
@@ -28,8 +38,8 @@ const Command = {
       name: "start_lobby",
       responseName: "start_lobby_response",
       type: COMMAND_TYPE.SERVER,
-      construct: (lobby_id) => {
-          return { "lobby_id" : lobby_id };
+      construct: (lobby_id, arguments) => {
+          return { "lobby_id" : lobby_id, "arguments": arguments};
       }
     },
     LEAVE_LOBBY: {
@@ -79,8 +89,8 @@ const Command = {
 		name: "get_settings",
         responseName: "return_settings",
 		type: COMMAND_TYPE.INCOMING,
-		construct: (lobby_id) => {
-            return { "lobby_id" : lobby_id };
+		construct: (lobby_id, state) => {
+            return { "lobby_id" : lobby_id, "state": state};
         }
 	},
     FORCE_BEGIN_GAME: {
@@ -199,7 +209,7 @@ class ServerConn {
         let d = new Date();
         d.setTime(d.getTime() + (this.CLIENT_ID_COOKIE_EXPIRATION * 60 * 1000)); //60 minutes
         let expires = "expires="+d.toUTCString();
-        document.cookie = "client_id=" + id + d.getTime() + ";" + expires;
+        document.cookie = "client_id=" + id  + ":" + d.getTime() + ";" + expires;
         this.clientId = id;
     }
 
@@ -216,8 +226,8 @@ class ServerConn {
     }
 
     // set lobby_id to "" for the current one
-    getSettings(lobby_id, callback, errCallback) {
-        this._send(Command.GET_SETTINGS, callback, errCallback, [lobby_id]);
+    getSettings(lobby_id, state, callback, errCallback) {
+        this._send(Command.GET_SETTINGS, callback, errCallback, [lobby_id, state]);
     }
 
     setUsername(username, callback, errCallback) {
@@ -248,8 +258,8 @@ class ServerConn {
      * default lobby SYSTEM commands
      */
     // set lobby_id to null or undefined to generate a random one
-    startLobby(lobby_id, callback, errCallback) {
-        this._send(Command.START_LOBBY, callback, errCallback, [lobby_id]);
+    startLobby(lobby_id, args, callback, errCallback) {
+        this._send(Command.START_LOBBY, callback, errCallback, [lobby_id, args]);
     }
 
     leaveLobby(callback, errCallback) {

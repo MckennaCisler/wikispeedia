@@ -87,7 +87,7 @@ class ServerCommandHandler implements Runnable {
                   String lobbyId = commandPayload.get("lobby_id").getAsString();
                   Lobby lobby = server.createLobby(lobbyId);
 
-                  if (commandMap.has("arguments")) {
+                  if (commandPayload.has("arguments")) {
                     lobby.init(
                         commandPayload.get("arguments").getAsJsonObject());
                   }
