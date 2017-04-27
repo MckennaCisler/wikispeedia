@@ -15,6 +15,7 @@ const $article = $("#article");
 
 let ding = new Audio('lib/assets/ding.mp3');
 let currHistory;
+let currHistoryName;
 
 // Player info
 let playerPaths = new Map();
@@ -115,8 +116,9 @@ function cleanHtml() {
 // History
 ///
 
-function historyChange(newHistory) {
+function historyChange(newHistory, newHistoryName) {
   currHistory = newHistory;
+  currHistoryName = newHistoryName;
   drawHistory();
 }
 
@@ -127,18 +129,22 @@ function drawHistoryCallback(players) {
 
     if (!hasDrawnPlayerList) {
       // Something like this: <li><a href="javascript:historyChange('Player 1')"><b>Me</b></a></li>
-      playerHtml = "" + player.id;
+      playerHtml = "";
       if (player.id == serverConn.clientId) {
-        playerHtml = "<b>" + playerHtml + "</b>";
+        playerHtml = "<b>Me</b>";
+      } else {
+        playerHtml = player.name;
       }
 
       $historyDropdownList.append(
-        "<li><a"
-        + hrefHelper("historyChange", player.id)
-        + ">" + playerHtml + "</a></li>");
-
-      hasDrawnPlayerList = true;
+        "<li><a href=\""
+        + hrefHelper("historyChange", player.id + "', '" + player.name)
+        + "\">" + playerHtml + "</a></li>");
     }
+  }
+
+  if (!hasDrawnPlayerList) {
+    hasDrawnPlayerList = true;
   }
 
   drawHistory();
@@ -156,16 +162,16 @@ function drawHistory() {
     }
 
     for (i = startIndex; i < playerHistory.length - 1; i++) {
-      html = html + playerHistory[i] + "<br>";
+      html = html + playerHistory[i].name + "<br>";
     }
 
-    html = html + "<b>" + playerHistory[playerHistory.length - 1] + "</b>";
+    html = html + "<b>" + playerHistory[playerHistory.length - 1].name + "</b>";
   }
 
   $history.html(html);
 
   if (currHistory != serverConn.clientId) {
-    $historyDropdown.html(currHistory + "'s progress");
+    $historyDropdown.html(currHistoryName + "'s progress");
   } else {
     $historyDropdown.html("<b>My progress</b>");
   }
