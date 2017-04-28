@@ -163,7 +163,9 @@ enum Command {
    */
   void sendToAll(WikiLobby lobby, Object data, String errorMessage) {
     for (WikiPlayer player : lobby.getPlayers()) {
-      send(lobby.getServer(), player.getId(), data, errorMessage);
+      if (player.connected()) {
+        send(lobby.getServer(), player.getId(), data, errorMessage);
+      }
     }
   }
 
