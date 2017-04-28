@@ -1,20 +1,34 @@
-# Jacob
+#### General todo
+- <b>Fix bugs</b>
+- Least clicks mode
+- Levels of difficulty
+  - Page generation
+  - Sliding scale
+- Visualizations for history and endgame
+- Chat everywhere
+- Music
+- Mobile-friendly
+- Deployment
+- Track history
+- Shortest path
+- Design work
 
+#### Deadlines:
+- <b>Adversary TA Meeting (Wednesday, 4/26)</b>
+- <b>Done with coding (Saturday, 5/6)</b>
+- <b>Practice presentation w/ Erica (Sunday, 5/7)</b>
+- <b>Demo (Monday, 5/8)</b>
 
-# Rohan
-- Styling of ul
+#### Jacob
+
+#### Rohan
 - & in links (i.e. R&B)
 - Geographic coordinates system
 - Make videos work?
 
+#### Sean
 
-
-
-
-
-# Sean
-
-# Mckenna
+#### Mckenna
 Core Functionality
   Create ERROR struct to give all errors consistent error codes for frontend to use
 
