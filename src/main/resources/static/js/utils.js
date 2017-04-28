@@ -46,3 +46,12 @@ function clearError() {
 function displayServerConnError(error) {
     displayError(error.error_message);
 }
+
+function minutesToStr(minutes) {
+  let seconds = Math.floor(((minutes - Math.floor(minutes)) * 60));
+  if (seconds < 10) {
+    seconds = "0" + seconds;
+  }
+
+  return "" + Math.floor(minutes) + ":" + seconds;
+}

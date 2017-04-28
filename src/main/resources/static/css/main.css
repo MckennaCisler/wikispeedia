@@ -66,6 +66,12 @@
 	max-width: 40%;
 }
 
+#leaderboard {
+	max-width: 40%;
+	margin-top: -10px;
+	margin-bottom: -12px;
+}
+
 /* Lobby page */
 
 .top {

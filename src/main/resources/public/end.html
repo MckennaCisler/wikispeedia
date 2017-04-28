@@ -10,8 +10,9 @@
 	<script src="lib/js/tether.min.js"></script>
 	<script src="lib/js/bootstrap.min.js"></script>
 	<link href="https://fonts.googleapis.com/css?family=Heebo:400,900|Rubik+Mono+One" rel="stylesheet">
+	<script src="js/utils.js"></script>
 	<script src="js/end.js"></script>
-	
+
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<link rel="apple-touch-icon-precomposed" sizes="57x57" href="lib/assets/apple-touch-icon-57x57.png" />
 	<link rel="apple-touch-icon-precomposed" sizes="114x114" href="lib/assets/apple-touch-icon-114x114.png" />
@@ -37,36 +38,15 @@
 <body>
 	<div class="top">
 		<h1 style="margin-left: 5px; margin-top: 10px; display: inline-block;" title="Go back to the main screen"><a class="title-a" href="/">Wikispeedia</a></h1>
-		<h1 id="end_timer">5:12</h1>
 	</div>
 
 	<div class="container-fluid row main_content">
 		<div class="col">
 			<div class="card card-default">
-				<h3 class="card-header">Sean wins!</h3>
+				<h3 class="card-header" id="winner"></h3>
 				<div class="card-block">
-					<div class="list-group" id="players">
-						<li class="list-group-item end_row" id="u0">
-							<strong class="end_row_name">Sean: </strong>
-							<!--<canvas class="end_canvas"></canvas>-->
-							<strong class="end_row_time">273 seconds</strong>
-						</li>
-						<li class="list-group-item end_row running" id="u1">
-							<strong class="end_row_name">Jacob: </strong>
-							<!--<canvas class="end_canvas"></canvas>-->
-							<strong class="end_row_time going">312 seconds...</strong>
-						</li>
-						<li class="list-group-item end_row" id="u2">
-							<strong class="end_row_name">McKenna: </strong>
-							<!--<canvas class="end_canvas"></canvas>-->
-							<strong class="end_row_time">298 seconds</strong>
-						</li>
-						<li class="list-group-item end_row running" id="u3">
-							<strong class="end_row_name">Rohan: </strong>
-							<!--<canvas class="end_canvas"></canvas>-->
-							<strong class="end_row_time going">312 seconds...</strong>
-						</li>
-					</div>
+					<table class="table" id="leaderboard">
+					</table>
 				</div>
 				<div class="card-footer">
 					<a href="waiting"><button class="btn my_success">Play a game with the same people</button></a>
