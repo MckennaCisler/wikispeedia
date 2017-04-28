@@ -78,7 +78,7 @@ The users can navigate to a page where new games can be joined or created.
 ## Project Specs and Mockup
 
 ### Basic functionality:
- - Creating and joining a lobbby with friends
+ - Creating and joining a lobby with friends
  - One game type
  - Basic Wikipedia text, links
  - No advanced options
