@@ -28,6 +28,9 @@ $(document).ready(() => {
 	"use strict";
 	keepGoing = true;
 
+	$title1.html("Loading...");
+	$title2.html("Loading...");
+
 	$("#force").on('click', () => {
 		$(".loader").hide();
 		$("#counter").show();

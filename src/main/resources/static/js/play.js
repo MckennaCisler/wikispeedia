@@ -34,8 +34,7 @@ let startTime = new Date().getTime();
 $(document).ready(() => {
   $timer.text("0:00");
   $title.html("<b>Loading...</b>");
-
-  $destination.html("<b>" + titleFromHref(destHref) + "</b>");
+  $destination.html("<b>Loading...</b>");
   setInterval(updateTimer, 200);
 });
 
@@ -45,6 +44,7 @@ serverConn.ready(() => {
     });
 
     hasDrawnPlayerList = false;
+    // $destination.html("<b>" + titleFromHref(end) + "</b>");
     currHistory = serverConn.clientId; // the player whose history is currently displayed
     serverConn.registerAllPlayers(drawHistoryCallback);
     serverConn.getPlayers(drawHistoryCallback);
@@ -152,7 +152,6 @@ function drawHistoryCallback(players) {
 
 function drawHistory() {
   playerHistory = playerPaths.get(currHistory);
-  console.log(playerHistory);
   html = "";
   if (playerHistory.length > 0) {
     startIndex = 0;
@@ -162,10 +161,10 @@ function drawHistory() {
     }
 
     for (i = startIndex; i < playerHistory.length - 1; i++) {
-      html = html + playerHistory[i].name + "<br>";
+      html = html + titleFromHref(playerHistory[i].url) + "<br>";
     }
 
-    html = html + "<b>" + playerHistory[playerHistory.length - 1].name + "</b>";
+    html = html + "<b>" + titleFromHref(playerHistory[playerHistory.length - 1].url) + "</b>";
   }
 
   $history.html(html);
