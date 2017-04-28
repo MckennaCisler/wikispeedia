@@ -7,8 +7,10 @@ let lobbyName;
 $(document).ready(function () {
 	"use strict";
 	resize();
+	$('[data-toggle="tooltip"]').tooltip();
 
 	$("#advanced_ops").hide();
+	$("#difficulty_slider").slider();
 	$("#advanced").on('click', () => {
 		if ($("#advanced_ops").is(":hidden")) {
 			$("#advanced_ops").show();
@@ -22,7 +24,7 @@ $(document).ready(function () {
 	$("#open_games").on('click', (event) => {
 		isMaking = false;
 		const $target = $(event.target);
-		if ($target.attr('id') !== "none-found") {
+		if (!$("#open_games").hasClass("none-found")) {
 			lobbyName = $target.html();
 			$("#main").hide();
 			$("#rules").hide();
@@ -36,15 +38,24 @@ $(document).ready(function () {
 		$("#main").show();
 		$("#rules").show();
 	});
+});
 
-
+$(document).keypress((e) => {
+	"use strict";
+	if (e.keyCode === 13) {
+		if ($("#main").is(":hidden")) {
+			$("#launch").click();
+		} else {
+			$("#start_game").click();
+		}
+	}
 });
 
 $(window).resize(resize);
 
 function resize() {
 	"use strict";
-	if ($(window).width() <= 600) {
+	if ($(window).width() <= 400) {
 		$('#main_buttons').removeClass("btn-group");
 	} else {
 		$('#main_buttons').addClass("btn-group");
@@ -138,8 +149,10 @@ function drawLobbies(lobbies) {
 	"use strict";
 	$("#open_games").html("");
 	if (lobbies.length === 0) {
-		$("#open_games").append("<p id='none-found'>No games were found, you'll have to make your own!</p>");
+		$("#open_games").append("<p>No games were found, you'll have to make your own!</p>");
+		$("#open_games").addClass("none-found");
 	} else {
+		$("#open_games").removeClass("none-found");
 		for (let i = 0; i < lobbies.length; i++) {
 			$("#open_games").append('<li class="alobby list-group-item list-group-item-action" id="' +
 				lobbies[i].id + '">' + lobbies[i].id + '</li>');

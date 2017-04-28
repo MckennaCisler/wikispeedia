@@ -11,6 +11,7 @@
 	<script src="lib/js/tether.min.js"></script>
 	<script src="lib/js/bootstrap.min.js"></script>
 	<link href="https://fonts.googleapis.com/css?family=Heebo:400,900|Rubik+Mono+One" rel="stylesheet">
+	<link href="lib/jqui/jquery-ui.css" rel="stylesheet" type="text/css">
 	<script src="lib/jqui/jquery-ui.js"></script>
 	<script src="js/index.js"></script>
 	
@@ -54,22 +55,14 @@
 							<label class="btn btn-outline-secondary">
 								<input type="radio" name="gametypes" id="clicks"><img src="lib/assets/mouse-cursor.png" height="20"> Least Clicks
 							</label>
-							<label class="btn btn-outline-secondary">
-								<input type="radio" name="gametypes" id="explore"><img src="lib/assets/explore-icon.png" height="20"> Explore
-							</label>
 						</div>
 						<br><br>
 
-						<!--<div id="difficulty_radio">
+						<div id="difficulty">
 							<b>Difficulty: </b>
-							<form style="display: inline; padding-left: .5em;">
-								<input type="radio" name="difficulty" value="1" checked=""> Easy
-								<input type="radio" name="difficulty" value="2"> Medium
-								<input type="radio" name="difficulty" value="3"> Hard
-								<input type="radio" name="difficulty" value="4"> Extreme
-							</form>
+							<input type="range" id="difficulty_slider" data-toggle="tooltip" data-placement="bottom" title="Easiest -> Hardest">
 						</div>
-						<br>-->
+						<br>
 
 						<div class="form-group row">
 							<label for="example-text-input" class="col-4 col-form-label">Game name</label>
@@ -108,27 +101,13 @@
 				</div>
 			</div>
 		</div>
+		<br>
 	</div>
+	
 
-	<!--<div id="rules" class="container text-center main_content">
+	<div id="uname_picker" class="container-fluid text-center main_content">
 		<div class="row">
-			<div class="col-3"></div>
-			<div class="col-6">
-				<div class="card card-default">
-					<h3 class="card-header">Rules</h3>
-					<div class="card-block">
-						<p>Just some rules for you to know!</p>
-					</div>
-				</div>
-			</div>
-			<div class="col-3"></div>
-		</div>
-	</div>-->
-
-	<div id="uname_picker" class="container text-center main_content" style="display: none;">
-		<div class="row">
-			<div class="col-3"></div>
-			<div class="col-6">
+			<div class="col">
 				<div class="card card-default">
 					<h3 class="card-header">Pick a username for the lobby <div id="u_header"></div></h3>
 					<div class="card-block">
@@ -143,7 +122,6 @@
 					</div>
 				</div>
 			</div>
-			<div class="col-3"></div>
 		</div>
 	</div>
 </body>
