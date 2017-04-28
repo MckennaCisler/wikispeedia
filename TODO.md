@@ -17,18 +17,9 @@
 # Mckenna
 Core Functionality
   Create ERROR struct to give all errors consistent error codes for frontend to use
-
-    Write Serializers
-        Replace JsonSerializable with https://github.com/google/gson/blob/master/UserGuide.md#TOC-Custom-Serialization-and-Deserialization
-    Core
-        Change commands to transmit in uppercase?
-        Change websockets so we don't need polling
-            Send out the LOBBIES message to everyone when one is added
-        TIMING
-            When to start (5s countdown in beginning, etc.)
-            When to update on /play?
-            Should we send a message every second?
-        Figure out how to nicely deserialize wikipages differently in different contexts
+  Core
+      TIMING
+          When to start (5s countdown in beginning, etc.)
 
 Wiki Pages
     Be explicit with variable names (page name vs. href!)
