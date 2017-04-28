@@ -1,1 +1,1 @@
-web: ./run --gui
+web: run --gui
