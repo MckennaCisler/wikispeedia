@@ -13,6 +13,9 @@
 	<link href="https://fonts.googleapis.com/css?family=Heebo:400,900|Rubik+Mono+One" rel="stylesheet">
 	<link href="lib/jqui/jquery-ui.css" rel="stylesheet" type="text/css">
 	<script src="lib/jqui/jquery-ui.js"></script>
+	<script src="https://www.w3schools.com/lib/w3data.js"></script>
+	<link rel="import" href="lib/chat.html">
+	<script src="js/chat.js"></script>
 	<script src="js/index.js"></script>
 	
 	<meta name="viewport" content="width=device-width, initial-scale=1">
@@ -40,7 +43,7 @@
 <body>
 	<div class="top">
 		<h1 title="Wikispeedia" style="padding-top: 10px; display: inline-block;"><a class="title-a" href="/">Wikispeedia</a></h1>
-		<button id="chat_button" style="float: right; padding-top: 15px; padding-right: 15px;" class="btn">C</button>
+		<button id="chat_button" style="float: right;" class="btn btn-secondary mr-2 mt-2">Chat</button>
 	</div>
 
 	<div class="container-fluid text-center main_content" id="main">
@@ -60,8 +63,8 @@
 						<br><br>
 
 						<div id="difficulty">
-							<b>Difficulty: </b>
-							<input type="range" id="difficulty_slider" data-toggle="tooltip" data-placement="bottom" title="Easiest -> Hardest">
+							<b data-toggle="tooltip" data-placement="bottom" title="Easiest -> Hardest">Difficulty: </b>
+							<input type="range" id="difficulty_slider">
 						</div>
 						<br>
 
@@ -93,10 +96,6 @@
 					<h3 class="card-header">Join a lobby</h3>
 					<div class="card-block">
 						<div class="list-group" id="open_games">
-							<p>No games were found, you'll have to make your own!</p>
-							<!--<li class="alobby list-group-item list-group-item-action" id="game1">Cool game</li>
-							<li class="alobby list-group-item list-group-item-action" id="game2">Better game</li>
-							<li class="alobby list-group-item list-group-item-action" id="game3">Troll game</li>-->
 						</div>
 					</div>
 				</div>
@@ -126,24 +125,6 @@
 		</div>
 	</div>
 	
-	<div class="col-4" id="chat_card" style="position: absolute; left: 65%; top: 5%;">
-	  <div class="card card-default" style="height: 70vh;">
-		<div class="card-header">
-			<h3 style="float: left;">Chat</h3>
-			<h5 id="xout" style="float: right;">X</h5>
-		</div>
-		<div class="card-block">
-		  <div id="chat_div">No one has said anything yet - start a conversation!</div>
-		</div>
-		<div class="card-footer">
-		  <div class="input-group">
-			<input id="chat_text" type="text" class="form-control" placeholder="Say something...">
-			<span class="input-group-btn">
-			<button id="send_chat" class="btn btn-success" type="button">Send</button>
-			</span>
-		  </div>
-		</div>
-	  </div>
-	</div>
+	<!--<div w3-include-html="lib/chat.html"></div> -->
 </body>
 </html>

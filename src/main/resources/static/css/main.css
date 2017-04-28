@@ -99,6 +99,11 @@
 		margin-right: 10em;
 	}
 }
+@media(max-width: 650px) {
+	#chat_button {
+		display: none;
+	}
+}
 
 /* Lobby page */
 
@@ -193,6 +198,11 @@ h3.card-header {
 	font-family: 'Heebo', sans-serif !important;
 	font-weight: 900;
 }
+#chat_header {
+	font-family: 'Heebo', sans-serif !important;
+	font-weight: 900;
+}
+
 
 .loader,
 .loader:before,
