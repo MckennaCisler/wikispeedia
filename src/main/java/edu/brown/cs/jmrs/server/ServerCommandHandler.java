@@ -26,17 +26,6 @@ class ServerCommandHandler implements Runnable {
     NULL;
 
     /**
-     * @return Whether the given commandName matches (is) this Command.
-     */
-    boolean is(String commandName) {
-      try {
-        return this.equals(valueOf(commandName.toUpperCase()));
-      } catch (IllegalArgumentException | NullPointerException e) {
-        return false;
-      }
-    }
-
-    /**
      * Equivalent to valueOf() but returns a blank string instead of an
      * exception.
      */
@@ -92,12 +81,12 @@ class ServerCommandHandler implements Runnable {
                     lobby.init(
                         commandPayload.get("arguments").getAsJsonObject());
                   }
+                  server.lobbylessMap().remove(player.getId(), player);
                   lobby.addClient(player.getId());
                   player.setLobby(lobby);
                   jsonObject.addProperty("error_message", "");
                   toClient = gson.toJson(jsonObject);
                   conn.getRemote().sendString(toClient);
-                  conn.getRemote().sendString(gson.toJson(allLobbies()));
                   return;
 
                 case LEAVE_LOBBY:
@@ -106,6 +95,7 @@ class ServerCommandHandler implements Runnable {
                     throw new InputError(
                         "This client is not registered with any lobby");
                   }
+                  server.lobbylessMap().put(player.getId(), player);
                   player.getLobby().removeClient(player.getId());
                   jsonObject.addProperty("error_message", "");
                   toClient = gson.toJson(jsonObject);
@@ -127,15 +117,12 @@ class ServerCommandHandler implements Runnable {
                   if (playerLobby != null) {
                     playerLobby.removeClient(player.getId());
                   }
+                  server.lobbylessMap().remove(player.getId(), player);
                   lobby2.addClient(player.getId());
                   player.setLobby(lobby2);
                   jsonObject.addProperty("error_message", "");
                   toClient = gson.toJson(jsonObject);
                   conn.getRemote().sendString(toClient);
-                  conn.getRemote().sendString(gson.toJson(allLobbies()));
-                  return;
-                case GET_LOBBIES:
-                  conn.getRemote().sendString(gson.toJson(allLobbies()));
                   return;
                 default: // equivalent to NULL, i.e. that the command type was
                          // not
@@ -182,21 +169,6 @@ class ServerCommandHandler implements Runnable {
       e.printStackTrace();
       throw e;
     }
-  }
-
-  private JsonObject allLobbies() {
-    JsonObject jsonObject = new JsonObject();
-    jsonObject.addProperty("command", "all_lobbies");
-    List<String> lobbies = server.getOpenLobbies();
-    jsonObject.addProperty("error_message", "");
-
-    JsonArray lobbyArray = new JsonArray();
-    for (String id : lobbies) {
-      lobbyArray.add(gson.toJsonTree(server.getLobby(id)));
-    }
-
-    jsonObject.add("payload", lobbyArray);
-    return jsonObject;
   }
 
   /**

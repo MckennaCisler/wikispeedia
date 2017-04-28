@@ -1,5 +1,7 @@
 package edu.brown.cs.jmrs.server.customizable;
 
+import com.google.gson.Gson;
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 
 public interface Lobby {
@@ -16,4 +18,5 @@ public interface Lobby {
 
   void playerDisconnected(String clientId);
 
+  JsonElement toJson(Gson gson);
 }
