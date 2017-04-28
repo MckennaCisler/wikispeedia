@@ -28,17 +28,13 @@ let ddd = window.setInterval(() => {
 $(document).ready(() => {
 	"use strict";
 	resize();
+	$('[data-toggle="tooltip"]').tooltip();
 	keepGoing = true;
 
 	$title1.html("Loading...");
 	$title2.html("Loading...");
 
 	$("#force").on('click', () => {
-		$(".loader").hide();
-		if ($(window).width() > 700) {
-			$("#counter").show();
-		}
-		loader = false;
 		startGame();
 	});
 });
@@ -49,8 +45,12 @@ function resize() {
 	"use strict";
 	if ($(window).width() <= 700) {
 		$('.loader').hide();
+		$("#waiting_card").removeClass("row");
+		$("#players").removeClass("col-4");
 	} else if (loader) {
 		$('.loader').show();
+		$("#waiting_card").addClass("row");
+		$("#players").addClass("col-4");
 	}
 
 	if (!loader && $(window).width() > 700) {
@@ -82,6 +82,11 @@ function startGame() {
 	document.title = "The game is starting";
 	let audio = new Audio('lib/assets/beep.wav');
 	audio.play();
+	$(".loader").hide();
+	if ($(window).width() > 700) {
+		$("#counter").show();
+	}
+	loader = false;
 	var pid = setInterval(decrement, 1000, pid);
 }
 
@@ -128,13 +133,17 @@ function drawPlayers(players) {
 	// example line: <li class="list-group-item"><input type="checkbox" id="u0" checked disabled> You</li>
 	$players.html("");
 	for (let i = 0; i < players.length; i++) {
-		if (players[i].id == serverConn.clientId) {
-			$("<li class=\"list-group-item\"><input type=\"checkbox\">&nbsp<b>Me</b></li>")
-				.appendTo($players)
-				.children("input").prop('checked', players[i].ready)
-				.click(function() {
-					serverConn.setPlayerState($(this).prop('checked'));
+		if (players[i].id === serverConn.clientId) {
+			if (!players[i].ready) {
+				$("<li class=\"list-group-item\"><div class=\"me_li\"><div style=\"align-self: flex-start;\"><b>Me</b></div><button class=\"btn btn-outline-success\" id=\"my_but\" style=\"align-self: flex-end;\">Click when ready</button></li>")
+				.appendTo($players);
+				$("#my_but").on('click', function() {
+					serverConn.setPlayerState(true);
 				});
+			} else {
+				$("<li class=\"list-group-item\"><div class=\"me_li\"><div style=\"align-self: flex-start;\"><b>Me</b></div><button class=\"btn btn-success\" id=\"my_but\" style=\"align-self: flex-end;\" disabled>Click when ready</button></li>")
+				.appendTo($players);
+			}
 		} else {
 			$("<li class=\"list-group-item\"><input type=\"checkbox\" disabled>&nbsp" + players[i].name + "</li>")
 				.appendTo($players);
