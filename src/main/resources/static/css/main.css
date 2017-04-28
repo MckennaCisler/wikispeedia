@@ -129,6 +129,12 @@
 .end_row_time {
 	align-self: flex-end;
 }
+.me_li {
+	display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    width: 100%;
+}
 #main_buttons {
 	margin-top: 15px;
 	align-self: center;

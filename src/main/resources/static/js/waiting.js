@@ -124,13 +124,6 @@ function drawSecondPage(article) {
 	// $blurb2.text(firstSentence(article.blurb));
 }
 
-function dimMyBut() {
-	"use strict";
-	$("#my_but").removeClass("btn-outline-success");
-	$("#my_but").addClass("btn-success");
-	$("#my_but").attr('disabled', true);
-}
-
 let playersFake = [{name : "Rohan", id : "a"}, {name : "McKenna", id : "b"}, {name : "Jacob", id : "c"}, {name : "Sean", id : "d"}];
 function drawPlayers(players) {
 	"use strict";
@@ -139,14 +132,15 @@ function drawPlayers(players) {
 	for (let i = 0; i < players.length; i++) {
 		if (players[i].id === serverConn.clientId) {
 			if (!players[i].ready) {
-				$("<li class=\"list-group-item\"><div><p style=\"float: left;\"><b>Me</b></p><button class=\"btn btn-outline-success\" id=\"my_but\" style=\"float: right;\">Click when ready</button></li>")
+				$("<li class=\"list-group-item\"><div class=\"me_li\"><div style=\"align-self: flex-start;\"><b>Me</b></div><button class=\"btn btn-outline-success\" id=\"my_but\" style=\"align-self: flex-end;\">Click when ready</button></li>")
 				.appendTo($players);
 				$("#my_but").on('click', function() {
 					serverConn.setPlayerState(true);
 				});
-			} else 
-				$("<li class=\"list-group-item\"><b>Me</b><button class=\"btn btn-success\" id=\"my_but\" style=\"float: right;\" disabled>Click when ready</button></li>")
+			} else {
+				$("<li class=\"list-group-item\"><div class=\"me_li\"><div style=\"align-self: flex-start;\"><b>Me</b></div><button class=\"btn btn-success\" id=\"my_but\" style=\"align-self: flex-end;\" disabled>Click when ready</button></li>")
 				.appendTo($players);
+			}
 		} else {
 			$("<li class=\"list-group-item\"><input type=\"checkbox\" disabled>&nbsp" + players[i].name + "</li>")
 				.appendTo($players);
