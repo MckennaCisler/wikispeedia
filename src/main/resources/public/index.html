@@ -11,6 +11,7 @@
 	<script src="lib/js/tether.min.js"></script>
 	<script src="lib/js/bootstrap.min.js"></script>
 	<link href="https://fonts.googleapis.com/css?family=Heebo:400,900|Rubik+Mono+One" rel="stylesheet">
+	<link href="lib/jqui/jquery-ui.css" rel="stylesheet" type="text/css">
 	<script src="lib/jqui/jquery-ui.js"></script>
 	<script src="js/index.js"></script>
 	
@@ -38,7 +39,8 @@
 </head>
 <body>
 	<div class="top">
-		<h1 title="Wikispeedia" style="padding-top: 10px;"><a class="title-a" href="/">Wikispeedia</a></h1>
+		<h1 title="Wikispeedia" style="padding-top: 10px; display: inline-block;"><a class="title-a" href="/">Wikispeedia</a></h1>
+		<button id="chat_button" style="float: right; padding-top: 15px; padding-right: 15px;" class="btn">C</button>
 	</div>
 
 	<div class="container-fluid text-center main_content" id="main">
@@ -54,22 +56,14 @@
 							<label class="btn btn-outline-secondary">
 								<input type="radio" name="gametypes" id="clicks"><img src="lib/assets/mouse-cursor.png" height="20"> Least Clicks
 							</label>
-							<label class="btn btn-outline-secondary">
-								<input type="radio" name="gametypes" id="explore"><img src="lib/assets/explore-icon.png" height="20"> Explore
-							</label>
 						</div>
 						<br><br>
 
-						<!--<div id="difficulty_radio">
+						<div id="difficulty">
 							<b>Difficulty: </b>
-							<form style="display: inline; padding-left: .5em;">
-								<input type="radio" name="difficulty" value="1" checked=""> Easy
-								<input type="radio" name="difficulty" value="2"> Medium
-								<input type="radio" name="difficulty" value="3"> Hard
-								<input type="radio" name="difficulty" value="4"> Extreme
-							</form>
+							<input type="range" id="difficulty_slider" data-toggle="tooltip" data-placement="bottom" title="Easiest -> Hardest">
 						</div>
-						<br>-->
+						<br>
 
 						<div class="form-group row">
 							<label for="example-text-input" class="col-4 col-form-label">Game name</label>
@@ -108,27 +102,13 @@
 				</div>
 			</div>
 		</div>
+		<br>
 	</div>
+	
 
-	<!--<div id="rules" class="container text-center main_content">
+	<div id="uname_picker" class="container-fluid text-center main_content">
 		<div class="row">
-			<div class="col-3"></div>
-			<div class="col-6">
-				<div class="card card-default">
-					<h3 class="card-header">Rules</h3>
-					<div class="card-block">
-						<p>Just some rules for you to know!</p>
-					</div>
-				</div>
-			</div>
-			<div class="col-3"></div>
-		</div>
-	</div>-->
-
-	<div id="uname_picker" class="container text-center main_content" style="display: none;">
-		<div class="row">
-			<div class="col-3"></div>
-			<div class="col-6">
+			<div class="col">
 				<div class="card card-default">
 					<h3 class="card-header">Pick a username for the lobby <div id="u_header"></div></h3>
 					<div class="card-block">
@@ -143,8 +123,27 @@
 					</div>
 				</div>
 			</div>
-			<div class="col-3"></div>
 		</div>
+	</div>
+	
+	<div class="col-4" id="chat_card" style="position: absolute; left: 65%; top: 5%;">
+	  <div class="card card-default" style="height: 70vh;">
+		<div class="card-header">
+			<h3 style="float: left;">Chat</h3>
+			<h5 id="xout" style="float: right;">X</h5>
+		</div>
+		<div class="card-block">
+		  <div id="chat_div">No one has said anything yet - start a conversation!</div>
+		</div>
+		<div class="card-footer">
+		  <div class="input-group">
+			<input id="chat_text" type="text" class="form-control" placeholder="Say something...">
+			<span class="input-group-btn">
+			<button id="send_chat" class="btn btn-success" type="button">Send</button>
+			</span>
+		  </div>
+		</div>
+	  </div>
 	</div>
 </body>
 </html>

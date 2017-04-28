@@ -72,6 +72,34 @@
 	margin-bottom: -12px;
 }
 
+#difficulty_slider {
+	width: 70%;
+    float: right;
+}
+
+#uname_picker {
+	display: none;
+}
+
+@media(min-width: 700px) {
+	#uname_picker {
+		margin-left: 2em;
+		margin-right: 2em;
+	}
+}
+@media(min-width: 900px) {
+	#uname_picker {
+		margin-left: 5em;
+		margin-right: 5em;
+	}
+}
+@media(min-width: 1200px) {
+	#uname_picker {
+		margin-left: 10em;
+		margin-right: 10em;
+	}
+}
+
 /* Lobby page */
 
 .top {
@@ -106,6 +134,12 @@
 }
 .end_row_time {
 	align-self: flex-end;
+}
+.me_li {
+	display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    width: 100%;
 }
 #main_buttons {
 	margin-top: 15px;
@@ -175,7 +209,7 @@ h3.card-header {
   text-indent: -9999em;
   margin: 1.5em 5em;
   position: absolute;
-	top: 1.5%;
+	top: 0.75%;
 	right: 0%;
   font-size: .5em;
   -webkit-transform: translateZ(0);
