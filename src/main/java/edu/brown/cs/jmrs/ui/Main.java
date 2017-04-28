@@ -14,6 +14,7 @@ import edu.brown.cs.jmrs.wikispeedia.WikiInterpreter;
 import edu.brown.cs.jmrs.wikispeedia.WikiLobby;
 import edu.brown.cs.jmrs.wikispeedia.WikiMainHandlers;
 import edu.brown.cs.jmrs.wikispeedia.WikiPageHandlers;
+import edu.brown.cs.jmrs.wikispeedia.WikiPlayer;
 import joptsimple.OptionException;
 import joptsimple.OptionParser;
 import joptsimple.OptionSet;
@@ -47,8 +48,7 @@ public final class Main {
     GsonBuilder builder = new GsonBuilder();
     builder.registerTypeAdapter(WikiPage.class, new WikiPage.Serializer());
     builder.registerTypeAdapter(WikiLobby.class, new WikiLobby.Serializer());
-    // builder.registerTypeAdapter(WikiPlayer.class, new
-    // WikiPlayer.Serializer());
+    builder.registerTypeAdapter(WikiPlayer.class, new WikiPlayer.Serializer());
 
     return builder.create();
   }

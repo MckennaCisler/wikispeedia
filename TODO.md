@@ -12,6 +12,8 @@
 - Track history
 - Shortest path
 - Design work
+- Deal with what happens when a player can't be on a page (/waiting for ex.)
+- MEMORY LEAKS
 
 #### Deadlines:
 - <b>Adversary TA Meeting (Wednesday, 4/26)</b>

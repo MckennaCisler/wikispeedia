@@ -52,7 +52,7 @@ function resize() {
 	} else if (loader) {
 		$('.loader').show();
 	}
-	
+
 	if (!loader && $(window).width() > 700) {
 		$("#counter").show();
 	}
@@ -96,11 +96,11 @@ serverConn.ready(() => {
 
 	// Get player states
 	serverConn.registerAllPlayers(drawPlayers);
-	serverConn.getPlayers(drawPlayers);
+	serverConn.getPlayers(drawPlayers, displayServerConnError);
 	serverConn.registerBeginGame(startGame); // TODO: Game will be 5s off in time!!!!
 
 	// Get current lobby settings
-	serverConn.getSettings("", GameState.WAITING, (settings) => {
+	serverConn.getSettings("", GAME_STATE.WAITING, (settings) => {
  		// Get articles
 		serverConn.getPage(settings.start.name, (article) => {
 			drawFirstPage(article);

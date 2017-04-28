@@ -93,7 +93,8 @@ serverConn.ready(() => {
 
 			serverConn.startLobby(lobbyName.trim(),
 				{
-					"TODO": "lobby_args" // TODO
+					"gameMode": GAME_MODES.TIME_TRIAL,
+					"difficulty": 5
 				},
 				() => {
 					$("#main").hide();
@@ -101,9 +102,7 @@ serverConn.ready(() => {
 					$("#uname_picker").show();
 					$("#u_header").html(lobbyName);
 				},
-				(error) => {
-					displayServerConnError(error);
-			});
+				displayServerConnError);
 			console.log(lobbyName);
 		}
 	});

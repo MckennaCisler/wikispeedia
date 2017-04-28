@@ -34,7 +34,7 @@ function hrefHelper(f, href) {
   return "javascript:" + f + "('" + href + "')";
 }
 
-function displayError(msg) {
+function displayError(msg, error_code) {
     // TODO
     alert(msg);
 }
@@ -44,5 +44,5 @@ function clearError() {
 }
 
 function displayServerConnError(error) {
-    displayError(error.error_message);
+    displayError(error.error_message, error.error_code);
 }

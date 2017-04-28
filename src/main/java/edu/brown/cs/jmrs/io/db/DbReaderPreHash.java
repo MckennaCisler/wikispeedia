@@ -46,7 +46,7 @@ public class DbReaderPreHash<T, H> extends DbReader<T> {
       T t = super.construct(rs);
       // avoid out of memory error
       if (madeObjects.size() < MAX_SAVED_PREHASH) {
-        madeObjects.putIfAbsent(ph, t);
+        madeObjects.put(ph, t);
       } else {
         madeObjects.clear();
       }

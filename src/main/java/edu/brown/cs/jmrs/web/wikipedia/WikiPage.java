@@ -173,7 +173,7 @@ public class WikiPage extends Page {
    * @return Whether url is a Wikipedia article page other than this one.
    */
   public boolean isChildWikipediaArticle(String url) {
-    return isWikipediaArticle(url) && url != super.url();
+    return isWikipediaArticle(url) && !url.equals(super.url());
   }
 
   /**

@@ -31,7 +31,7 @@ public class Server {
   public Server(BiFunction<Server, String, ? extends Lobby> lobbyFactory,
       CommandInterpreter interpreter, Gson gson) {
     this.interpreter = interpreter;
-    server = new ServerWorker(this, lobbyFactory, gson);
+    server = new ServerWorker(this, lobbyFactory);
     this.gson = gson;
   }
 
