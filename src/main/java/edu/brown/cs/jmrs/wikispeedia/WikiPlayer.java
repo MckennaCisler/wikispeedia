@@ -330,6 +330,6 @@ public class WikiPlayer {
   public String toString() {
     return String.format("Player %s (%s) named '%s' in lobby %s at %s", id,
         connected() ? "connected" : "disconnected", name, lobby,
-        getCurPage().url());
+        getCurPage() == null ? "[no page yet]" : getCurPage().url());
   }
 }

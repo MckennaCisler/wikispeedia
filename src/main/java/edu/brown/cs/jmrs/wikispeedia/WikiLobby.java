@@ -80,12 +80,19 @@ public class WikiLobby implements Lobby {
       throw new IllegalArgumentException("Invalid GameMode specified.");
     }
 
-    if (arguments.has("startPage") && arguments.has("goalPage")) {
-      // add custom shortcut to set start and end page.
-      int difficulty = arguments.get("difficulty").getAsInt();
-      WikiGame game = GameGenerator.ofDist(difficulty * 2);
-      this.startPage = game.getStart();
-      this.goalPage = game.getGoal();
+    // generate page from difficulty
+    int difficulty = arguments.get("difficulty").getAsInt();
+    WikiGame game = GameGenerator.ofDist(difficulty * 2); // TODO:
+    this.startPage = game.getStart();
+    this.goalPage = game.getGoal();
+
+    // add custom shortcut to set start and end page specifically.
+    if (arguments.has("startPage")) {
+      this.startPage =
+          WikiPage.fromAny(arguments.get("startPage").getAsString());
+    }
+    if (arguments.has("goalPage")) {
+      this.goalPage = WikiPage.fromAny(arguments.get("goalPage").getAsString());
     }
   }
 
