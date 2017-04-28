@@ -40,10 +40,7 @@ $(document).ready(function () {
 
 });
 
-$(window).resize(function () {
-	"use strict";
-	resize();
-});
+$(window).resize(resize);
 
 function resize() {
 	"use strict";
