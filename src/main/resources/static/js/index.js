@@ -10,6 +10,8 @@ $(document).ready(function () {
 	$('[data-toggle="tooltip"]').tooltip();
 
 	$("#advanced_ops").hide();
+	$("#chat_card").hide();
+	
 	$("#difficulty_slider").slider();
 	$("#advanced").on('click', () => {
 		if ($("#advanced_ops").is(":hidden")) {
@@ -37,6 +39,14 @@ $(document).ready(function () {
 		$("#uname_picker").hide();
 		$("#main").show();
 		$("#rules").show();
+	});
+	
+	$("#chat_button").on('click', () => {
+		$("#chat_card").toggle();
+	});
+	
+	$("#xout").on('click', () => {
+		$("#chat_card").hide();
 	});
 });
 
