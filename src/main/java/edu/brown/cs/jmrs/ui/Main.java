@@ -97,8 +97,17 @@ public final class Main {
             "/static", "src/main/resources/public");
         System.out.println("[ Started Spark ]");
 
+        // TODO: how to really stop it?
+        String waiter = "";
+        synchronized (waiter) {
+          while (true) {
+            waiter.wait();
+          }
+        }
+
+      } catch (InterruptedException e) {
       } finally {
-        // SparkServer.stop(); // TODO: how to really stop it?
+        SparkServer.stop();
       }
     } else if (options.has("chat-test")) {
 

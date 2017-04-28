@@ -11,7 +11,7 @@ $(document).ready(function () {
 
 	$("#advanced_ops").hide();
 	$("#chat_card").hide();
-	
+
 	$("#difficulty_slider").slider();
 	$("#advanced").on('click', () => {
 		if ($("#advanced_ops").is(":hidden")) {
@@ -40,11 +40,11 @@ $(document).ready(function () {
 		$("#main").show();
 		$("#rules").show();
 	});
-	
+
 	$("#chat_button").on('click', () => {
 		$("#chat_card").toggle();
 	});
-	
+
 	$("#xout").on('click', () => {
 		$("#chat_card").hide();
 	});
@@ -114,8 +114,8 @@ serverConn.ready(() => {
 
 			serverConn.startLobby(lobbyName.trim(),
 				{
-					"gameMode": GAME_MODES.TIME_TRIAL,
-					"difficulty": 5
+					"gameMode": GAME_MODES.TIME_TRIAL,					 // TODO: YOU-HOO!!!!!!!!!!!!!!!!
+					"difficulty": 5										 // TODO: YOU-HOO!!!!!!!!!!!!!!!!
 				},
 				() => {
 					$("#main").hide();

@@ -50,7 +50,7 @@ public final class GameGenerator {
   }
 
   /**************************************************************/
-  /* Helpers for page traversal */
+  /* Helpers for page traversal / basic generation */
   /**************************************************************/
 
   private static WikiPage goDownFrom(WikiPage start, int depth) {
@@ -71,7 +71,11 @@ public final class GameGenerator {
     }
   }
 
-  private static WikiPage getRandomPage() {
+  /**
+   * @return A pseudo-random page with little parsing. Underlying implementation
+   *         simply moves a distance off a very general Wikipedia page.
+   */
+  public static WikiPage getRandomPage() {
     // Start from the main page for rapidly-changing and diverse content
     return goDownFrom(START_PAGE, OFF_START_PAGE);
   }

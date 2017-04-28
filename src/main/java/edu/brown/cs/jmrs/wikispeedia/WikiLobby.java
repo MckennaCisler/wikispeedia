@@ -62,6 +62,10 @@ public class WikiLobby implements Lobby {
   /* LOBBY OVERRIDES */
   /****************************************/
 
+  /**
+   * Called on lobby creation; stuctures this lobby to follow a certain game
+   * mode.
+   */
   @Override
   public void init(JsonObject arguments) {
     int mode = arguments.get("gameMode").getAsInt();
@@ -76,11 +80,13 @@ public class WikiLobby implements Lobby {
       throw new IllegalArgumentException("Invalid GameMode specified.");
     }
 
-    // add custom shortcut to set start and end page.
-    int difficulty = arguments.get("difficulty").getAsInt();
-    WikiGame game = GameGenerator.ofDist(difficulty * 2);
-    this.startPage = game.getStart();
-    this.goalPage = game.getGoal();
+    if (arguments.has("startPage") && arguments.has("goalPage")) {
+      // add custom shortcut to set start and end page.
+      int difficulty = arguments.get("difficulty").getAsInt();
+      WikiGame game = GameGenerator.ofDist(difficulty * 2);
+      this.startPage = game.getStart();
+      this.goalPage = game.getGoal();
+    }
   }
 
   @Override
