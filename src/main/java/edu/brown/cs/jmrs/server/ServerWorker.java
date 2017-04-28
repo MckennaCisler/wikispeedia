@@ -124,12 +124,15 @@ class ServerWorker {
     if (!disconnectedPlayers.isEmpty()) {
       Date now = new Date();
       Player p = disconnectedPlayers.poll();
-      while (p.getCookieExpiration().before(now)) {
+      while (p != null && p.getCookieExpiration().before(now)) {
         players.remove(players.getReversed(p));
         if (!disconnectedPlayers.isEmpty()) {
           p = disconnectedPlayers.poll();
+        } else {
+          p = null;
         }
       }
+      disconnectedPlayers.add(p);
     }
   }
 

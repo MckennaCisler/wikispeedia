@@ -8,6 +8,7 @@ let $blurb1;
 let $title2;
 let $blurb2;
 let keepGoing = true;
+let loader = true;
 
 // Maybe do this with the title instead
 let dots = 0;
@@ -26,16 +27,36 @@ let ddd = window.setInterval(() => {
 
 $(document).ready(() => {
 	"use strict";
+	resize();
 	keepGoing = true;
 
 	$("#force").on('click', () => {
 		$(".loader").hide();
-		$("#counter").show();
+		if ($(window).width() > 700) {
+			$("#counter").show();
+		}
+		loader = false;
 		startGame();
 	});
 });
 
+$(window).resize(resize);
+
+function resize() {
+	"use strict";
+	if ($(window).width() <= 700) {
+		$('.loader').hide();
+	} else if (loader) {
+		$('.loader').show();
+	}
+	
+	if (!loader && $(window).width() > 700) {
+		$("#counter").show();
+	}
+}
+
 function decrement(pid) {
+	"use strict";
 	if ($("#counter").html() === "0") {
 		clearInterval(pid);
 		window.location.replace("play");
@@ -50,9 +71,10 @@ function decrement(pid) {
 			keepGoing = false;
 		}
 	}
-};
+}
 
 function startGame() {
+	"use strict";
 	clearInterval(ddd);
 	document.title = "The game is starting";
 	let audio = new Audio('lib/assets/beep.wav');
@@ -62,6 +84,7 @@ function startGame() {
 
 // game logic handlers
 serverConn.ready(() => {
+	"use strict";
 	$players = $("#players");
 	$title1 = $("#a1_title");
 	$blurb1 = $("#a1_blurb");
@@ -85,17 +108,20 @@ serverConn.ready(() => {
 });
 
 function drawFirstPage(article) {
-	$title1.html("<a href=\"" + article.href + "\">" + article.title + "</a>");
+	"use strict";
+	$title1.html("<a href=\"" + article.href + "\" target=\"_blank\">" + article.title + "</a>");
 	// $blurb1.text(firstSentence(article.blurb));
 }
 
 function drawSecondPage(article) {
-	$title2.html("<a href=\"" + article.href + "\">" + article.title + "</a>");
+	"use strict";
+	$title2.html("<a href=\"" + article.href + "\" target=\"_blank\">" + article.title + "</a>");
 	// $blurb2.text(firstSentence(article.blurb));
 }
 
 let playersFake = [{name : "Rohan", id : "a"}, {name : "McKenna", id : "b"}, {name : "Jacob", id : "c"}, {name : "Sean", id : "d"}];
 function drawPlayers(players) {
+	"use strict";
 	// example line: <li class="list-group-item"><input type="checkbox" id="u0" checked disabled> You</li>
 	$players.html("");
 	for (let i = 0; i < players.length; i++) {
