@@ -1,6 +1,7 @@
 package edu.brown.cs.jmrs.wikispeedia;
 
 import java.io.IOException;
+import java.lang.reflect.Type;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.ArrayList;
@@ -8,6 +9,12 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonSerializationContext;
+import com.google.gson.JsonSerializer;
+
+import edu.brown.cs.jmrs.ui.Main;
 import edu.brown.cs.jmrs.web.wikipedia.WikiPage;
 
 /**
@@ -96,6 +103,13 @@ public class WikiPlayer {
    */
   public final String getName() {
     return name;
+  }
+
+  /**
+   * @return This player's name.
+   */
+  public final WikiLobby getLobby() {
+    return lobby;
   }
 
   /**
@@ -253,6 +267,39 @@ public class WikiPlayer {
     return false;
   }
 
+  /**
+   * Custom serializer for use with GSON.
+   *
+   * @author mcisler
+   *
+   */
+  public static class Serializer implements JsonSerializer<WikiPlayer> {
+
+    @Override
+    public JsonElement serialize(WikiPlayer src, Type typeOfSrc,
+        JsonSerializationContext context) {
+      JsonObject root = new JsonObject();
+      root.addProperty("id", src.getId());
+      root.addProperty("name", src.getName());
+      root.addProperty("ready", src.ready());
+      root.addProperty("connected", src.connected());
+      root.addProperty("done", src.done());
+      root.add("startPage", Main.GSON.toJsonTree(src.startPage));
+      root.add("goalPage", Main.GSON.toJsonTree(src.goalPage));
+      root.add("path", Main.GSON.toJsonTree(src.path));
+      root.addProperty("endTime", src.getEndTime().toEpochMilli());
+      if (src.getLobby().started()) {
+        root.addProperty("startTime", src.getStartTime().toEpochMilli());
+        root.addProperty("playTime", src.getPlayTime().toMinutes());
+      }
+      if (src.getLobby().ended()) {
+        root.addProperty("isWinner", src.getLobby().getWinner().equals(src));
+      }
+
+      return root;
+    }
+  }
+
   @Override
   public int hashCode() {
     return Objects.hash(id);
@@ -276,7 +323,7 @@ public class WikiPlayer {
 
   @Override
   public String toString() {
-    return String.format("Player %s named '%s' in lobby %s at %s", id, name,
-        lobby, getCurPage().url());
+    return String.format("Player %s (%s) named '%s' in lobby %s at %s", id,
+        connected(), name, lobby, getCurPage().url());
   }
 }

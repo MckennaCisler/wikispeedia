@@ -1,34 +1,39 @@
-# Jacob
+#### General todo
+- <b>Fix bugs</b>
+- Least clicks mode
+- Levels of difficulty
+  - Page generation
+  - Sliding scale
+- Visualizations for history and endgame
+- Chat everywhere
+- Music
+- Mobile-friendly
+- Deployment
+- Track history
+- Shortest path
+- Design work
 
+#### Deadlines:
+- <b>Adversary TA Meeting (Wednesday, 4/26)</b>
+- <b>Done with coding (Saturday, 5/6)</b>
+- <b>Practice presentation w/ Erica (Sunday, 5/7)</b>
+- <b>Demo (Monday, 5/8)</b>
 
-# Rohan
-- Styling of ul
+#### Jacob
+
+#### Rohan
 - & in links (i.e. R&B)
 - Geographic coordinates system
 - Make videos work?
 
+#### Sean
 
-
-
-
-
-# Sean
-
-# Mckenna
+#### Mckenna
 Core Functionality
   Create ERROR struct to give all errors consistent error codes for frontend to use
-
-    Write Serializers
-        Replace JsonSerializable with https://github.com/google/gson/blob/master/UserGuide.md#TOC-Custom-Serialization-and-Deserialization
-    Core
-        Change commands to transmit in uppercase?
-        Change websockets so we don't need polling
-            Send out the LOBBIES message to everyone when one is added
-        TIMING
-            When to start (5s countdown in beginning, etc.)
-            When to update on /play?
-            Should we send a message every second?
-        Figure out how to nicely deserialize wikipages differently in different contexts
+  Core
+      TIMING
+          When to start (5s countdown in beginning, etc.)
 
 Wiki Pages
     Be explicit with variable names (page name vs. href!)

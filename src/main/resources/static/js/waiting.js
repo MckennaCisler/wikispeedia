@@ -31,6 +31,9 @@ $(document).ready(() => {
 	$('[data-toggle="tooltip"]').tooltip();
 	keepGoing = true;
 
+	$title1.html("Loading...");
+	$title2.html("Loading...");
+
 	$("#force").on('click', () => {
 		startGame();
 	});

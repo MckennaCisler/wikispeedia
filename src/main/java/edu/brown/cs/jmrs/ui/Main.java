@@ -47,6 +47,8 @@ public final class Main {
     GsonBuilder builder = new GsonBuilder();
     builder.registerTypeAdapter(WikiPage.class, new WikiPage.Serializer());
     builder.registerTypeAdapter(WikiLobby.class, new WikiLobby.Serializer());
+    // builder.registerTypeAdapter(WikiPlayer.class, new
+    // WikiPlayer.Serializer());
 
     return builder.create();
   }
