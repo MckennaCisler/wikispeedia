@@ -14,18 +14,14 @@ import edu.brown.cs.jmrs.server.customizable.Lobby;
 
 class ServerCommandHandler implements Runnable {
 
-  private final ServerWorker       server;
-  private final Session            conn;
-  private final String             unformattedCommand;
+  private final ServerWorker server;
+  private final Session conn;
+  private final String unformattedCommand;
   private final CommandInterpreter interpreter;
-  private final Gson               gson;
+  private final Gson gson;
 
   private enum Commands {
-    SET_CLIENT_ID,
-    START_LOBBY,
-    LEAVE_LOBBY,
-    JOIN_LOBBY,
-    GET_LOBBIES,
+    SET_CLIENT_ID, START_LOBBY, LEAVE_LOBBY, JOIN_LOBBY, GET_LOBBIES,
     // Value to signify not in enum (when using switch statement)
     NULL;
 
@@ -53,12 +49,8 @@ class ServerCommandHandler implements Runnable {
     }
   }
 
-  public ServerCommandHandler(
-      ServerWorker server,
-      Session conn,
-      String command,
-      CommandInterpreter interpreter,
-      Gson gson) {
+  public ServerCommandHandler(ServerWorker server, Session conn, String command,
+      CommandInterpreter interpreter, Gson gson) {
     this.server = server;
     this.conn = conn;
     this.unformattedCommand = command;
@@ -125,8 +117,8 @@ class ServerCommandHandler implements Runnable {
                   if (!commandPayload.has("lobby_id")) {
                     throw new InputError("No lobby ID provided");
                   }
-                  String lobbyId2 = commandPayload.get("lobby_id")
-                      .getAsString();
+                  String lobbyId2 =
+                      commandPayload.get("lobby_id").getAsString();
                   Lobby lobby2 = server.getLobby(lobbyId2);
                   if (lobby2 == null) {
                     throw new InputError("No lobby with specified ID exists");
@@ -151,13 +143,10 @@ class ServerCommandHandler implements Runnable {
 
                   if (player.getLobby() != null) {
                     // if not a server command pass it to the lobby
-                    interpreter.interpret(
-                        player.getLobby(),
-                        player.getId(),
+                    interpreter.interpret(player.getLobby(), player.getId(),
                         commandMap);
                   } else {
-                    jsonObject.addProperty(
-                        "error_message",
+                    jsonObject.addProperty("error_message",
                         "Player must join a lobby first.");
                     toClient = gson.toJson(jsonObject);
                     conn.getRemote().sendString(toClient);
@@ -170,16 +159,14 @@ class ServerCommandHandler implements Runnable {
               conn.getRemote().sendString(toClient);
             }
           } else {
-            jsonObject.addProperty(
-                "error_message",
+            jsonObject.addProperty("error_message",
                 "Cannot continue without unique ID");
             toClient = gson.toJson(jsonObject);
             conn.getRemote().sendString(toClient);
           }
         } else {
           jsonObject.addProperty("command", "command_error");
-          jsonObject.addProperty(
-              "error_message",
+          jsonObject.addProperty("error_message",
               "Client-to-Server commands must be JSON with 'command' field");
           toClient = gson.toJson(jsonObject);
           conn.getRemote().sendString(toClient);

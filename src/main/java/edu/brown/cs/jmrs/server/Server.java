@@ -24,14 +24,12 @@ import edu.brown.cs.jmrs.server.threading.GlobalThreadManager;
 @WebSocket
 public class Server {
 
-  protected ServerWorker       server;
+  protected ServerWorker server;
   protected CommandInterpreter interpreter;
-  protected final Gson         gson;
+  protected final Gson gson;
 
-  public Server(
-      BiFunction<Server, String, ? extends Lobby> lobbyFactory,
-      CommandInterpreter interpreter,
-      Gson gson) {
+  public Server(BiFunction<Server, String, ? extends Lobby> lobbyFactory,
+      CommandInterpreter interpreter, Gson gson) {
     this.interpreter = interpreter;
     server = new ServerWorker(this, lobbyFactory);
     this.gson = gson;
@@ -62,7 +60,6 @@ public class Server {
 
   @OnWebSocketConnect
   public void onOpen(Session conn) throws Exception {
-    conn.getUpgradeResponse().setHeader("cookie", "name=hello");
     GlobalThreadManager.submit(new PlayerConnectedHandler(server, conn));
   }
 }
