@@ -27,16 +27,14 @@ class ServerWorker {
   private ConcurrentBiMap<Session, Player> players;
   private Map<String, Player> notInLobbies;
   private Queue<Player> disconnectedPlayers;
-  private final Gson gson;
 
   public ServerWorker(Server server,
-      BiFunction<Server, String, ? extends Lobby> lobbyFactory, Gson gson) {
+      BiFunction<Server, String, ? extends Lobby> lobbyFactory) {
     this.server = server;
     lobbies = new LobbyManager(lobbyFactory);
     players = new ConcurrentBiMap<>();
     notInLobbies = new ConcurrentHashMap<>();
     disconnectedPlayers = new PriorityBlockingQueue<>();
-    this.gson = gson;
   }
 
   public String setPlayerId(Session conn, String playerId) throws InputError {

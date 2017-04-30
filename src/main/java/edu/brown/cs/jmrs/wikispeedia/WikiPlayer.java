@@ -101,7 +101,7 @@ public class WikiPlayer {
   /**
    * @return This player's name.
    */
-  public final String getName() {
+  public final synchronized String getName() {
     return name;
   }
 
@@ -138,16 +138,19 @@ public class WikiPlayer {
    * @return The time this player finished their game, or null if they have not
    *         finished.
    */
-  public final Instant getEndTime() {
+  public final synchronized Instant getEndTime() {
     return endTime;
   }
 
   /**
-   * @return The playTime of this player.
+   * @return The playTime of this player, either the complete time or a running
+   *         time.
+   * @throws IllegalStateException
+   *           If the lobby has not been started.
    */
   public final Duration getPlayTime() {
-    assert endTime != null;
-    return Duration.between(lobby.getStartTime(), endTime);
+    return Duration.between(lobby.getStartTime(),
+        done() ? endTime : Instant.now());
   }
 
   /**
@@ -188,7 +191,7 @@ public class WikiPlayer {
    * @param state
    *          The connected state to set the player to.
    */
-  public void setConnected(boolean state) {
+  public synchronized void setConnected(boolean state) {
     connected = state;
   }
 
@@ -208,7 +211,7 @@ public class WikiPlayer {
    *          did finish.
    * @return Whether the player was done after checking.
    */
-  private synchronized boolean checkIfDone(Instant endTimeIfSo) {
+  synchronized boolean checkIfDone(Instant endTimeIfSo) {
     if (done()) {
       throw new IllegalStateException(
           String.format("Player %s has already reached the goal", name));
@@ -227,7 +230,7 @@ public class WikiPlayer {
    * @param endTime
    *          The endTime to set
    */
-  public synchronized void setEndTime(Instant endTime) {
+  synchronized void setEndTime(Instant endTime) {
     assert this.endTime == null;
     assert endTime != null;
     this.endTime = endTime;
@@ -287,10 +290,12 @@ public class WikiPlayer {
       root.add("startPage", Main.GSON.toJsonTree(src.startPage));
       root.add("goalPage", Main.GSON.toJsonTree(src.goalPage));
       root.add("path", Main.GSON.toJsonTree(src.path));
-      root.addProperty("endTime", src.getEndTime().toEpochMilli());
       if (src.getLobby().started()) {
         root.addProperty("startTime", src.getStartTime().toEpochMilli());
         root.addProperty("playTime", src.getPlayTime().toMinutes());
+      }
+      if (src.done()) {
+        root.addProperty("endTime", src.getEndTime().toEpochMilli());
       }
       if (src.getLobby().ended()) {
         root.addProperty("isWinner", src.getLobby().getWinner().equals(src));
@@ -324,6 +329,7 @@ public class WikiPlayer {
   @Override
   public String toString() {
     return String.format("Player %s (%s) named '%s' in lobby %s at %s", id,
-        connected(), name, lobby, getCurPage().url());
+        connected() ? "connected" : "disconnected", name, lobby,
+        getCurPage() == null ? "[no page yet]" : getCurPage().url());
   }
 }

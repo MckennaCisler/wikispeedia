@@ -16,6 +16,7 @@ import edu.brown.cs.jmrs.web.wikipedia.WikiFooterRemover;
 import edu.brown.cs.jmrs.web.wikipedia.WikiPage;
 import edu.brown.cs.jmrs.web.wikipedia.WikiPageLinkFinder;
 import edu.brown.cs.jmrs.web.wikipedia.WikiPageLinkFinder.Filter;
+import spark.QueryParamsMap;
 import spark.Request;
 import spark.Response;
 import spark.Route;
@@ -30,7 +31,8 @@ import spark.template.freemarker.FreeMarkerEngine;
  */
 public class WikiPageHandlers implements SparkHandlers {
   private static LinkFinder<WikiPage> linkFinder =
-      new WikiPageLinkFinder(Filter.DISAMBIGUATION);
+      new WikiPageLinkFinder(Filter.DISAMBIGUATION,
+          Filter.NON_ENGLISH_WIKIPEDIA);
   private static ContentFormatter<WikiPage> contentFormatter =
       new ContentFormatterChain<WikiPage>(
           ImmutableList.of(new WikiBodyFormatter(), new WikiFooterRemover(),
@@ -40,6 +42,7 @@ public class WikiPageHandlers implements SparkHandlers {
   public void registerHandlers(FreeMarkerEngine freeMarker) {
     Spark.get("/wiki/:name", new InnerContentHandler());
     Spark.get("/wiki/links/:name", new LinksHandler());
+    Spark.get("/random", new GenerateHandler());
 
     // TODO - Spark.get("/wiki/suggest/:page", new PageNameSuggestHandler());
   }
@@ -73,9 +76,37 @@ public class WikiPageHandlers implements SparkHandlers {
     @Override
     public String handle(Request req, Response res) {
       try {
-        // TODO
         return Main.GSON.toJson(
             linkFinder.linkedPages(WikiPage.fromName(req.params(":name"))));
+      } catch (IOException | IllegalArgumentException e) {
+        e.printStackTrace();
+        return SparkServer.reqError(e.getMessage());
+      }
+    }
+  }
+
+  /**
+   * Handler generating a random wikipage.
+   *
+   * @author mcisler
+   *
+   */
+  public static class GenerateHandler implements Route {
+    @Override
+    public String handle(Request req, Response res) {
+      QueryParamsMap qm = req.queryMap();
+
+      try {
+        if (qm.hasKey("obscurity")) {
+          WikiPage generatedPage =
+              GameGenerator
+                  .pageWithObscurity(Double.parseDouble(qm.value("obscurity")));
+
+          return generatedPage.content() + String.format("<h1>links: %d</h1>",
+              linkFinder.links(generatedPage).size());
+        } else {
+          return GameGenerator.getRandomPage().content();
+        }
       } catch (IOException | IllegalArgumentException e) {
         e.printStackTrace();
         return SparkServer.reqError(e.getMessage());

@@ -34,7 +34,7 @@ function hrefHelper(f, href) {
   return "javascript:" + f + "('" + href + "')";
 }
 
-function displayError(msg) {
+function displayError(msg, error_code) {
     // TODO
     alert(msg);
 }
@@ -44,5 +44,14 @@ function clearError() {
 }
 
 function displayServerConnError(error) {
-    displayError(error.error_message);
+    displayError(error.error_message, error.error_code);
+}
+
+function minutesToStr(minutes) {
+  let seconds = Math.floor(((minutes - Math.floor(minutes)) * 60));
+  if (seconds < 10) {
+    seconds = "0" + seconds;
+  }
+
+  return "" + Math.floor(minutes) + ":" + seconds;
 }

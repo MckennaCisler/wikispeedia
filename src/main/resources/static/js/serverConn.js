@@ -12,15 +12,25 @@ const COMMAND_TYPE = {
   SERVER: 3
 };
 
-
 /**
  * A specific enum for game states.
  */
-const GameState = {
+const GAME_STATE = {
   WAITING: 0,
   STARTED: 1,
   ENDED: 2
 };
+
+const ERROR_CODES = {
+    TIMEOUT: 0,
+    LOBBY_ID_TAKEN: 1, // TODO
+    CANNOT_GOTO_PAGE: 2, // TODO
+}
+
+const GAME_MODES = {
+    TIME_TRIAL: 0,
+    LEAST_CLICKS: 1
+}
 
 const Command = {
     /**
@@ -173,7 +183,7 @@ const Command = {
 class ServerConn {
     constructor(source) {
         // constants
-        this.COMMAND_TIMEOUT = 5000;
+        this.COMMAND_TIMEOUT = 10000; // some can take a while
         this.CLIENT_ID_COOKIE_EXPIRATION = 60;
 
         this.clientId = "";
@@ -395,10 +405,13 @@ class ServerConn {
             "errCallback": errCallback,
             "timeout": window.setTimeout(() => {
                 if (errCallback != undefined) {
-                    errCallback("Request timed out");
+                    errCallback({
+                        error_code: ERROR_CODES.TIMEOUT,
+                        error_message: `Request for ${command.name} timed out`
+                    });
                 }
-                console.log("Response for " + command.name + " timed out.");
-            }, this.COMMAND_TIMEOUT)
+                console.log(`Request for ${command.name} timed out`);
+            }, command === Command.START_LOBBY ? this.COMMAND_TIMEOUT * 3 : this.COMMAND_TIMEOUT)
         };
 
         this.ws.send(JSON.stringify(msg));

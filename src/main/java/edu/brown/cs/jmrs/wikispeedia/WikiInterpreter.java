@@ -9,6 +9,7 @@ import com.google.gson.JsonObject;
 
 import edu.brown.cs.jmrs.server.customizable.CommandInterpreter;
 import edu.brown.cs.jmrs.server.customizable.Lobby;
+import edu.brown.cs.jmrs.ui.Main;
 import edu.brown.cs.jmrs.web.wikipedia.WikiPage;
 
 /**
@@ -21,6 +22,7 @@ public class WikiInterpreter implements CommandInterpreter {
   @Override
   public void interpret(Lobby uncastLobby, String clientId,
       JsonObject command) {
+    assert uncastLobby instanceof WikiLobby;
     WikiLobby lobby = (WikiLobby) uncastLobby;
     String cname = command.get("command").getAsString();
     JsonObject commandPayload = command.get("payload").getAsJsonObject();
@@ -120,7 +122,7 @@ public class WikiInterpreter implements CommandInterpreter {
       JsonObject command) {
     WikiPlayer player = lobby.getPlayer(clientId);
     WikiPage curPlayerPage = player.getCurPage();
-    Map<String, ?> curPageInfo = ImmutableMap.of();
+    JsonObject curPageInfo = new JsonObject();
 
     assert command.get("payload").isJsonObject();
     String reqPage =
@@ -162,12 +164,12 @@ public class WikiInterpreter implements CommandInterpreter {
     }
   }
 
-  private Map<String, ?> getPlayerPageInfo(WikiPage page, WikiLobby lobby)
+  private JsonObject getPlayerPageInfo(WikiPage page, WikiLobby lobby)
       throws IOException {
-    return ImmutableMap.of("href", page.url(), "title", page.getTitle(),
-        "blurb", page.getBlurb(), "text",
+    return Main.GSON.toJsonTree(ImmutableMap.of("href", page.url(), "title",
+        page.getTitle(), "blurb", page.getBlurb(), "text",
         lobby.getContentFormatter()
             .stringFormat(page.linksMatching(lobby.getLinkFinder())),
-        "links", lobby.getLinkFinder().linkedPages(page));
+        "links", lobby.getLinkFinder().linkedPages(page))).getAsJsonObject();
   }
 }

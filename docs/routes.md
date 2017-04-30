@@ -2,8 +2,20 @@
 
 #### Lobby:
 
-- List of available games (just names)
-- -> list ${games}
+###### _INCOMING_ : GET_LOBBIES
+###### _OUTGOING_ : ALL_LOBBIES
+
+###### _SERVER_ : START_LOBBY
+  JS : `startLobby(lobbyId, arguments, callback(), errCallback(error))`
+```
+arguments : {
+  "gameMode" : GAME_MODES.TIME_TRIAL | GAME_MODES.LEAST_CLICKS
+  "difficulty" : <numeric>
+  "startPage" : <page name>
+  "goalPage" : <page name>
+}
+```
+
 
 #### Waiting:
 - Settings and players in a game -> Start and end articles
@@ -38,3 +50,12 @@
 - Player: names, lobby, path
 - Path (list of nodes): some path through articles
 - Articles (node): title, lists of articles
+
+## Enums that must be replicated on Server & Client
+| Enum | Purpose |
+| --- | --- |
+| Command  | the big one, the list of all various commands (see above) |
+| COMMAND_TYPE | the type of websocket command sent |
+| GAME_STATE | all game states |
+| ERROR_CODES | set of codes corresponding to general types of errors |
+| WikiGameMode.Mode <-> GAME_MODES | all modes of games |

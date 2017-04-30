@@ -25,7 +25,8 @@ public class WikiPageLinkFinder implements LinkFinder<WikiPage> {
    *
    */
   public enum Filter {
-    DISAMBIGUATION((url) -> url.contains("(disambiguation)"));
+    DISAMBIGUATION((url) -> url.contains("(disambiguation)")), //
+    NON_ENGLISH_WIKIPEDIA((url) -> !url.contains("en.wikipedia.org"));
 
     // a method to IGNORE links by (if it's true, the link is filtered out)
     private Predicate<String> method;
