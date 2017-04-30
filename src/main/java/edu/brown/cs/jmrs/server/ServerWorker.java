@@ -22,19 +22,23 @@ import edu.brown.cs.jmrs.server.customizable.Lobby;
 
 class ServerWorker {
 
-  private Server server;
-  private LobbyManager lobbies;
+  private Server                           server;
+  private LobbyManager                     lobbies;
   private ConcurrentBiMap<Session, Player> players;
-  private Map<String, Player> notInLobbies;
-  private Queue<Player> disconnectedPlayers;
+  private Map<String, Player>              notInLobbies;
+  private Queue<Player>                    disconnectedPlayers;
+  private Gson                             gson;
 
-  public ServerWorker(Server server,
-      BiFunction<Server, String, ? extends Lobby> lobbyFactory) {
+  public ServerWorker(
+      Server server,
+      BiFunction<Server, String, ? extends Lobby> lobbyFactory,
+      Gson gson) {
     this.server = server;
     lobbies = new LobbyManager(lobbyFactory);
     players = new ConcurrentBiMap<>();
     notInLobbies = new ConcurrentHashMap<>();
     disconnectedPlayers = new PriorityBlockingQueue<>();
+    this.gson = gson;
   }
 
   public String setPlayerId(Session conn, String playerId) throws InputError {
@@ -96,9 +100,10 @@ class ServerWorker {
     for (HttpCookie cookie : cookies) {
       if (cookie.getName().equals("client_id")) {
         String cookieVal = cookie.getValue();
-        expiration =
-            Date.from(Instant.ofEpochMilli(Long
-                .parseLong(cookieVal.substring(cookieVal.indexOf(":") + 1))));
+        expiration = Date.from(
+            Instant.ofEpochMilli(
+                Long.parseLong(
+                    cookieVal.substring(cookieVal.indexOf(":") + 1))));
         break;
       }
     }
@@ -119,7 +124,7 @@ class ServerWorker {
     }
   }
 
-  private void checkDisconnectedPlayers() { 
+  private void checkDisconnectedPlayers() {
     if (!disconnectedPlayers.isEmpty()) {
       Date now = new Date();
       Player p = disconnectedPlayers.poll();
@@ -163,7 +168,7 @@ class ServerWorker {
         break;
       }
     }
-    
+
     // notify client of their id
 
     String toClient = "";
@@ -189,26 +194,26 @@ class ServerWorker {
     } catch (IOException e) {
       e.printStackTrace();
     }
-  
-  // if they are not in a lobby, give them a list of lobbies
+
+    // if they are not in a lobby, give them a list of lobbies
 
     Player player = players.get(trueId);
-	  if (player != null && player.getLobby() == null) {
-		  notInLobbies.put(player.getId(), player);
-		  
-	   jsonObject = allLobbies();
-	  jsonObject.addProperty("command", "get_lobbies");
-	  jsonObject.addProperty("error_message", "");
-	  toClient = gson.toJson(jsonObject);
-	  try {
-	  conn.getRemote().sendString(toClient);
-	  } catch (IOException e) {
-	    e.printStackTrace();
-	  }
-	}
+    if (player != null && player.getLobby() == null) {
+      notInLobbies.put(player.getId(), player);
+
+      jsonObject = allLobbies();
+      jsonObject.addProperty("command", "get_lobbies");
+      jsonObject.addProperty("error_message", "");
+      toClient = gson.toJson(jsonObject);
+      try {
+        conn.getRemote().sendString(toClient);
+      } catch (IOException e) {
+        e.printStackTrace();
+      }
+    }
   }
-  
+
   public Map<String, Player> lobbylessMap() {
-	  return notInLobbies;
+    return notInLobbies;
   }
 }
