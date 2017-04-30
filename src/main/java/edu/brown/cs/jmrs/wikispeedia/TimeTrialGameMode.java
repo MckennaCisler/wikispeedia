@@ -28,7 +28,7 @@ public class TimeTrialGameMode implements WikiGameMode {
   public static final WikiGameMode.Mode MODE = WikiGameMode.Mode.TIME_TRIAL;
 
   private static final LinkFinder<WikiPage> LINK_FINDER =
-      new WikiPageLinkFinder(Filter.DISAMBIGUATION);
+      new WikiPageLinkFinder(Filter.DISAMBIGUATION, Filter.NON_ENGLISH_WIKIPEDIA);
 
   private static final ContentFormatter<WikiPage> CONTENT_FORMATTER =
       new ContentFormatterChain<WikiPage>(

@@ -1,9 +1,9 @@
 #### General todo
 - <b>Fix bugs</b>
+- Loading icons
 - Least clicks mode
 - Levels of difficulty
   - Page generation
-  - Sliding scale
 - Visualizations for history and endgame
 - Chat everywhere
 - Music
@@ -13,7 +13,6 @@
 - Shortest path
 - Design work
 - Deal with what happens when a player can't be on a page (/waiting for ex.)
-- MEMORY LEAKS
 
 #### Deadlines:
 - <b>Adversary TA Meeting (Wednesday, 4/26)</b>
@@ -32,7 +31,6 @@
 
 #### Mckenna
 Core Functionality
-  Create ERROR struct to give all errors consistent error codes for frontend to use
   Core
       TIMING
           When to start (5s countdown in beginning, etc.)

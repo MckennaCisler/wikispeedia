@@ -86,6 +86,8 @@ public class WikiLobby implements Lobby {
     this.startPage = game.getStart();
     this.goalPage = game.getGoal();
 
+    System.out.println(startPage + " -> " + goalPage);
+
     // add custom shortcut to set start and end page specifically.
     if (arguments.has("startPage")) {
       this.startPage =
@@ -187,6 +189,7 @@ public class WikiLobby implements Lobby {
       boolean ready = entry.getValue().ready();
       if (!ready) {
         allReady = false;
+        break;
       }
     }
 
@@ -194,6 +197,7 @@ public class WikiLobby implements Lobby {
     Command.sendAllPlayers(this);
 
     if (allReady) {
+      start();
       Command.sendBeginGame(this);
     }
 

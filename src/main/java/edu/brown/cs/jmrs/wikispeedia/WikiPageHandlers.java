@@ -30,7 +30,8 @@ import spark.template.freemarker.FreeMarkerEngine;
  */
 public class WikiPageHandlers implements SparkHandlers {
   private static LinkFinder<WikiPage> linkFinder =
-      new WikiPageLinkFinder(Filter.DISAMBIGUATION);
+      new WikiPageLinkFinder(Filter.DISAMBIGUATION,
+          Filter.NON_ENGLISH_WIKIPEDIA);
   private static ContentFormatter<WikiPage> contentFormatter =
       new ContentFormatterChain<WikiPage>(
           ImmutableList.of(new WikiBodyFormatter(), new WikiFooterRemover(),

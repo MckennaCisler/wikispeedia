@@ -183,7 +183,7 @@ const Command = {
 class ServerConn {
     constructor(source) {
         // constants
-        this.COMMAND_TIMEOUT = 5000;
+        this.COMMAND_TIMEOUT = 10000; // some can take a while
         this.CLIENT_ID_COOKIE_EXPIRATION = 60;
 
         this.clientId = "";

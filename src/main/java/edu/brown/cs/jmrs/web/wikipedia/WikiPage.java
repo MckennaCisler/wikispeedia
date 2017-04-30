@@ -176,6 +176,11 @@ public class WikiPage extends Page {
     return isWikipediaArticle(url) && !url.equals(super.url());
   }
 
+  @Override
+  public String toString() {
+    return url;
+  }
+
   /**
    * Custom serializer for use with GSON.
    *
