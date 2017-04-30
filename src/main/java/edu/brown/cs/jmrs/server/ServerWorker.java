@@ -41,7 +41,7 @@ class ServerWorker {
     this.gson = gson;
   }
 
-  public String setPlayerId(Session conn, String clientId) throws InputError {
+  public String setClientId(Session conn, String clientId) throws InputError {
     Client client = clients.getBack(new Client(clientId));
     if (client == null) {
       clientId = conn.hashCode() + "";
@@ -105,8 +105,12 @@ class ServerWorker {
       }
     }
 
+    Client client = clients.get(conn);
+    if (client != null && client.getLobby() == null) {
+      notInLobbies.remove(client.getId());
+    }
+
     if (expiration.after(new Date())) {
-      Client client = clients.get(conn);
       if (client != null) {
         assert client.isConnected();
         client.toggleConnected();
@@ -176,7 +180,7 @@ class ServerWorker {
     jsonObject.addProperty("command", "notify_id");
     try {
       try {
-        trueId = setPlayerId(conn, clientId);
+        trueId = setClientId(conn, clientId);
 
         Client client = clients.get(conn);
         if (!client.isConnected()) {
@@ -200,6 +204,10 @@ class ServerWorker {
 
     // if they are not in a lobby, give them a list of lobbies
 
+    Client client = clients.get(conn);
+    if (client != null && client.getLobby() == null) {
+      notInLobbies.put(client.getId(), client);
+    }
     sendLobbies(clients.get(trueId));
   }
 
@@ -210,19 +218,15 @@ class ServerWorker {
   }
 
   private void sendLobbies(Client client) {
-    if (client != null && client.getLobby() == null) {
-      notInLobbies.put(client.getId(), client);
-
-      JsonObject jsonObject = allLobbies();
-      jsonObject.addProperty("command", "get_lobbies");
-      jsonObject.add("lobbies", allLobbies());
-      jsonObject.addProperty("error_message", "");
-      String toClient = gson.toJson(jsonObject);
-      try {
-        clients.getReversed(client).getRemote().sendString(toClient);
-      } catch (IOException e) {
-        e.printStackTrace();
-      }
+    JsonObject jsonObject = allLobbies();
+    jsonObject.addProperty("command", "get_lobbies");
+    jsonObject.add("lobbies", allLobbies());
+    jsonObject.addProperty("error_message", "");
+    String toClient = gson.toJson(jsonObject);
+    try {
+      clients.getReversed(client).getRemote().sendString(toClient);
+    } catch (IOException e) {
+      e.printStackTrace();
     }
   }
 
