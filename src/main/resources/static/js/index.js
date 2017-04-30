@@ -8,7 +8,7 @@ $(document).ready(function () {
 	"use strict";
 	resize();
 	$('[data-toggle="tooltip"]').tooltip();
-	
+
 	$("#advanced_ops").hide();
 	$("#difficulty_slider").slider();
 	$("#advanced").on('click', () => {
@@ -105,7 +105,7 @@ serverConn.ready(() => {
 			serverConn.startLobby(lobbyName.trim(),
 				{
 					"gameMode": GAME_MODES.TIME_TRIAL,					 // TODO: YOU-HOO!!!!!!!!!!!!!!!!
-					"difficulty": 5										 // TODO: YOU-HOO!!!!!!!!!!!!!!!!
+					"difficulty": 0.5										 // TODO: YOU-HOO!!!!!!!!!!!!!!!!
 				},
 				() => {
 					$("#main").hide();

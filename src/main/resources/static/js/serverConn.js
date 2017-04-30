@@ -411,7 +411,7 @@ class ServerConn {
                     });
                 }
                 console.log(`Request for ${command.name} timed out`);
-            }, this.COMMAND_TIMEOUT)
+            }, command === Command.START_LOBBY ? this.COMMAND_TIMEOUT * 3 : this.COMMAND_TIMEOUT)
         };
 
         this.ws.send(JSON.stringify(msg));

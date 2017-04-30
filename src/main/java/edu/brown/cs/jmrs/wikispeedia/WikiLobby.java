@@ -81,8 +81,8 @@ public class WikiLobby implements Lobby {
     }
 
     // generate page from difficulty
-    int difficulty = arguments.get("difficulty").getAsInt();
-    WikiGame game = GameGenerator.ofDist(difficulty * 2); // TODO:
+    double difficulty = arguments.get("difficulty").getAsDouble();
+    WikiGame game = GameGenerator.withObscurity(difficulty);
     this.startPage = game.getStart();
     this.goalPage = game.getGoal();
 

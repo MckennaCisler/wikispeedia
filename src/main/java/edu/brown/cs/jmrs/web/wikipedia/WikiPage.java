@@ -178,7 +178,7 @@ public class WikiPage extends Page {
 
   @Override
   public String toString() {
-    return url;
+    return url();
   }
 
   /**

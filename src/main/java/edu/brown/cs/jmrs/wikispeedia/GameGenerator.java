@@ -5,10 +5,12 @@ import java.util.ArrayList;
 import java.util.Set;
 
 import com.google.common.base.Predicate;
+import com.google.common.primitives.Doubles;
 
 import edu.brown.cs.jmrs.web.LinkFinder;
 import edu.brown.cs.jmrs.web.wikipedia.WikiPage;
 import edu.brown.cs.jmrs.web.wikipedia.WikiPageLinkFinder;
+import edu.brown.cs.jmrs.web.wikipedia.WikiPageLinkFinder.Filter;
 
 /**
  * A class to generate the start and end pages of a Wikipedia game given a
@@ -19,7 +21,7 @@ import edu.brown.cs.jmrs.web.wikipedia.WikiPageLinkFinder;
  */
 public final class GameGenerator {
   private static final LinkFinder<WikiPage> WIKI_LINK_FINDER =
-      new WikiPageLinkFinder();
+      new WikiPageLinkFinder(Filter.NON_ENGLISH_WIKIPEDIA);
   private static final WikiPage START_PAGE = WikiPage.fromName("Main_Page");
 
   /**
@@ -32,29 +34,36 @@ public final class GameGenerator {
 
   /**
    * a value that determines how quickly the predicate-based page finder moves
-   * on from a single page's links to search deeper. Smaller values lead to
-   * greater depth searches with less consideration of each page's links. It is
-   * essentially the chance that a given link on a page will be skipped,so 1
-   * will just continue check a single link and 0 will check all links.
+   * on from a single page's links to search deeper.
+   *
+   * Smaller values lead to greater depth searches with less consideration of
+   * each page's links. It is essentially the chance that a given link on a page
+   * will be skipped,so 1 will just continue check a single link and 0 will
+   * check all links.
    *
    * Decreasing it may make generation slower and more memory-intensive.
    */
-  private static final double DEPTH_BREADTH_SEARCH_RATIO = 0.5;
+  private static final double DEPTH_BREADTH_SEARCH_RATIO = 0.9;
 
   /**
    * the distance (inclusive) between two obscurity value to be considered
    * "equivalent". Increasing it may make generation slower and more
    * memory-intensive.
    */
-  private static final double OBSCURITY_EQUAL_RANGE = 0.05;
+  private static final double OBSCURITY_EQUAL_RANGE = 0.1;
 
   /**
    * The expected largest number of Wikipedia links on a page (under the
-   * linkFinder that is used; at least the most average one). This number comes
-   * from /wiki/List_of_2016_albums; other candidates are best found here:
-   * https://en.wikipedia.org/wiki/Special:LongPages
+   * linkFinder that is used; at least the most average one). A good highest
+   * number is from /wiki/List_of_2016_albums (3080); other candidates are best
+   * found here: https://en.wikipedia.org/wiki/Special:LongPages
+   *
+   * You may actually want to set this a bit lower than the very largest; as
+   * pages with such numbers of links are often abnormal pages such as lists,
+   * where the link number has little to do with obscurity. Also these pages are
+   * very rare and thus slow to find.
    */
-  private static final double MAX_NUM_OF_PAGE_LINKS = 3100;
+  private static final double MAX_NUM_OF_PAGE_LINKS = 2000;
 
   private GameGenerator() {
     // override default constructor
@@ -69,27 +78,26 @@ public final class GameGenerator {
    * @return The WikiGame defined by both pages.
    */
   public static WikiGame withObscurity(double obscurity) {
-    assert obscurity <= 1 && obscurity >= 0;
-    WikiPage start = getRandomPage(obscurityFilter(obscurity));
+    WikiPage start = pageWithObscurity(obscurity);
     return new WikiGame(start, goDownFrom(start, obscurityFilter(obscurity)));
+  }
+
+  /**
+   * Generates a WikiPage that has an approximate obscurity value.
+   *
+   * @param obscurity
+   *          The target obscurity of the page.
+   * @return A WikiPage with that approximate obscurity.
+   */
+  public static WikiPage pageWithObscurity(double obscurity) {
+    assert obscurity <= 1 && obscurity >= 0;
+    return getRandomPage(obscurityFilter(obscurity));
   }
 
   private static Predicate<WikiPage> obscurityFilter(double obscurity) {
     return (page) -> {
       return Math.abs(obscurity - obscurity(page)) <= OBSCURITY_EQUAL_RANGE;
     };
-  }
-
-  /**
-   * Generates a WikiGame (essentially pair of pages) a .
-   *
-   * @param pageDist
-   *          The distance the pages should be apart.
-   * @return The WikiGame defined by both pages.
-   */
-  public static WikiGame ofDifficulty(int pageDist) {
-    WikiPage start = getRandomPage();
-    return new WikiGame(start, goDownFrom(start, pageDist));
   }
 
   /**
@@ -188,10 +196,16 @@ public final class GameGenerator {
    */
   private static double obscurity(WikiPage page) {
     try {
-      // TODO
-      return 1 - WIKI_LINK_FINDER.links(page).size() / MAX_NUM_OF_PAGE_LINKS;
+      double linkRatio =
+          WIKI_LINK_FINDER.links(page).size() / MAX_NUM_OF_PAGE_LINKS;
+
+      // make sure if we find a page with more links that we don't go negative
+      // (note we can never go over one - page links can't be negative). This
+      // also server to cluster together the small number of high-link pages, to
+      // speed things up.
+      return Doubles.compare(linkRatio, 1.0) > 0 ? 0 : 1 - linkRatio;
     } catch (IOException e) {
-      return 5; // pages that can't be reach are "very" obscure
+      return 5; // pages that can't be reached are "very" obscure
     }
   }
 }

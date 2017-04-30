@@ -3,7 +3,6 @@
 - Loading icons
 - Least clicks mode
 - Levels of difficulty
-  - Page generation
 - Visualizations for history and endgame
 - Chat everywhere
 - Music
