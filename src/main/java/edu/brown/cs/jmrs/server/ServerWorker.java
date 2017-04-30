@@ -24,9 +24,9 @@ class ServerWorker {
 
   private Server                           server;
   private LobbyManager                     lobbies;
-  private ConcurrentBiMap<Session, Player> players;
-  private Map<String, Player>              notInLobbies;
-  private Queue<Player>                    disconnectedPlayers;
+  private ConcurrentBiMap<Session, Client> clients;
+  private Map<String, Client>              notInLobbies;
+  private Queue<Client>                    disconnectedClients;
   private Gson                             gson;
 
   public ServerWorker(
@@ -35,42 +35,39 @@ class ServerWorker {
       Gson gson) {
     this.server = server;
     lobbies = new LobbyManager(lobbyFactory);
-    players = new ConcurrentBiMap<>();
+    clients = new ConcurrentBiMap<>();
     notInLobbies = new ConcurrentHashMap<>();
-    disconnectedPlayers = new PriorityBlockingQueue<>();
+    disconnectedClients = new PriorityBlockingQueue<>();
     this.gson = gson;
   }
 
-  public String setPlayerId(Session conn, String playerId) throws InputError {
-    Player player = players.getBack(new Player(playerId));
-    if (player == null) {
-      playerId = conn.hashCode() + "";
-      player = new Player(playerId);
-      while (!players.putNoOverwrite(conn, player)) {
-        playerId = Math.random() + "";
-        player = new Player(playerId);
+  public String setPlayerId(Session conn, String clientId) throws InputError {
+    Client client = clients.getBack(new Client(clientId));
+    if (client == null) {
+      clientId = conn.hashCode() + "";
+      client = new Client(clientId);
+      while (!clients.putNoOverwrite(conn, client)) {
+        clientId = Math.random() + "";
+        client = new Client(clientId);
       }
-
-      players.put(conn, player); // TODO: make this not needed
-
-    } else if (!player.isConnected()) {
-      players.put(conn, player);
-      player.toggleConnected();
-      if (player.getLobby() != null) {
-        player.getLobby().playerReconnected(player.getId());
+    } else if (!client.isConnected()) {
+      clients.put(conn, client);
+      client.toggleConnected();
+      if (client.getLobby() != null) {
+        client.getLobby().playerReconnected(client.getId());
       }
     } else {
-      throw new InputError("Stop stealing identities");
+      throw new InputError("Don't steal identities");
     }
-    return player.getId();
+    return client.getId();
   }
 
-  public Player getPlayer(Session conn) {
-    return players.get(conn);
+  public Client getClient(Session conn) {
+    return clients.get(conn);
   }
 
-  public Session getPlayer(String playerId) {
-    return players.getReversed(new Player(playerId));
+  public Session getClient(String playerId) {
+    return clients.getReversed(new Client(playerId));
   }
 
   public List<String> getOpenLobbies() {
@@ -109,34 +106,35 @@ class ServerWorker {
     }
 
     if (expiration.after(new Date())) {
-      Player player = players.get(conn);
-      assert player.isConnected();
-      player.toggleConnected();
+      Client client = clients.get(conn);
+      if (client != null) {
+        assert client.isConnected();
+        client.toggleConnected();
 
-      player.setCookieExpiration(expiration);
-      disconnectedPlayers.add(player);
+        client.setCookieExpiration(expiration);
+        disconnectedClients.add(client);
 
-      if (player.getLobby() != null) {
-        player.getLobby().playerDisconnected(player.getId());
+        if (client.getLobby() != null) {
+          client.getLobby().playerDisconnected(client.getId());
+        }
       }
     } else {
-      players.remove(conn);
+      clients.remove(conn);
     }
   }
 
   private void checkDisconnectedPlayers() {
-    if (!disconnectedPlayers.isEmpty()) {
+    if (!disconnectedClients.isEmpty()) {
       Date now = new Date();
-      Player p = disconnectedPlayers.poll();
-      while (p != null && p.getCookieExpiration().before(now)) {
-        players.remove(players.getReversed(p));
-        if (!disconnectedPlayers.isEmpty()) {
-          p = disconnectedPlayers.poll();
-        } else {
-          p = null;
+      Client p = disconnectedClients.poll();
+      while (p.getCookieExpiration().before(now)) {
+        clients.remove(clients.getReversed(p));
+        if (disconnectedClients.isEmpty()) {
+          return;
         }
+        p = disconnectedClients.poll();
       }
-      disconnectedPlayers.add(p);
+      disconnectedClients.add(p);
     }
   }
 
@@ -180,6 +178,11 @@ class ServerWorker {
       try {
         trueId = setPlayerId(conn, clientId);
 
+        Client client = clients.get(conn);
+        if (!client.isConnected()) {
+          client.toggleConnected();
+        }
+
         jsonObject.addProperty("client_id", trueId);
         jsonObject.addProperty("error_message", "");
         toClient = gson.toJson(jsonObject);
@@ -197,23 +200,33 @@ class ServerWorker {
 
     // if they are not in a lobby, give them a list of lobbies
 
-    Player player = players.get(trueId);
-    if (player != null && player.getLobby() == null) {
-      notInLobbies.put(player.getId(), player);
+    sendLobbies(clients.get(trueId));
+  }
 
-      jsonObject = allLobbies();
+  public void updateLobbylessPlayers() {
+    for (Client client : notInLobbies.values()) {
+      sendLobbies(client);
+    }
+  }
+
+  private void sendLobbies(Client client) {
+    if (client != null && client.getLobby() == null) {
+      notInLobbies.put(client.getId(), client);
+
+      JsonObject jsonObject = allLobbies();
       jsonObject.addProperty("command", "get_lobbies");
+      jsonObject.add("lobbies", allLobbies());
       jsonObject.addProperty("error_message", "");
-      toClient = gson.toJson(jsonObject);
+      String toClient = gson.toJson(jsonObject);
       try {
-        conn.getRemote().sendString(toClient);
+        clients.getReversed(client).getRemote().sendString(toClient);
       } catch (IOException e) {
         e.printStackTrace();
       }
     }
   }
 
-  public Map<String, Player> lobbylessMap() {
+  public Map<String, Client> lobbylessMap() {
     return notInLobbies;
   }
 }

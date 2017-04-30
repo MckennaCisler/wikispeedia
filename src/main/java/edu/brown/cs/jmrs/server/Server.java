@@ -39,7 +39,7 @@ public class Server {
 
   public void sendToClient(String playerId, String message) {
     try {
-      server.getPlayer(playerId).getRemote().sendString(message);
+      server.getClient(playerId).getRemote().sendString(message);
     } catch (IOException e) {
       e.printStackTrace();
     }
@@ -51,7 +51,7 @@ public class Server {
 
   @OnWebSocketClose
   public void onClose(Session conn, int code, String reason) {
-    GlobalThreadManager.submit(new PlayerDisconnectedHandler(server, conn));
+    GlobalThreadManager.submit(new ClientDisconnectedHandler(server, conn));
   }
 
   @OnWebSocketMessage
@@ -62,6 +62,6 @@ public class Server {
 
   @OnWebSocketConnect
   public void onOpen(Session conn) throws Exception {
-    GlobalThreadManager.submit(new PlayerConnectedHandler(server, conn));
+    GlobalThreadManager.submit(new ClientConnectedHandler(server, conn));
   }
 }

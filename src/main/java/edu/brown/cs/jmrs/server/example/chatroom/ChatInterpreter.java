@@ -18,20 +18,21 @@ public class ChatInterpreter implements CommandInterpreter {
   public void interpret(
       Lobby uncastLobby,
       String clientId,
-      JsonObject command) {
+      JsonObject commandMap) {
+    JsonObject payload = commandMap.get("payload").getAsJsonObject();
     ChatLobby lobby = (ChatLobby) uncastLobby;
 
-    String commandString = command.get("command").getAsString();
+    String commandString = commandMap.get("command").getAsString();
 
     switch (Commands.valueOf(commandString.toUpperCase())) {
       case MESSAGE:
-        lobby.sendMessage(clientId, command.get("message").getAsString());
+        lobby.sendMessage(clientId, payload.get("message").getAsString());
         return;
       case WHISPER:
         lobby.sendMessage(
-            command.get("recipient").getAsString(),
+            payload.get("recipient").getAsString(),
             clientId,
-            command.get("message").getAsString());
+            payload.get("message").getAsString());
         return;
     }
   }
