@@ -12,6 +12,8 @@
 - Shortest path
 - Design work
 - Deal with what happens when a player can't be on a page (/waiting for ex.)
+- Deal with ties (using "lists" of winners) for shortest-path mode
+- Hide user's IDs from obvious places (i.e. ALL_PLAYERS) using isCurrentPlayer, etc.
 
 #### Deadlines:
 - <b>Adversary TA Meeting (Wednesday, 4/26)</b>
