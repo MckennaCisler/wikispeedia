@@ -5,8 +5,10 @@ import java.lang.reflect.Type;
 import java.util.Set;
 import java.util.regex.Pattern;
 
+import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 
+import com.google.common.cache.LoadingCache;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonSerializationContext;
@@ -45,6 +47,21 @@ public class WikiPage extends Page {
   }
 
   /**
+   * Creates a page based on the given URL. Content is downloaded upon request,
+   * and stored in the included cache.
+   *
+   * @param url
+   *          The url of the wikipedia page to be constructed.
+   * @param docCache
+   *          The cache from url to parsed HTML document to be used to store and
+   *          retrieve the internal HTML.
+   */
+  public WikiPage(String url, LoadingCache<String, Document> docCache) {
+    super(url, docCache);
+    assert isWikipediaArticle(url);
+  }
+
+  /**
    * Constructs a Wikipage from the given page string.
    *
    * @param name
@@ -59,6 +76,26 @@ public class WikiPage extends Page {
   }
 
   /**
+   * Constructs a Wikipage from the given page string,using a particular cache
+   * for getting content.
+   *
+   * @param name
+   *          The String page to convert to a Wikipedia URL. If there are
+   *          spaces, they will be replaced with underscores.
+   * @param docCache
+   *          The cache from url to parsed HTML document to be used to store and
+   *          retrieve the internal HTML.
+   *
+   * @return A new Wikipage constructed with the url using the given page.
+   */
+  public static WikiPage fromName(String name,
+      LoadingCache<String, Document> docCache) {
+    // it will likely be escaped, but replace spaces otherwise.
+    return new WikiPage(WIKIPEDIA_ARTICLE_PREFIX + name.replaceAll("\\s", "_"),
+        docCache);
+  }
+
+  /**
    * Constructs a Wikipage from the given string of some type and attempts to
    * create the appropriate page.
    *
@@ -69,6 +106,25 @@ public class WikiPage extends Page {
    * @return A new Wikipage constructed with the url using the given name.
    */
   public static WikiPage fromAny(String identifier) {
+    return fromAny(identifier, null);
+  }
+
+  /**
+   * Constructs a Wikipage from the given string of some type and attempts to
+   * create the appropriate page. Also takes in a cache for storing internal
+   * data.
+   *
+   * @param identifier
+   *          The String page to convert to a Wikipedia URL. Can be either a
+   *          full wiki url, a relative wiki url, or a page name.
+   * @param docCache
+   *          The cache from url to parsed HTML document to be used to store and
+   *          retrieve the internal HTML.
+   *
+   * @return A new Wikipage constructed with the url using the given name.
+   */
+  public static WikiPage fromAny(String identifier,
+      LoadingCache<String, Document> docCache) {
     String cleanedId = cleanUrl(identifier);
 
     // remove a VERY last slash
@@ -80,10 +136,10 @@ public class WikiPage extends Page {
 
     // extract title and add it onto full link to be safe
     if (lastSlash != -1) {
-      return WikiPage.fromName(cleanedId.substring(lastSlash + 1));
+      return WikiPage.fromName(cleanedId.substring(lastSlash + 1), docCache);
     } else {
       // already just a title
-      return WikiPage.fromName(cleanedId);
+      return WikiPage.fromName(cleanedId, docCache);
     }
   }
 

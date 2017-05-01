@@ -110,7 +110,8 @@ public class WikiInterpreter implements CommandInterpreter {
         command.get("payload").getAsJsonObject().get("page_name").getAsString();
     try {
       Command.RETURN_GET_PAGE.send(lobby.getServer(), clientId,
-          getPlayerPageInfo(WikiPage.fromAny(identifier), lobby));
+          getPlayerPageInfo(
+              WikiPage.fromAny(identifier, Main.WIKI_PAGE_DOC_CACHE), lobby));
     } catch (IOException e) {
       Command.RETURN_GET_PAGE.send(lobby.getServer(), clientId,
           ImmutableMap.of(), String.format("Error in accessing page %s: %s",
@@ -132,7 +133,8 @@ public class WikiInterpreter implements CommandInterpreter {
     System.out.println(reqPage);
 
     try {
-      WikiPage reqWikiPage = WikiPage.fromAny(reqPage);
+      WikiPage reqWikiPage =
+          WikiPage.fromAny(reqPage, Main.WIKI_PAGE_DOC_CACHE);
       if (player.goToPage(reqWikiPage)) {
         // if could go to page (and thus did go to page)
         Command.RETURN_GOTO_PAGE.send(lobby.getServer(), clientId,

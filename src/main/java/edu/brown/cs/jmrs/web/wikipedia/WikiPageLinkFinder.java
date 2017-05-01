@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.Set;
 import java.util.function.Predicate;
 
+import edu.brown.cs.jmrs.ui.Main;
 import edu.brown.cs.jmrs.web.LinkFinder;
 import edu.brown.cs.jmrs.web.LinkFinderMethod;
 
@@ -52,7 +53,7 @@ public class WikiPageLinkFinder implements LinkFinder<WikiPage> {
   public WikiPageLinkFinder(Filter... filters) {
     this.linkFinderMethod =
         new LinkFinderMethod<WikiPage>().select("#mw-content-text a[href]")
-            .factory(url -> new WikiPage(url));
+            .factory(url -> new WikiPage(url, Main.WIKI_PAGE_DOC_CACHE));
     this.filterMethod = getFilterMethod(filters);
   }
 

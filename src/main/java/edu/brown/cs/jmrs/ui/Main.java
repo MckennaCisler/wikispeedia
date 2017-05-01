@@ -1,7 +1,12 @@
 package edu.brown.cs.jmrs.ui;
 
 import java.io.IOException;
+import java.util.concurrent.TimeUnit;
 
+import org.jsoup.nodes.Document;
+
+import com.google.common.cache.CacheBuilder;
+import com.google.common.cache.LoadingCache;
 import com.google.common.collect.ImmutableList;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -9,6 +14,7 @@ import com.google.gson.GsonBuilder;
 import edu.brown.cs.jmrs.server.Server;
 import edu.brown.cs.jmrs.server.example.chatroom.ChatInterpreter;
 import edu.brown.cs.jmrs.server.example.chatroom.ChatLobby;
+import edu.brown.cs.jmrs.web.Page;
 import edu.brown.cs.jmrs.web.wikipedia.WikiPage;
 import edu.brown.cs.jmrs.wikispeedia.WikiInterpreter;
 import edu.brown.cs.jmrs.wikispeedia.WikiLobby;
@@ -25,7 +31,7 @@ import spark.Spark;
 import spark.template.freemarker.FreeMarkerEngine;
 
 /**
- * Primary execution class.
+ * Primary execution class for Wikispeedia.
  *
  * @author mcisler
  *
@@ -34,7 +40,20 @@ public final class Main {
   public static final int DEFAULT_SPARK_PORT = 4567;
   public static final int DEFAULT_SOCKET_PORT = 4568;
 
+  /**
+   * Global GSON for defining custom JSON serializers on.
+   */
   public static final Gson GSON = registerSerializers();
+
+  /**
+   * Cache for the internals of WikiPages.
+   */
+  static final int MAX_WIKI_CACHE_SIZE = 2000;
+  static final int WIKIPAGE_EVICTION_TIMEOUT = 24; // hours
+  public static final LoadingCache<String, Document> WIKI_PAGE_DOC_CACHE =
+      CacheBuilder.newBuilder().maximumSize(MAX_WIKI_CACHE_SIZE)
+          .expireAfterWrite(WIKIPAGE_EVICTION_TIMEOUT, TimeUnit.HOURS)
+          .build(new Page.Loader());
 
   /**
    * Registers custom Json (Gson) serializers for this project.
