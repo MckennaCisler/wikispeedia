@@ -72,7 +72,7 @@ public class DirectedDijkstraPathFinder<N extends Node<N, E>, E extends Edge<N, 
         // the root) (use doubles because it will offer the most precision and
         // range of values)
         double edgeDist =
-            edge.getValue().doubleValue() + shortest.get(curStart);
+            edgeFinder.edgeValue(edge).doubleValue() + shortest.get(curStart);
         if (!shortest.containsKey(destNode)) {
           shortest.put(destNode, edgeDist);
           prevs.put(destNode, edge);

@@ -4,12 +4,16 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.URL;
+import java.util.concurrent.ExecutionException;
 
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 
 import com.google.common.base.Charsets;
 import com.google.common.base.Objects;
+import com.google.common.cache.CacheLoader;
+import com.google.common.cache.LoadingCache;
+import com.google.common.util.concurrent.UncheckedExecutionException;
 
 import edu.brown.cs.jmrs.collect.graph.Graph.Node;
 
@@ -21,21 +25,45 @@ import edu.brown.cs.jmrs.collect.graph.Graph.Node;
  */
 public class Page implements Node<Page, Link> {
   // Useful regexs
+  // (not compiled because just concatenated to others)
   public static final String HTTP_REGEX = "^https?:\\/\\/";
 
   private String url;
+
+  // only one of the following will be used
   private Document parsed;
+  private LoadingCache<String, Document> docCache;
+  private boolean cached; // note this is not universal; it may have been
+                          // evicted separately.
 
   /**
-   * Creates a page with the default (all links) page finder.
+   * Creates a page based on the given URL. Content is downloaded upon request
+   * and stored in this object.
    *
    * @param url
    *          The url of the page to be constructed. May change internally if
    *          this url redirects.
    */
   public Page(String url) {
+    this(url, null);
+  }
+
+  /**
+   * Creates a page based on the given URL. Content is downloaded upon request,
+   * and stored in the included cache.
+   *
+   * @param url
+   *          The url of the page to be constructed. May change internally if
+   *          this url redirects.
+   * @param docCache
+   *          The cache from url to parsed HTML document to be used to store and
+   *          retrieve the internal HTML.
+   */
+  public Page(String url, LoadingCache<String, Document> docCache) {
     this.url = cleanUrl(url);
     this.parsed = null;
+    this.docCache = docCache;
+    cached = false;
   }
 
   /**
@@ -64,13 +92,16 @@ public class Page implements Node<Page, Link> {
    * Reads in the content of the page, either using already-parsed html or by a
    * direct download of the content.
    *
+   * Note: does not use the docCache even if defined.
+   *
    * @return The raw content of the page.
    * @throws IOException
    *           If the page could not be reached or loaded.
    */
   public String content() throws IOException {
-    if (parsed != null) {
-      return parsed.outerHtml();
+    if (cached) {
+      // may retrieve if docCache was evicted elsewhere.
+      return parsedContentOriginal().outerHtml();
     } else {
       try (BufferedReader in =
           new BufferedReader(new InputStreamReader(new URL(url).openStream(),
@@ -105,8 +136,18 @@ public class Page implements Node<Page, Link> {
    *           If the page could not be reached.
    */
   protected Document parsedContentOriginal() throws IOException {
-    if (parsed == null) {
-      parsed = Jsoup.connect(url).get();
+    if (docCache != null) {
+      // use cache first
+      assert parsed == null;
+      try {
+        cached = true;
+        return docCache.get(url);
+      } catch (ExecutionException e) {
+        throw new UncheckedExecutionException(e);
+      }
+    } else if (parsed == null) {
+      parsed = Loader.loadStatic(url);
+      cached = true;
     }
     return parsed;
   }
@@ -127,7 +168,39 @@ public class Page implements Node<Page, Link> {
    * Clears the internal storage of the parsed content of this page.
    */
   public void clearCache() {
-    parsed = null;
+    if (docCache != null) {
+      docCache.invalidate(url);
+    } else {
+      parsed = null;
+    }
+    cached = false;
+  }
+
+  /**
+   * A basic cache loader for loading a document given a URL, for use in an
+   * external docCache.
+   *
+   * @author mcisler
+   *
+   */
+  public static class Loader extends CacheLoader<String, Document> {
+    @Override
+    public Document load(String url) throws IOException {
+      return loadStatic(url);
+    }
+
+    /**
+     * Loads a Document from a url.
+     *
+     * @param url
+     *          The url of the page to get parsed HTML from.
+     * @return The parsed HTML.
+     * @throws IOException
+     *           If the page could not be contacted.
+     */
+    public static Document loadStatic(String url) throws IOException {
+      return Jsoup.connect(url).get();
+    }
   }
 
   /**

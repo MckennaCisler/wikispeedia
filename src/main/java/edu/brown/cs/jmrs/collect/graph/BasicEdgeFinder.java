@@ -21,4 +21,10 @@ public class BasicEdgeFinder<NV, EV extends Number>
   public Set<BasicEdge<NV, EV>> edges(BasicNode<NV, EV> node) {
     return node.getEdges();
   }
+
+  @Override
+  public Number edgeValue(BasicEdge<NV, EV> edge) {
+    // defer
+    return edge.getValue();
+  }
 }

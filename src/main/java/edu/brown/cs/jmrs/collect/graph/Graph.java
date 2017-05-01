@@ -89,7 +89,7 @@ public class Graph<N extends Node<N, E>, E extends Edge<N, E>> {
    */
   public interface Node<N extends Node<N, E>, E extends Edge<N, E>> {
     /**
-     * @return The value at this Node.
+     * @return The value at this Node. Used to determine equality between nodes.
      * @param <NV>
      *          The type of the value at this node.
      */
@@ -154,6 +154,9 @@ public class Graph<N extends Node<N, E>, E extends Edge<N, E>> {
 
   /**
    * An interface for implementing shortest-path finding algorithms in a graph.
+   *
+   * Note: should use EdgeFinder.edgeValue() instead of Edge.getValue() if using
+   * EdgeFinders.
    *
    * @author mcisler
    *

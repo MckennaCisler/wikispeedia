@@ -5,6 +5,8 @@ import java.util.Objects;
 import edu.brown.cs.jmrs.collect.graph.AbstractEdge;
 
 /**
+ * A link between Pages, for use in graph algorithms.
+ *
  * @author mcisler
  *
  */
@@ -16,7 +18,7 @@ public class Link extends AbstractEdge<Page, Link> {
    * Constructs a link between two pages, without loss of generality.
    *
    * @param page1
-   *          The first page
+   *          The first page.
    * @param page2
    *          The second page.
    */
