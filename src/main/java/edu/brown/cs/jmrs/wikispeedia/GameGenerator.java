@@ -7,6 +7,7 @@ import java.util.Set;
 import com.google.common.base.Predicate;
 import com.google.common.primitives.Doubles;
 
+import edu.brown.cs.jmrs.ui.Main;
 import edu.brown.cs.jmrs.web.LinkFinder;
 import edu.brown.cs.jmrs.web.wikipedia.WikiPage;
 import edu.brown.cs.jmrs.web.wikipedia.WikiPageLinkFinder;
@@ -50,7 +51,7 @@ public final class GameGenerator {
    * "equivalent". Increasing it may make generation slower and more
    * memory-intensive.
    */
-  private static final double OBSCURITY_EQUAL_RANGE = 0.1;
+  private static final double OBSCURITY_EQUAL_RANGE = 0.2;
 
   /**
    * The expected largest number of Wikipedia links on a page (under the
@@ -154,7 +155,8 @@ public final class GameGenerator {
       Set<String> links = WIKI_LINK_FINDER.links(page);
 
       return new WikiPage(
-          new ArrayList<>(links).get((int) (Math.random() * links.size())));
+          new ArrayList<>(links).get((int) (Math.random() * links.size())),
+          Main.WIKI_PAGE_DOC_CACHE);
     } catch (IOException e) {
       return page;
     }

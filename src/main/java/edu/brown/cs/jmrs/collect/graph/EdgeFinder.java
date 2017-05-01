@@ -36,6 +36,17 @@ public interface EdgeFinder<N extends Node<N, E>, E extends Edge<N, E>> {
   Set<E> edges(N node);
 
   /**
+   * Finds the value of an edge under the parameters of this particular
+   * implementation. Should be used in PathFinder implementations to allow for
+   * dynamic edge finding.
+   *
+   * @param edge
+   *          The edge to find the value of.
+   * @return The (Numeric) value of this edge.
+   */
+  Number edgeValue(E edge);
+
+  /**
    * A default implementation of the required neighbors() method that uses
    * edges() to find non-self neighbors (unless one neighbor is
    * self-referencing).

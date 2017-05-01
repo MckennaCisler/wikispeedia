@@ -117,7 +117,6 @@ public class DbConn implements AutoCloseable {
   }
 
   /**
-   *
    * @param insertStatement
    *          The query to insert using.
    * @param writer
@@ -125,9 +124,11 @@ public class DbConn implements AutoCloseable {
    * @return The new Insert.
    * @param <T>
    *          The type of object to the query will insert.
+   * @throws SQLException
+   *           If the initial setupStatement of the writer fails.
    */
   public <T> Insert<T> makeInsert(final String insertStatement,
-      DbWriter<T> writer) {
+      DbWriter<T> writer) throws SQLException {
     ThreadLocal<PreparedStatement> p = ThreadLocal.withInitial(() -> {
       try {
         return conn.get().prepareStatement(insertStatement);
@@ -135,6 +136,7 @@ public class DbConn implements AutoCloseable {
         throw new UncheckedSqlException(e);
       }
     });
+    writer.setup(conn.get());
     return new Insert<T>(p, writer);
   }
 

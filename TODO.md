@@ -10,8 +10,16 @@
 - Deployment
 - Track history
 - Shortest path
+  - Separate page data into external cache
+  - Create an EdgeFinder that caches edges
+  - Add the shortest-path future to WikiGame
+  - Make an intermitent (or parrallel... maybe do it while shortest-path finding?) DB-compare method that randomly double-checks a link list and changes it if needed
+  - Make a two-sided Dijkstra?
 - Design work
 - Deal with what happens when a player can't be on a page (/waiting for ex.)
+- Deal with ties (using "lists" of winners) for shortest-path mode
+- Hide user's IDs from obvious places (i.e. ALL_PLAYERS) using isCurrentPlayer, etc.
+- Add small REPL parser to hang main thread.
 
 #### Deadlines:
 - <b>Adversary TA Meeting (Wednesday, 4/26)</b>

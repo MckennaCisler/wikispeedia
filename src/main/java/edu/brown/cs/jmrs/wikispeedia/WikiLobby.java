@@ -39,7 +39,7 @@ public class WikiLobby implements Lobby {
 
   private Instant startTime = null;
 
-  private WikiPage startPage;
+  private WikiPage startPage; // TODO: encapsulate in a WikiGame.
   private WikiPage goalPage;
 
   private WikiPlayer winner;
@@ -92,10 +92,13 @@ public class WikiLobby implements Lobby {
     // add custom shortcut to set start and end page specifically.
     if (arguments.has("startPage")) {
       this.startPage =
-          WikiPage.fromAny(arguments.get("startPage").getAsString());
+          WikiPage.fromAny(arguments.get("startPage").getAsString(),
+              Main.WIKI_PAGE_DOC_CACHE);
     }
     if (arguments.has("goalPage")) {
-      this.goalPage = WikiPage.fromAny(arguments.get("goalPage").getAsString());
+      this.goalPage =
+          WikiPage.fromAny(arguments.get("goalPage").getAsString(),
+              Main.WIKI_PAGE_DOC_CACHE);
     }
   }
 
@@ -372,6 +375,7 @@ public class WikiLobby implements Lobby {
       if (src.ended()) {
         lobby.addProperty("endTime", src.getEndTime().toEpochMilli());
         lobby.add("winner", Main.GSON.toJsonTree(src.getWinner()));
+        // TODO: Shortest / known path
       }
 
       return lobby;

@@ -79,7 +79,8 @@ public class AStarDirectedPathFinder<N extends Node<N, E>, E extends Edge<N, E>>
         // to the root) (use doubles because it will offer the most precision
         // and range of values)
         double edgeDist =
-            shortestDists.get(curStart) + edge.getValue().doubleValue();
+            shortestDists.get(curStart)
+                + edgeFinder.edgeValue(edge).doubleValue();
         if (!shortestDists.containsKey(destNode)
             || Double.compare(edgeDist, shortestDists.get(destNode)) < 0) {
           shortestDists.put(destNode, edgeDist);
