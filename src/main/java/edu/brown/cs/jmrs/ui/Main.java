@@ -1,6 +1,8 @@
 package edu.brown.cs.jmrs.ui;
 
 import java.io.IOException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.concurrent.TimeUnit;
 
 import org.jsoup.nodes.Document;
@@ -154,6 +156,21 @@ public final class Main {
             }
           }), "/public-testing", "src/main/resources/public-testing");
       System.out.println("[ Started Chat Test ]");
+    }
+  }
+
+  /**
+   * Prints the input string to a logging location for debugging.
+   *
+   * @param info
+   *          The info message to log.
+   */
+  public static void debugLog(String info) {
+    if (DEBUG) {
+      System.out.println(String.format("[ DEBUG : %s ]\n\r\t%s\n\r",
+          new SimpleDateFormat("dd-MM HH:mm:ss").format(new Date()), info));
+    } else {
+      // TODO: Pipe to logfile
     }
   }
 }

@@ -86,7 +86,8 @@ public class WikiLobby implements Lobby {
     this.startPage = game.getStart();
     this.goalPage = game.getGoal();
 
-    System.out.println(startPage + " -> " + goalPage);
+    Main.debugLog(
+        String.format("Generated game: %s -> %s", startPage, goalPage));
 
     // add custom shortcut to set start and end page specifically.
     if (arguments.has("startPage")) {

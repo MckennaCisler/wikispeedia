@@ -143,7 +143,12 @@ public class Page implements Node<Page, Link> {
         cached = true;
         return docCache.get(url);
       } catch (ExecutionException e) {
-        throw new UncheckedExecutionException(e);
+        // IOExceptions are expected; others are not
+        if (e.getCause() instanceof IOException) {
+          throw (IOException) e.getCause();
+        } else {
+          throw new UncheckedExecutionException(e);
+        }
       }
     } else if (parsed == null) {
       parsed = Loader.loadStatic(url);
@@ -162,6 +167,47 @@ public class Page implements Node<Page, Link> {
   public String formattedContent(ContentFormatter<Page> formatter)
       throws IOException {
     return formatter.stringFormat(this);
+  }
+
+  /**
+   * Tries to access this page.
+   *
+   * @return Whether this page can be accessed.
+   */
+  public boolean accessible() {
+    return accessible(false);
+  }
+
+  /**
+   * Tries to access this page.
+   *
+   * @param cacheIfSo
+   *          Determines whether the page is cached if it IS accessible.
+   * @return Whether this page can be accessed.
+   */
+  public boolean accessible(boolean cacheIfSo) {
+    try {
+      if (cacheIfSo) {
+        cache();
+      } else {
+        content();
+      }
+      return true;
+    } catch (IOException e) {
+      return false;
+    }
+  }
+
+  /**
+   * Attempts to access this Page and cache it's HTML.
+   *
+   * @return This Page.
+   * @throws IOException
+   *           If this page cannot be accessed to cache.
+   */
+  public Page cache() throws IOException {
+    parsedContentOriginal();
+    return this;
   }
 
   /**
