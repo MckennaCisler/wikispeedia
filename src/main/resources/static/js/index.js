@@ -92,7 +92,6 @@ serverConn.ready(() => {
 		serverConn.registerAllLobbies(drawLobbies);
 	});
 
-
 	$("#start_game").on('click', () => {
 		if ($("#game_name").val() === "") {
 			$("#game_name").effect("highlight", {
