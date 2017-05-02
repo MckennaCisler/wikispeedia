@@ -38,6 +38,63 @@ $(document).ready(function () {
 		$("#main").show();
 		$("#rules").show();
 	});
+	
+	$("#start_game").on('click', () => {
+		if ($("#game_name").val() === "") {
+			$("#game_name").effect("highlight", {
+				"color": "red"
+			}, 1000);
+		} else {
+			isMaking = true;
+			lobbyName = $("#game_name").val();
+			
+			let mode;
+			if (document.getElementById("time").checked) {
+				mode = GAME_MODES.TIME_TRIAL;
+			} else {
+				mode = GAME_MODES.LEAST_CLICKS;
+			}
+
+			serverConn.startLobby(lobbyName.trim(),
+				{
+					"gameMode": mode,
+					"difficulty": $("#difficulty_slider").val() / 100
+				},
+				() => {
+					$("#main").hide();
+					$("#rules").hide();
+					$("#uname_picker").show();
+					$("#u_header").html(lobbyName);
+				},
+				displayServerConnError);
+			console.log(lobbyName);
+		}
+	});
+
+	$("#launch").on('click', () => {
+		if ($("#uname").val() === "") {
+			$("#uname").effect("highlight", {
+				"color": "red"
+			}, 1000);
+
+		} else if (lobbyName !== "") {
+			if (isMaking) {
+				// only have to do this, lobby was created & joined earlier
+				serverConn.setUsername($("#uname").val(), () => {
+					window.location.href = "waiting";
+				}, displayServerConnError);
+
+			} else {
+				serverConn.joinLobby(lobbyName.trim(),
+				() => {
+					serverConn.setUsername($("#uname").val(), () => {
+						window.location.href = "waiting";
+					}, displayServerConnError);
+				},
+				displayServerConnError);
+			}
+		}
+	});
 });
 
 $(document).keypress((e) => {
@@ -90,56 +147,6 @@ serverConn.ready(() => {
 	}, (error) => {
 		displayServerConnError(error);
 		serverConn.registerAllLobbies(drawLobbies);
-	});
-
-	$("#start_game").on('click', () => {
-		if ($("#game_name").val() === "") {
-			$("#game_name").effect("highlight", {
-				"color": "red"
-			}, 1000);
-		} else {
-			isMaking = true;
-			lobbyName = $("#game_name").val();
-
-			serverConn.startLobby(lobbyName.trim(),
-				{
-					"gameMode": GAME_MODES.TIME_TRIAL,					 // TODO: YOU-HOO!!!!!!!!!!!!!!!!
-					"difficulty": 0.5										 // TODO: YOU-HOO!!!!!!!!!!!!!!!!
-				},
-				() => {
-					$("#main").hide();
-					$("#rules").hide();
-					$("#uname_picker").show();
-					$("#u_header").html(lobbyName);
-				},
-				displayServerConnError);
-			console.log(lobbyName);
-		}
-	});
-
-	$("#launch").on('click', () => {
-		if ($("#uname").val() === "") {
-			$("#uname").effect("highlight", {
-				"color": "red"
-			}, 1000);
-
-		} else if (lobbyName !== "") {
-			if (isMaking) {
-				// only have to do this, lobby was created & joined earlier
-				serverConn.setUsername($("#uname").val(), () => {
-					window.location.href = "waiting";
-				}, displayServerConnError);
-
-			} else {
-				serverConn.joinLobby(lobbyName.trim(),
-				() => {
-					serverConn.setUsername($("#uname").val(), () => {
-						window.location.href = "waiting";
-					}, displayServerConnError);
-				},
-				displayServerConnError);
-			}
-		}
 	});
 });
 
