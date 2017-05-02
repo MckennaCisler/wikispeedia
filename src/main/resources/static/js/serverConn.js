@@ -187,6 +187,7 @@ class ServerConn {
         this.CLIENT_ID_COOKIE_EXPIRATION = 60;
 
         this.clientId = "";
+        this.readyNow = false;
         this.ws = new WebSocket("ws://" + source);
         this.ws.onopen = this.ws_onopen.bind(this);
         this.ws.onmessage = this.ws_onmessage.bind(this);
@@ -204,10 +205,13 @@ class ServerConn {
             "callback": (message) => {
                 this._setId(message.client_id);
 
-                // call ready callbacks
-                for (let i = 0; i < this.readyCallbacks.length; i++) {
-                    this.readyCallbacks[i]();
+                // call ready callbacks added before we got here
+                for (let i = 0; i < this.preReadyCallbacks.length; i++) {
+                    this.preReadyCallbacks[i]();
                 }
+
+                // note we're ready so any further ready callbacks added are called immediately.
+                this.readyNow = true;
             },
             "errCallback" : () => {}, // no reason
             "timeout" : null          // no reason
@@ -217,7 +221,7 @@ class ServerConn {
         /**
          * callbacks called once websocket is ready
          */
-        this.readyCallbacks = [];
+        this.preReadyCallbacks = [];
     }
 
     _setId(id) {
@@ -319,7 +323,13 @@ class ServerConn {
 
 
     ready(callback) {
-        this.readyCallbacks.push(callback);
+        if (!this.readyNow) {
+          // if we're not ready for registering things, defer until we are
+          this.preReadyCallbacks.push(callback);
+        } else {
+          // otherwise, just call it now
+          callback();
+        }
     }
 
     /**
