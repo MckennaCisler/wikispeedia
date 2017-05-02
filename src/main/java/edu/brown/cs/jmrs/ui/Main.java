@@ -39,6 +39,7 @@ import spark.template.freemarker.FreeMarkerEngine;
 public final class Main {
   public static final int DEFAULT_SPARK_PORT = 4567;
   public static final int DEFAULT_SOCKET_PORT = 4568;
+  public static final boolean DEBUG = true;
 
   /**
    * Global GSON for defining custom JSON serializers on.
@@ -110,7 +111,7 @@ public final class Main {
         System.out.println("[ Started Websocket ]");
 
         // Setup Spark for main page and extra serving
-        SparkServer.setDebug(true);
+        SparkServer.setDebug(DEBUG);
         SparkServer.runSparkServer((int) options.valueOf("spark-port"),
             ImmutableList.of(new WikiMainHandlers(), new WikiPageHandlers()),
             "/static", "src/main/resources/public");
