@@ -5,6 +5,7 @@ import java.util.Set;
 import java.util.function.Predicate;
 
 import edu.brown.cs.jmrs.ui.Main;
+import edu.brown.cs.jmrs.web.Link;
 import edu.brown.cs.jmrs.web.LinkFinder;
 import edu.brown.cs.jmrs.web.LinkFinderMethod;
 
@@ -85,5 +86,11 @@ public class WikiPageLinkFinder implements LinkFinder<WikiPage> {
       }
       return true;
     };
+  }
+
+  @Override
+  public Number edgeValue(Link edge) {
+    // just return generic value
+    return 1;
   }
 }

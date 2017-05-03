@@ -22,6 +22,7 @@ import edu.brown.cs.jmrs.ui.Main;
 import edu.brown.cs.jmrs.web.ContentFormatter;
 import edu.brown.cs.jmrs.web.LinkFinder;
 import edu.brown.cs.jmrs.web.wikipedia.WikiPage;
+import edu.brown.cs.jmrs.wikispeedia.comms.Command;
 
 /**
  * Coordinates a lobby of players in a Wiki game.
@@ -64,7 +65,7 @@ public class WikiLobby implements Lobby {
   /****************************************/
 
   /**
-   * Called on lobby creation; stuctures this lobby to follow a certain game
+   * Called on lobby creation; structures this lobby to follow a certain game
    * mode.
    */
   @Override
@@ -87,7 +88,8 @@ public class WikiLobby implements Lobby {
     this.startPage = game.getStart();
     this.goalPage = game.getGoal();
 
-    System.out.println(startPage + " -> " + goalPage);
+    Main.debugLog(
+        String.format("Generated game: %s -> %s", startPage, goalPage));
 
     // add custom shortcut to set start and end page specifically.
     if (arguments.has("startPage")) {
@@ -104,15 +106,15 @@ public class WikiLobby implements Lobby {
 
   @Override
   public boolean isClosed() {
-    // TODO Auto-generated method stub
-    return false;
+    return players.isEmpty();
   }
 
   @Override
   public void addClient(String playerId) {
     if (started()) {
-      throw new IllegalStateException(
+      Command.sendError(server, playerId,
           "Game has already started, cannot add player.");
+      return;
     }
     this.players.put(playerId,
         new WikiPlayer(playerId, this, startPage, goalPage));
@@ -167,11 +169,17 @@ public class WikiLobby implements Lobby {
   public void start() {
     for (Entry<String, WikiPlayer> entry : players.entrySet()) {
       if (!entry.getValue().ready()) {
-        throw new IllegalStateException(String.format("Player %s is not ready",
-            entry.getValue().getName()));
+        Command.sendError(server, entry.getKey(), String
+            .format("Player %s is not ready", entry.getValue().getName()));
+        return;
       }
     }
     startTime = Instant.now(); // this is how we determine whether started
+
+    // notify players
+    for (Entry<String, WikiPlayer> entry : players.entrySet()) {
+      entry.getValue().setStartTime(startTime);
+    }
   }
 
   /**
@@ -269,7 +277,7 @@ public class WikiLobby implements Lobby {
   /**
    * @return The server associated with this lobby.
    */
-  Server getServer() {
+  public Server getServer() {
     return server;
   }
 
@@ -370,7 +378,7 @@ public class WikiLobby implements Lobby {
       lobby.addProperty("ended", src.ended());
       if (src.started()) {
         lobby.addProperty("startTime", src.getStartTime().toEpochMilli());
-        lobby.addProperty("playTime", src.getPlayTime().toMinutes());
+        lobby.addProperty("playTime", src.getPlayTime().toMillis());
       }
       if (src.ended()) {
         lobby.addProperty("endTime", src.getEndTime().toEpochMilli());

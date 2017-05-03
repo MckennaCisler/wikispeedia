@@ -1,4 +1,4 @@
-package edu.brown.cs.jmrs.wikispeedia;
+package edu.brown.cs.jmrs.wikispeedia.comms;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -11,6 +11,8 @@ import edu.brown.cs.jmrs.server.customizable.CommandInterpreter;
 import edu.brown.cs.jmrs.server.customizable.Lobby;
 import edu.brown.cs.jmrs.ui.Main;
 import edu.brown.cs.jmrs.web.wikipedia.WikiPage;
+import edu.brown.cs.jmrs.wikispeedia.WikiLobby;
+import edu.brown.cs.jmrs.wikispeedia.WikiPlayer;
 
 /**
  * Interprets commands over a Wiki lobby.
@@ -89,7 +91,7 @@ public class WikiInterpreter implements CommandInterpreter {
         break;
 
       default:
-        Command.ERROR.send(lobby.getServer(), clientId, ImmutableMap.of(),
+        Command.sendError(lobby.getServer(), clientId,
             "Invalid command specified: " + cname);
     }
   }
@@ -126,39 +128,51 @@ public class WikiInterpreter implements CommandInterpreter {
     JsonObject curPageInfo = new JsonObject();
 
     assert command.get("payload").isJsonObject();
-    String reqPage =
-        command.get("payload").getAsJsonObject().get("page_name").getAsString();
-    String curPage = player.getCurPage().getName();
-
-    System.out.println(reqPage);
 
     try {
-      WikiPage reqWikiPage =
-          WikiPage.fromAny(reqPage, Main.WIKI_PAGE_DOC_CACHE);
-      if (player.goToPage(reqWikiPage)) {
-        // if could go to page (and thus did go to page)
+      // if the player is just requesting their initial page, give it to them
+      if (command.get("payload").getAsJsonObject().has("initial") && command
+          .get("payload").getAsJsonObject().get("initial").getAsBoolean()) {
+
         Command.RETURN_GOTO_PAGE.send(lobby.getServer(), clientId,
-            getPlayerPageInfo(reqWikiPage, lobby));
-
-        // on success, check for winner, in which case we'll send an additional
-        // mass message
-        if (!lobby.checkForWinner()) {
-          // if there wasn't a winner, update all player's on eachother's status
-          // (i.e. when one moves)
-          Command.sendAllPlayers(lobby);
-        }
-
+            getPlayerPageInfo(curPlayerPage, lobby));
       } else {
-        // if we can't go to the page, revert to the previous current
-        Command.RETURN_GOTO_PAGE.send(lobby.getServer(), clientId,
-            getPlayerPageInfo(curPlayerPage, lobby), String.format(
-                "Player cannot move from page %s to %s", curPage, reqPage));
+        String reqPage =
+            command.get("payload").getAsJsonObject().get("page_name")
+                .getAsString();
+
+        Main.debugLog(player.getName() + " going to " + reqPage);
+
+        WikiPage reqWikiPage =
+            WikiPage.fromAny(reqPage, Main.WIKI_PAGE_DOC_CACHE);
+        if (player.goToPage(reqWikiPage)) {
+          // if could go to page (and thus did go to page)
+          Command.RETURN_GOTO_PAGE.send(lobby.getServer(), clientId,
+              getPlayerPageInfo(reqWikiPage, lobby));
+
+          // on success, check for winner, in which case we'll send an
+          // additional
+          // mass message
+          if (!lobby.checkForWinner()) {
+            // if there wasn't a winner, update all player's on eachother's
+            // status
+            // (i.e. when one moves)
+            Command.sendAllPlayers(lobby);
+          }
+
+        } else {
+          // if we can't go to the page, revert to the previous current
+          Command.RETURN_GOTO_PAGE.send(lobby.getServer(), clientId,
+              getPlayerPageInfo(curPlayerPage, lobby),
+              String.format("Player cannot move from page %s to %s",
+                  curPlayerPage.getName(), reqPage));
+        }
+        curPageInfo = getPlayerPageInfo(curPlayerPage, lobby);
       }
-      curPageInfo = getPlayerPageInfo(curPlayerPage, lobby);
     } catch (IOException e) {
       Command.RETURN_GOTO_PAGE.send(lobby.getServer(), clientId, curPageInfo,
-          String.format("Error in accessing page %s: %s", curPage,
-              e.getMessage()));
+          String.format("Error in accessing page %s: %s",
+              curPlayerPage.getName(), e.getMessage()));
 
     } catch (IllegalStateException es) {
       Command.RETURN_GOTO_PAGE.send(lobby.getServer(), clientId, curPageInfo,

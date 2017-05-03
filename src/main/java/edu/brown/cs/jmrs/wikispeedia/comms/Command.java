@@ -1,4 +1,4 @@
-package edu.brown.cs.jmrs.wikispeedia;
+package edu.brown.cs.jmrs.wikispeedia.comms;
 
 import java.util.List;
 
@@ -8,6 +8,8 @@ import com.google.gson.JsonObject;
 import edu.brown.cs.jmrs.collect.Functional;
 import edu.brown.cs.jmrs.server.Server;
 import edu.brown.cs.jmrs.ui.Main;
+import edu.brown.cs.jmrs.wikispeedia.WikiLobby;
+import edu.brown.cs.jmrs.wikispeedia.WikiPlayer;
 
 /**
  * All possible incoming and outgoing commands for the WikiInterpreter. Also
@@ -16,7 +18,7 @@ import edu.brown.cs.jmrs.ui.Main;
  * @author mcisler
  *
  */
-enum Command {
+public enum Command {
   /**
    * INCOMING Commands.
    */
@@ -42,7 +44,6 @@ enum Command {
   RETURN_SET_USERNAME("return_set_username", CommandType.RESPONSE), //
   RETURN_GOTO_PAGE("return_goto_page", CommandType.RESPONSE), //
   RETURN_PATH("return_path", CommandType.RESPONSE), //
-  ERROR("error", CommandType.RESPONSE), //
 
   /**
    * OUTGOING Server Commands (see below for constructions).
@@ -50,7 +51,7 @@ enum Command {
   END_GAME("end_game", CommandType.OUTGOING), //
   BEGIN_GAME("begin_game", CommandType.OUTGOING), //
   ALL_PLAYERS("all_players", CommandType.OUTGOING), //
-  // ALL_LOBBIES("all_lobbies", CommandType.OUTGOING),
+  ERROR("error", CommandType.OUTGOING), //
 
   // Value to signify not in enum (when using switch statement)
   NULL(null, null);
@@ -138,30 +139,75 @@ enum Command {
 
   /**
    * Sends a JSONified version of data to the client with clientId.
+   *
+   * @param server
+   *          The server to use to send.
+   * @param clientId
+   *          The clientId.
+   * @param data
+   *          The data to JSONify and send.
    */
-  void send(Server server, String clientId, Object data) {
+  public void send(Server server, String clientId, Object data) {
     send(server, clientId, data, "");
   }
 
   /**
    * Sends a JSONified version of data to the client with clientId.
+   *
+   * @param server
+   *          The server to use to send.
+   * @param clientId
+   *          The clientId.
+   * @param data
+   *          The data to JSONify and send.
+   * @param errorMessage
+   *          An error message to send as well.
    */
-  void send(Server server, String clientId, Object data, String errorMessage) {
-    server.sendToClient(clientId, build(data));
+  public void send(Server server, String clientId, Object data,
+      String errorMessage) {
+    server.sendToClient(clientId, build(data, errorMessage));
+  }
+
+  /**
+   * Sends an error message with a generic message.
+   *
+   * @param server
+   *          The server to use to send.
+   * @param clientId
+   *          The clientId.
+   * @param errorMessage
+   *          The error message.
+   */
+  public static void sendError(Server server, String clientId,
+      String errorMessage) {
+    Main.debugLog("Command.ERROR sent: " + errorMessage);
+    ERROR.send(server, clientId, ImmutableMap.of(), errorMessage);
   }
 
   /**
    * Sends a to all players in lobby a JSONified version of data.
+   *
+   * @param lobby
+   *          The lobby to send to get players from.
+   * @param data
+   *          The data to send.
    */
-  void sendToAll(WikiLobby lobby, Object data) {
+  public void sendToAll(WikiLobby lobby, Object data) {
     sendToAll(lobby, data, "");
   }
 
   /**
    * Sends a to all players in lobby a JSONified version of data, and an error
    * message.
+   *
+   * @param lobby
+   *          The lobby to send to get players from.
+   * @param data
+   *          The data to send.
+   * @param errorMessage
+   *          An error message to send as well.
    */
-  void sendToAll(WikiLobby lobby, Object data, String errorMessage) {
+  public void sendToAll(WikiLobby lobby, Object data, String errorMessage) {
     for (WikiPlayer player : lobby.getPlayers()) {
       if (player.connected()) {
         send(lobby.getServer(), player.getId(), data, errorMessage);
@@ -172,23 +218,40 @@ enum Command {
   /*
    * Java functions to actually send Commands.
    */
-  static void sendAllPlayers(WikiLobby lobby) {
-    System.out.println("All: " + lobby.getPlayers());
+  /**
+   * @param lobby
+   *          The lobby to get players from.
+   */
+  public static void sendAllPlayers(WikiLobby lobby) {
+    Main.debugLog("All players: " + lobby.getPlayers());
     List<WikiPlayer> connectedPlayers =
         Functional.filter(lobby.getPlayers(), WikiPlayer::connected);
-    System.out.println("Connected: " + connectedPlayers);
     Command.ALL_PLAYERS.sendToAll(lobby, connectedPlayers);
   }
 
-  static void sendEndGame(WikiLobby lobby) {
+  /**
+   * @param lobby
+   *          The lobby to get players and winner from.
+   */
+  public static void sendEndGame(WikiLobby lobby) {
     Command.END_GAME.sendToAll(lobby, lobby.getWinner());
   }
 
-  static void sendBeginGame(WikiLobby lobby) {
+  /**
+   * @param lobby
+   *          The lobby to get players from.
+   */
+  public static void sendBeginGame(WikiLobby lobby) {
     sendBeginGame(lobby, "");
   }
 
-  static void sendBeginGame(WikiLobby lobby, String error) {
+  /**
+   * @param lobby
+   *          The lobby to get players and winner from.
+   * @param error
+   *          The error message to all.
+   */
+  public static void sendBeginGame(WikiLobby lobby, String error) {
     Command.BEGIN_GAME.sendToAll(lobby, ImmutableMap.of(), error);
   }
 }

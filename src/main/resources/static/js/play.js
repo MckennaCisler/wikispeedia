@@ -39,6 +39,8 @@ $(document).ready(() => {
 });
 
 serverConn.ready(() => {
+    serverConn.registerError(displayServerConnError);
+
     serverConn.registerEndGame(() => {
         window.location.href = "end";
     });
@@ -48,7 +50,7 @@ serverConn.ready(() => {
     currHistory = serverConn.clientId; // the player whose history is currently displayed
     serverConn.registerAllPlayers(drawHistoryCallback);
     serverConn.getPlayers(drawHistoryCallback);
-    goToPage(startHref);
+    serverConn.goToInitialPage(drawPage, errorPage);
 });
 
 ///
@@ -81,8 +83,8 @@ function drawPage(page) {
 }
 
 // Error callback
-function errorPage() {
-  displayError("Couldn't go to page");
+function errorPage(error) {
+  displayError("Couldn't go to page: " + error.error_message);
 }
 
 // Replaces the links with callbacks

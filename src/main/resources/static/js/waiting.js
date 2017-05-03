@@ -100,6 +100,8 @@ $(document).ready(() => {
 	serverConn.ready(() => {
 		"use strict";
 
+		serverConn.registerError(displayServerConnError);
+
 		// Get player states
 		serverConn.registerAllPlayers(drawPlayers);
 		serverConn.getPlayers(drawPlayers, displayServerConnError);

@@ -4,8 +4,6 @@ import java.io.IOException;
 import java.lang.reflect.Type;
 import java.time.Duration;
 import java.time.Instant;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 
@@ -36,15 +34,16 @@ public class WikiPlayer {
   /**
    * State variables (endTime is only set upon completion).
    */
+  private transient Instant startTime;
   private transient Instant endTime;
   private boolean ready; // for match starting
   private boolean connected;
 
   /**
-   * Path and location data (in case where start and end page are different for
-   * each player in lobby).
+   * WikiPath and location data (in case where start and end page are different
+   * for each player in lobby).
    */
-  private final List<WikiPage> path; // curPage is last page in here
+  private final WikiPath path; // curPage is last page in here
   private final WikiPage startPage;
   private final WikiPage goalPage;
 
@@ -68,8 +67,7 @@ public class WikiPlayer {
     this.lobby = lobby;
     this.startPage = startPage;
     this.goalPage = goalPage;
-    this.path = new ArrayList<>();
-    this.path.add(startPage);
+    this.path = new WikiPath(startPage);
   }
 
   /**
@@ -131,7 +129,8 @@ public class WikiPlayer {
    * @return The time this player started.
    */
   public final Instant getStartTime() {
-    return lobby.getStartTime();
+    assert lobby.getStartTime().equals(startTime);
+    return startTime;
   }
 
   /**
@@ -149,14 +148,13 @@ public class WikiPlayer {
    *           If the lobby has not been started.
    */
   public final Duration getPlayTime() {
-    return Duration.between(lobby.getStartTime(),
-        done() ? endTime : Instant.now());
+    return Duration.between(startTime, done() ? endTime : Instant.now());
   }
 
   /**
    * @return The path the player has taken through wiki articles.
    */
-  public final List<WikiPage> getPath() {
+  public final WikiPath getPath() {
     return path;
   }
 
@@ -164,14 +162,14 @@ public class WikiPlayer {
    * @return The length of this player's path, adjusted for reversals, etc.
    */
   public final int getPathLength() {
-    return path.size(); // TODO:
+    return path.size();
   }
 
   /**
    * @return The page that the player is currently at.
    */
   public WikiPage getCurPage() {
-    return path.get(path.size() - 1);
+    return path.end();
   }
 
   /**
@@ -225,6 +223,19 @@ public class WikiPlayer {
   }
 
   /**
+   * Sets the startTime for this player. Can only be set once.
+   *
+   * @param startTime
+   *          The startTime to set
+   */
+  public void setStartTime(Instant startTime) {
+    assert this.startTime == null;
+    assert startTime != null;
+    this.startTime = startTime;
+    path.setStartTime(startTime);
+  }
+
+  /**
    * Sets the endTime for this player. Can only be set once.
    *
    * @param endTime
@@ -247,11 +258,10 @@ public class WikiPlayer {
    *           If the curPage page cannot be accessed.
    */
   public synchronized boolean goToPage(WikiPage page) throws IOException {
-    // if (!lobby.started()) { // TODO:
-    // throw new IllegalStateException(
-    // String.format("Player %s's lobby has not started", name));
-    // } else
-    if (lobby.ended()) {
+    if (!lobby.started()) {
+      throw new IllegalStateException(
+          String.format("Player %s's lobby has not started", name));
+    } else if (lobby.ended()) {
       throw new IllegalStateException(
           String.format("Player %s's lobby has ended", name));
     } else if (done()) {
@@ -290,9 +300,10 @@ public class WikiPlayer {
       root.add("startPage", Main.GSON.toJsonTree(src.startPage));
       root.add("goalPage", Main.GSON.toJsonTree(src.goalPage));
       root.add("path", Main.GSON.toJsonTree(src.path));
+      Main.debugLog(Main.GSON.toJsonTree(src.path));
       if (src.getLobby().started()) {
         root.addProperty("startTime", src.getStartTime().toEpochMilli());
-        root.addProperty("playTime", src.getPlayTime().toMinutes());
+        root.addProperty("playTime", src.getPlayTime().toMillis());
       }
       if (src.done()) {
         root.addProperty("endTime", src.getEndTime().toEpochMilli());

@@ -110,3 +110,6 @@ All of this information is put together on a presentation linked here: https://d
   - `--spark` To run a Spark server with basic Wikipedia handlers (`/wiki/<page_name>` and `/wiki/links/<page_name>`) for testing
   - `--spark-port <port>` To set the port of the `--spark` server.
   - `--socket-port <port>` To set the port of either the `--gui` socket or the `--chat-test` socket.
+  - `--scrape` To simply scrape Wikipedia and populate database caches
+  - `--scrape-depth <depth>` The depth at which to stop scraping. Defaults to infinity.
+  - `--scrape-start <wiki page title>` The page to start from when scraping. Defaults to "Main_Page"

@@ -1,10 +1,12 @@
 package edu.brown.cs.jmrs.wikispeedia;
 
+import java.io.IOException;
 import java.sql.SQLException;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
-import edu.brown.cs.jmrs.collect.graph.EdgeFinder;
+import edu.brown.cs.jmrs.collect.Functional;
 import edu.brown.cs.jmrs.io.db.DbConn;
 import edu.brown.cs.jmrs.io.db.DbReader;
 import edu.brown.cs.jmrs.io.db.DbWriter;
@@ -14,6 +16,7 @@ import edu.brown.cs.jmrs.ui.Main;
 import edu.brown.cs.jmrs.web.Link;
 import edu.brown.cs.jmrs.web.Page;
 import edu.brown.cs.jmrs.web.wikipedia.WikiPage;
+import edu.brown.cs.jmrs.web.wikipedia.WikiPageLinkFinder;
 
 /**
  * An edge finder for use in graph searching on WikiPages that uses a database
@@ -22,7 +25,7 @@ import edu.brown.cs.jmrs.web.wikipedia.WikiPage;
  * @author mcisler
  *
  */
-public class CachingWikiEdgeFinder implements EdgeFinder<Page, Link> {
+public class CachingWikiEdgeFinder extends WikiPageLinkFinder {
   // TODO: How to prehash?
   private static final DbReader<Link> LINK_READER = new DbReader<>((rs) -> {
     // rs stores two urls (TODO??); use Main cache for insides
@@ -53,8 +56,37 @@ public class CachingWikiEdgeFinder implements EdgeFinder<Page, Link> {
   }
 
   @Override
+  public Set<String> links(WikiPage page) throws IOException {
+    // try database
+    List<Link> links = lookup.query(page.url());
+    if (links.isEmpty()) {
+      // grab links using wikipage link finder in normal way
+      return super.links(page);
+    }
+    return new HashSet<>(
+        Functional.map(links, (link) -> link.getDestination().url()));
+  }
+
+  @Override
+  public Set<WikiPage> linkedPages(WikiPage page) throws IOException {
+    // try database
+    List<Link> links = lookup.query(page.url());
+    if (links.isEmpty()) {
+      // grab links using wikipage link finder in normal way
+      return super.linkedPages(page);
+    }
+    return new HashSet<>(
+        Functional.map(links, (link) -> (WikiPage) link.getDestination()));
+  }
+
+  @Override
   public Set<Link> edges(Page node) {
-    return new HashSet<>(lookup.query(node.url()));
+    List<Link> links = lookup.query(node.url());
+    if (links.isEmpty()) {
+      // grab edges using wikipage link finder in normal way
+      return super.edges(node);
+    }
+    return new HashSet<>(links);
   }
 
   @Override

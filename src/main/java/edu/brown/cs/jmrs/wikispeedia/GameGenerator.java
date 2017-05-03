@@ -25,6 +25,11 @@ public final class GameGenerator {
       new WikiPageLinkFinder(Filter.NON_ENGLISH_WIKIPEDIA);
   private static final WikiPage START_PAGE = WikiPage.fromName("Main_Page");
 
+  static {
+    // check and cache if found
+    assert START_PAGE.accessible(true);
+  }
+
   /**
    * Page generation constants
    */
@@ -39,7 +44,7 @@ public final class GameGenerator {
    *
    * Smaller values lead to greater depth searches with less consideration of
    * each page's links. It is essentially the chance that a given link on a page
-   * will be skipped,so 1 will just continue check a single link and 0 will
+   * will be skipped, so 1 will just check a single link on a page and 0 will
    * check all links.
    *
    * Decreasing it may make generation slower and more memory-intensive.
@@ -51,7 +56,7 @@ public final class GameGenerator {
    * "equivalent". Increasing it may make generation slower and more
    * memory-intensive.
    */
-  private static final double OBSCURITY_EQUAL_RANGE = 0.2;
+  private static final double OBSCURITY_EQUAL_RANGE = 0.05;
 
   /**
    * The expected largest number of Wikipedia links on a page (under the
@@ -80,7 +85,8 @@ public final class GameGenerator {
    */
   public static WikiGame withObscurity(double obscurity) {
     WikiPage start = pageWithObscurity(obscurity);
-    return new WikiGame(start, goDownFrom(start, obscurityFilter(obscurity)));
+    return new WikiGame(start,
+        goDownFromRetrying(start, obscurityFilter(obscurity)));
   }
 
   /**
@@ -121,6 +127,7 @@ public final class GameGenerator {
     if (depth == 0) {
       return start;
     }
+
     return goDownFrom(getRandomLink(start), depth - 1);
   }
 
@@ -131,35 +138,81 @@ public final class GameGenerator {
    *          The predicate to stop searching for upon returning true. Probably
    *          shouldn't request page HTML.
    * @return A page satisfying the predicate, somewhere after start.
+   * @throws IOException
+   *           If a page could not be accessed; this defers the decision of what
+   *           to do upwards, because if we attempt to try more links in this
+   *           function we could easily get into infinite loops.
    */
-  private static WikiPage goDownFrom(WikiPage start, Predicate<WikiPage> stop) {
-    // don't check start because it will be
-    try {
-      Set<WikiPage> pages = WIKI_LINK_FINDER.linkedPages(start);
+  private static WikiPage goDownFrom(WikiPage start, Predicate<WikiPage> stop)
+      throws IOException {
+    // don't check start because it will be later
+    Set<WikiPage> pages = WIKI_LINK_FINDER.linkedPages(start);
 
-      for (WikiPage page : pages) {
-        if (Math.random() > DEPTH_BREADTH_SEARCH_RATIO && stop.test(page)) {
-          return page;
+    for (WikiPage page : pages) {
+      if (Math.random() > DEPTH_BREADTH_SEARCH_RATIO && stop.test(page)) {
+        return page;
+      }
+    }
+    return goDownFrom(
+        new ArrayList<>(pages).get((int) (Math.random() * pages.size())), stop);
+  }
+
+  /**
+   * Same as goDownFrom, but starts from a random link of start and retries
+   * other links on failure of that path.
+   */
+  private static WikiPage goDownFromRetrying(WikiPage start,
+      Predicate<WikiPage> stop) {
+    try {
+      Set<String> links = WIKI_LINK_FINDER.links(start);
+      int tries = 0;
+      while (tries < links.size()) {
+        try {
+          // try to go down from this link; try again down a different path on
+          // failure.
+          return goDownFrom(getRandomLinkFrom(links), stop);
+        } catch (IOException e) {
+          tries++;
         }
       }
-      return goDownFrom(
-          new ArrayList<>(pages).get((int) (Math.random() * pages.size())),
-          stop);
+      // something is wrong, no links from start page accessible
+      throw new AssertionError(
+          "Links from start page '" + START_PAGE + "' cannot be accessed");
     } catch (IOException e) {
-      return start;
+      throw new AssertionError(
+          "Start page '" + START_PAGE + "' cannot be accessed");
     }
   }
 
+  /**
+   * Gets a random link (WikiPage) outgoing from a page.
+   *
+   * @return A WikiPage off page that is guaranteed to be accessible.
+   */
   private static WikiPage getRandomLink(WikiPage page) {
     try {
       Set<String> links = WIKI_LINK_FINDER.links(page);
-
-      return new WikiPage(
-          new ArrayList<>(links).get((int) (Math.random() * links.size())),
-          Main.WIKI_PAGE_DOC_CACHE);
+      int tries = 0;
+      while (tries < links.size()) {
+        WikiPage newPage = getRandomLinkFrom(links);
+        if (newPage.accessible(true)) {
+          return newPage;
+        } else {
+          Main.debugLog("Could not access page: " + newPage);
+        }
+        tries++;
+      }
+      // if we run out of tries
     } catch (IOException e) {
-      return page;
+      // if root page error occurs
     }
+    return page;
+  }
+
+  private static WikiPage getRandomLinkFrom(Set<String> links) {
+    return new WikiPage(
+        new ArrayList<>(links).get((int) (Math.random() * links.size())),
+        Main.WIKI_PAGE_DOC_CACHE);
   }
 
   /**
@@ -179,8 +232,10 @@ public final class GameGenerator {
    *          shouldn't request page HTML.
    */
   public static WikiPage getRandomPage(Predicate<WikiPage> stop) {
-    // Start from the main page for rapidly-changing and diverse content
-    return goDownFrom(START_PAGE, stop);
+    // Start from the main page for rapidly-changing and diverse content, but
+    // start a level down (at random page) because predicate-based one can be
+    // very predictable under some parameters.
+    return goDownFromRetrying(START_PAGE, stop);
   }
 
   /**************************************************************/
