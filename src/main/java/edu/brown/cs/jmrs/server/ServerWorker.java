@@ -221,7 +221,7 @@ class ServerWorker {
     if (client != null) {
       JsonObject jsonObject = allLobbies();
       jsonObject.addProperty("command", "get_lobbies");
-      jsonObject.add("lobbies", allLobbies());
+      jsonObject.add("payload", allLobbies());
       jsonObject.addProperty("error_message", "");
       String toClient = gson.toJson(jsonObject);
       try {
