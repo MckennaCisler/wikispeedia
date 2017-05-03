@@ -208,7 +208,7 @@ class ServerWorker {
     if (client != null && client.getLobby() == null) {
       notInLobbies.put(client.getId(), client);
     }
-    sendLobbies(clients.get(trueId));
+    sendLobbies(client);
   }
 
   public void updateLobbylessPlayers() {
@@ -218,15 +218,17 @@ class ServerWorker {
   }
 
   private void sendLobbies(Client client) {
-    JsonObject jsonObject = allLobbies();
-    jsonObject.addProperty("command", "get_lobbies");
-    jsonObject.add("lobbies", allLobbies());
-    jsonObject.addProperty("error_message", "");
-    String toClient = gson.toJson(jsonObject);
-    try {
-      clients.getReversed(client).getRemote().sendString(toClient);
-    } catch (IOException e) {
-      e.printStackTrace();
+    if (client != null) {
+      JsonObject jsonObject = allLobbies();
+      jsonObject.addProperty("command", "get_lobbies");
+      jsonObject.add("lobbies", allLobbies());
+      jsonObject.addProperty("error_message", "");
+      String toClient = gson.toJson(jsonObject);
+      try {
+        clients.getReversed(client).getRemote().sendString(toClient);
+      } catch (IOException e) {
+        e.printStackTrace();
+      }
     }
   }
 
