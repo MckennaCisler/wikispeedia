@@ -25,10 +25,10 @@ public class WikiMainHandlers implements SparkHandlers {
     Spark.get("/waiting", new StaticHandler("waiting.html"), freeMarker);
     Spark.get("/end", new StaticHandler("end.html"), freeMarker);
     Spark.get("/404", new StaticHandler("404.html"), freeMarker);
-    Spark.notFound((req, res) -> {
-      res.redirect("404");
+    Spark.notFound(((req, res) -> {
+      res.redirect("/404");
       return "";
-    });
+    }));
   }
 
   /**
