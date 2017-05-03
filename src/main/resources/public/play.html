@@ -41,13 +41,13 @@
 	<meta name="msapplication-wide310x150logo" content="lib/assets/mstile-310x150.png" />
 	<meta name="msapplication-square310x310logo" content="lib/assets/mstile-310x310.png" />
 </head>
-<body>
+<body id="play_body">
 	<div class="top">
 		<h1 title="Wikispeedia" style="padding-top: 10px;"><a class="title-a" href="/">Wikispeedia</a></h1>
 	</div>
 
-	<div class="row" id="game-div">
-		<div class="col-md-2">
+	<div id="game-div">
+		<div class="col-md-2 my_col">
 			<div class="card card-default">
 				<div class="card-header" id="destination-label"> Destination </div>
 				<div class="card-block" id="destination"> <b>.</b> </div> <!-- Better solution here -->
@@ -58,9 +58,10 @@
 				<div class="card-block" id="timer"> <p>0:00</p> </div>
 			</div>
 			<br>
-			<div class="card card-default" id="history-panel">
+			<div class="card card-default f1" id="history-panel">
 				<div class="card-header" id="history-label">
-					<div class="dropdown">
+					Progress
+					<div class="dropdown d-inline-block">
 						<button class="btn btn-default dropdown-toggle" id="history-dropdown" type="button" data-toggle="dropdown">
 						</button>
 						<ul id="history-dropdown-list" class="dropdown-menu">
@@ -73,8 +74,8 @@
 			</div>
 	  </div>
 
-		<div class="col-md-10">
-			<div class="card card-default" id="title-article-panel">
+		<div class="col-md-10 my_col">
+			<div class="card card-default f1" id="title-article-panel">
 				<div class="card-header" id="title"> </div>
 				<div class="card-block" id="article"> </div>
 			</div>
