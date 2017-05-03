@@ -139,6 +139,8 @@ function startLobby(callback, errCallback) {
 // game logic handlers
 serverConn.ready(() => {
 	"use strict";
+	serverConn.registerError(displayServerConnError);
+
 	// setup lobbies
 	serverConn.getLobbies((lobbies) => {
 		console.log(lobbies)

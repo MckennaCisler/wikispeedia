@@ -10,8 +10,9 @@
 - Deployment
 - Track history
 - Shortest path
-  - Separate page data into external cache
   - Create an EdgeFinder that caches edges
+  - Create a web scraper to build the database
+  - Integrate WikiGame into lobby
   - Add the shortest-path future to WikiGame
   - Make an intermitent (or parrallel... maybe do it while shortest-path finding?) DB-compare method that randomly double-checks a link list and changes it if needed
   - Make a two-sided Dijkstra?

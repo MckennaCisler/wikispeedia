@@ -63,7 +63,7 @@ public class WikiLobby implements Lobby {
   /****************************************/
 
   /**
-   * Called on lobby creation; stuctures this lobby to follow a certain game
+   * Called on lobby creation; structures this lobby to follow a certain game
    * mode.
    */
   @Override
@@ -104,15 +104,15 @@ public class WikiLobby implements Lobby {
 
   @Override
   public boolean isClosed() {
-    // TODO Auto-generated method stub
-    return false;
+    return players.isEmpty();
   }
 
   @Override
   public void addClient(String playerId) {
     if (started()) {
-      throw new IllegalStateException(
+      Command.sendError(server, playerId,
           "Game has already started, cannot add player.");
+      return;
     }
     this.players.put(playerId,
         new WikiPlayer(playerId, this, startPage, goalPage));
@@ -162,11 +162,17 @@ public class WikiLobby implements Lobby {
   public void start() {
     for (Entry<String, WikiPlayer> entry : players.entrySet()) {
       if (!entry.getValue().ready()) {
-        throw new IllegalStateException(String.format("Player %s is not ready",
-            entry.getValue().getName()));
+        Command.sendError(server, entry.getKey(), String
+            .format("Player %s is not ready", entry.getValue().getName()));
+        return;
       }
     }
     startTime = Instant.now(); // this is how we determine whether started
+
+    // notify players
+    for (Entry<String, WikiPlayer> entry : players.entrySet()) {
+      entry.getValue().setStartTime(startTime);
+    }
   }
 
   /**
@@ -365,7 +371,7 @@ public class WikiLobby implements Lobby {
       lobby.addProperty("ended", src.ended());
       if (src.started()) {
         lobby.addProperty("startTime", src.getStartTime().toEpochMilli());
-        lobby.addProperty("playTime", src.getPlayTime().toMinutes());
+        lobby.addProperty("playTime", src.getPlayTime().toMillis());
       }
       if (src.ended()) {
         lobby.addProperty("endTime", src.getEndTime().toEpochMilli());

@@ -44,7 +44,7 @@ public final class GameGenerator {
    *
    * Smaller values lead to greater depth searches with less consideration of
    * each page's links. It is essentially the chance that a given link on a page
-   * will be skipped,so 1 will just continue check a single link and 0 will
+   * will be skipped, so 1 will just check a single link on a page and 0 will
    * check all links.
    *
    * Decreasing it may make generation slower and more memory-intensive.

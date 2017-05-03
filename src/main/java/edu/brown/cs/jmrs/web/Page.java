@@ -16,6 +16,7 @@ import com.google.common.cache.LoadingCache;
 import com.google.common.util.concurrent.UncheckedExecutionException;
 
 import edu.brown.cs.jmrs.collect.graph.Graph.Node;
+import edu.brown.cs.jmrs.ui.Main;
 
 /**
  * A class representing a webpage and the required functions of a web page.
@@ -137,12 +138,17 @@ public class Page implements Node<Page, Link> {
    */
   protected Document parsedContentOriginal() throws IOException {
     if (docCache != null) {
-      // use cache first
+      // parsed should not be set if docCache is set
       assert parsed == null;
       try {
+        // try to grab from external cache
+        Document result = docCache.get(url);
         cached = true;
-        return docCache.get(url);
+        return result;
       } catch (ExecutionException e) {
+
+        Main.debugLog(e.getCause());
+
         // IOExceptions are expected; others are not
         if (e.getCause() instanceof IOException) {
           throw (IOException) e.getCause();
@@ -151,6 +157,7 @@ public class Page implements Node<Page, Link> {
         }
       }
     } else if (parsed == null) {
+      // just use internal cache
       parsed = Loader.loadStatic(url);
       cached = true;
     }

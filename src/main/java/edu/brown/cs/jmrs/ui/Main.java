@@ -22,6 +22,8 @@ import edu.brown.cs.jmrs.wikispeedia.WikiInterpreter;
 import edu.brown.cs.jmrs.wikispeedia.WikiLobby;
 import edu.brown.cs.jmrs.wikispeedia.WikiMainHandlers;
 import edu.brown.cs.jmrs.wikispeedia.WikiPageHandlers;
+import edu.brown.cs.jmrs.wikispeedia.WikiPath;
+import edu.brown.cs.jmrs.wikispeedia.WikiPath.Visit;
 import edu.brown.cs.jmrs.wikispeedia.WikiPlayer;
 import joptsimple.OptionException;
 import joptsimple.OptionParser;
@@ -71,6 +73,7 @@ public final class Main {
     builder.registerTypeAdapter(WikiPage.class, new WikiPage.Serializer());
     builder.registerTypeAdapter(WikiLobby.class, new WikiLobby.Serializer());
     builder.registerTypeAdapter(WikiPlayer.class, new WikiPlayer.Serializer());
+    builder.registerTypeAdapter(Visit.class, new WikiPath.VisitSerializer());
 
     return builder.create();
   }
@@ -172,5 +175,15 @@ public final class Main {
     } else {
       // TODO: Pipe to logfile
     }
+  }
+
+  /**
+   * Prints the input string to a logging location for debugging.
+   *
+   * @param obj
+   *          The object to log.
+   */
+  public static void debugLog(Object obj) {
+    debugLog(obj.toString());
   }
 }

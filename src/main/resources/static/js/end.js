@@ -9,6 +9,8 @@ $(document).ready(() => {
 });
 
 serverConn.ready(() => {
+	serverConn.registerError(displayServerConnError);
+
 	// TODO: get everything interfacing with the server
 	// serverConn.registerAllPlayers("", playersCallback, displayServerConnError);
 	$winner = $("#winner");

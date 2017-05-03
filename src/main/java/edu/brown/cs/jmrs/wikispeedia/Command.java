@@ -42,7 +42,6 @@ enum Command {
   RETURN_SET_USERNAME("return_set_username", CommandType.RESPONSE), //
   RETURN_GOTO_PAGE("return_goto_page", CommandType.RESPONSE), //
   RETURN_PATH("return_path", CommandType.RESPONSE), //
-  ERROR("error", CommandType.RESPONSE), //
 
   /**
    * OUTGOING Server Commands (see below for constructions).
@@ -50,7 +49,7 @@ enum Command {
   END_GAME("end_game", CommandType.OUTGOING), //
   BEGIN_GAME("begin_game", CommandType.OUTGOING), //
   ALL_PLAYERS("all_players", CommandType.OUTGOING), //
-  // ALL_LOBBIES("all_lobbies", CommandType.OUTGOING),
+  ERROR("error", CommandType.OUTGOING), //
 
   // Value to signify not in enum (when using switch statement)
   NULL(null, null);
@@ -147,7 +146,15 @@ enum Command {
    * Sends a JSONified version of data to the client with clientId.
    */
   void send(Server server, String clientId, Object data, String errorMessage) {
-    server.sendToClient(clientId, build(data));
+    server.sendToClient(clientId, build(data, errorMessage));
+  }
+
+  /**
+   * Sends an error message with a generic message.
+   */
+  static void sendError(Server server, String clientId, String errorMessage) {
+    Main.debugLog("Command.ERROR sent: " + errorMessage);
+    ERROR.send(server, clientId, ImmutableMap.of(), errorMessage);
   }
 
   /**

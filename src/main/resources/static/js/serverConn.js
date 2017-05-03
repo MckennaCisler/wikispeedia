@@ -138,8 +138,11 @@ const Command = {
 		name: "goto_page",
         responseName: "return_goto_page",
 		type: COMMAND_TYPE.INCOMING,
-		construct: (page_name) => {
-            return { "page_name" : page_name };
+		construct: (page_name, initial) => {
+            return {
+              "page_name" : page_name,
+              "initial" : initial
+            };
         }
 	},
     GET_PATH : {
@@ -156,7 +159,7 @@ const Command = {
     // Lobby-specific commands
     ERROR : {
 		name: "error",
-		type: COMMAND_TYPE.RESPONSE,
+		type: COMMAND_TYPE.OUTGOING,
 	},
 
     /**
@@ -258,7 +261,11 @@ class ServerConn {
     }
 
     gotoPage(page_name, callback, errCallback) {
-        this._send(Command.GOTO_PAGE, callback, errCallback, [page_name]);
+        this._send(Command.GOTO_PAGE, callback, errCallback, [page_name, false]);
+    }
+
+    goToInitialPage(callback, errCallback) {
+        this._send(Command.GOTO_PAGE, callback, errCallback, ["", true]);
     }
 
     getPage(page_name, callback, errCallback) {
@@ -312,6 +319,10 @@ class ServerConn {
         this._registerOutgoing(Command.END_GAME, callback);
     }
 
+    registerError(callback) {
+        this._registerOutgoing(Command.ERROR, callback);
+    }
+
     _registerOutgoing(command, callback) {
         this.pendingResponses[command.name] = {
             "command": command,
@@ -353,17 +364,17 @@ class ServerConn {
         // if (this.clientId === undefined || // if we are getting and ID now
         //     parsedMsg.client_id === this.clientId) {
         if (this.pendingResponses.hasOwnProperty(parsedMsg.command)) {
-            // note we can't really localize an error command to a player
-            if (parsedMsg.command === Command.ERROR.name ||
-                parsedMsg.command === Command.COMMAND_ERROR.name) {
-                console.log("\nGot ERROR or COMMAND_ERROR: ");
-                console.log(parsedMsg);
-
-            } else if (parsedMsg.error_message === "") {
+            // // note we can't really localize an error command to a player
+            // if (parsedMsg.command === Command.ERROR.name ||
+            //     parsedMsg.command === Command.COMMAND_ERROR.name) {
+            //     console.log("\nGot ERROR or COMMAND_ERROR: ");
+            //     console.log(parsedMsg);
+            if (parsedMsg.error_message === "") {
                 // note that pendingResponses is a map from command RETURN MESSGAE NAME to the callbacks
                 // that should be called on the return message, so we can reference these all in one line
                 // without a switch statement
                 const actions = this.pendingResponses[parsedMsg.command];
+                window.clearTimeout(actions.timeout);
 
                 // if this is NOT a server command, just apply the callback on the payload too keep a nice interface
                 if (actions.command.type !== COMMAND_TYPE.SERVER) {
@@ -371,16 +382,17 @@ class ServerConn {
                 } else {
                     actions.callback(parsedMsg);
                 }
-                window.clearTimeout(actions.timeout);
             } else {
                 // (but give any command type access to the top-level error_message)
                 const actions = this.pendingResponses[parsedMsg.command];
-                if (actions.errCallback !== undefined) { actions.errCallback(parsedMsg); }
                 window.clearTimeout(actions.timeout);
+                if (actions.errCallback !== undefined) { actions.errCallback(parsedMsg); }
 
                 console.log("\nGot error: ");
                 console.log(parsedMsg);
             }
+        } else if (parsedMsg.error_message !== undefined && parsedMsg.error_message !== "") {
+          this.pendingResponses[Command.ERROR.name].callback(parsedMsg);
         } else {
             console.log("\nUnknown command recieved: ");
             console.log(parsedMsg);
