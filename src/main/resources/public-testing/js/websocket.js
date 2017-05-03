@@ -82,6 +82,7 @@ $(document).ready(() => {
 					break;
 				case "notify_id":
 					setId(message.client_id);
+					console.log(getId());
 					break;
 				default:
 					console.log("unhandled message of type: " + message.type);

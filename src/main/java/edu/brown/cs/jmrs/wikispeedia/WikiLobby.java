@@ -10,6 +10,7 @@ import java.util.Map.Entry;
 
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
+import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonSerializationContext;
@@ -136,6 +137,11 @@ public class WikiLobby implements Lobby {
   public void playerDisconnected(String clientId) {
     players.get(clientId).setConnected(false);
     Command.sendAllPlayers(this);
+  }
+  
+  @Override
+  public JsonElement toJson(Gson gson) {
+	  return gson.toJsonTree(this);
   }
 
   /****************************************/
