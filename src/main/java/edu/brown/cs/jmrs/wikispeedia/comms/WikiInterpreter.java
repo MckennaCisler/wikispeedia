@@ -1,4 +1,4 @@
-package edu.brown.cs.jmrs.wikispeedia;
+package edu.brown.cs.jmrs.wikispeedia.comms;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -11,6 +11,8 @@ import edu.brown.cs.jmrs.server.customizable.CommandInterpreter;
 import edu.brown.cs.jmrs.server.customizable.Lobby;
 import edu.brown.cs.jmrs.ui.Main;
 import edu.brown.cs.jmrs.web.wikipedia.WikiPage;
+import edu.brown.cs.jmrs.wikispeedia.WikiLobby;
+import edu.brown.cs.jmrs.wikispeedia.WikiPlayer;
 
 /**
  * Interprets commands over a Wiki lobby.

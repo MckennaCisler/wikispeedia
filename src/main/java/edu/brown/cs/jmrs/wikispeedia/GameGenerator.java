@@ -56,7 +56,7 @@ public final class GameGenerator {
    * "equivalent". Increasing it may make generation slower and more
    * memory-intensive.
    */
-  private static final double OBSCURITY_EQUAL_RANGE = 0.1;
+  private static final double OBSCURITY_EQUAL_RANGE = 0.05;
 
   /**
    * The expected largest number of Wikipedia links on a page (under the

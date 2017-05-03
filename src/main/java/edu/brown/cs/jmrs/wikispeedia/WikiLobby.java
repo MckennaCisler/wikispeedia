@@ -21,6 +21,7 @@ import edu.brown.cs.jmrs.ui.Main;
 import edu.brown.cs.jmrs.web.ContentFormatter;
 import edu.brown.cs.jmrs.web.LinkFinder;
 import edu.brown.cs.jmrs.web.wikipedia.WikiPage;
+import edu.brown.cs.jmrs.wikispeedia.comms.Command;
 
 /**
  * Coordinates a lobby of players in a Wiki game.
@@ -270,7 +271,7 @@ public class WikiLobby implements Lobby {
   /**
    * @return The server associated with this lobby.
    */
-  Server getServer() {
+  public Server getServer() {
     return server;
   }
 

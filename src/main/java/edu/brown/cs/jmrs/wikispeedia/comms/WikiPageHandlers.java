@@ -1,4 +1,4 @@
-package edu.brown.cs.jmrs.wikispeedia;
+package edu.brown.cs.jmrs.wikispeedia.comms;
 
 import java.io.IOException;
 
@@ -16,6 +16,7 @@ import edu.brown.cs.jmrs.web.wikipedia.WikiFooterRemover;
 import edu.brown.cs.jmrs.web.wikipedia.WikiPage;
 import edu.brown.cs.jmrs.web.wikipedia.WikiPageLinkFinder;
 import edu.brown.cs.jmrs.web.wikipedia.WikiPageLinkFinder.Filter;
+import edu.brown.cs.jmrs.wikispeedia.GameGenerator;
 import spark.QueryParamsMap;
 import spark.Request;
 import spark.Response;

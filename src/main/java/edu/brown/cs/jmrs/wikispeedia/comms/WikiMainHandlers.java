@@ -1,4 +1,4 @@
-package edu.brown.cs.jmrs.wikispeedia;
+package edu.brown.cs.jmrs.wikispeedia.comms;
 
 import com.google.common.collect.ImmutableMap;
 
