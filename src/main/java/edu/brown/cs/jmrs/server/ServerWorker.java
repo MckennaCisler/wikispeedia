@@ -5,13 +5,16 @@ import java.net.HttpCookie;
 import java.time.Instant;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 import java.util.Queue;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.PriorityBlockingQueue;
 import java.util.function.BiFunction;
 
 import org.eclipse.jetty.websocket.api.Session;
 
 import com.google.gson.Gson;
+import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 
 import edu.brown.cs.jmrs.collect.ConcurrentBiMap;
@@ -19,51 +22,52 @@ import edu.brown.cs.jmrs.server.customizable.Lobby;
 
 class ServerWorker {
 
-  private Server server;
-  private LobbyManager lobbies;
-  private ConcurrentBiMap<Session, Player> players;
-  private Queue<Player> disconnectedPlayers;
+  private Server                           server;
+  private LobbyManager                     lobbies;
+  private ConcurrentBiMap<Session, Client> clients;
+  private Map<String, Client>              notInLobbies;
+  private Queue<Client>                    disconnectedClients;
+  private Gson                             gson;
 
-  public ServerWorker(Server server,
-      BiFunction<Server, String, ? extends Lobby> lobbyFactory) {
+  public ServerWorker(
+      Server server,
+      BiFunction<Server, String, ? extends Lobby> lobbyFactory,
+      Gson gson) {
     this.server = server;
     lobbies = new LobbyManager(lobbyFactory);
-    players = new ConcurrentBiMap<>();
-    disconnectedPlayers = new PriorityBlockingQueue<>();
+    clients = new ConcurrentBiMap<>();
+    notInLobbies = new ConcurrentHashMap<>();
+    disconnectedClients = new PriorityBlockingQueue<>();
+    this.gson = gson;
   }
 
-  public String setPlayerId(Session conn, String playerId) throws InputError {
-    Player player = players.getBack(new Player(playerId));
-    if (player == null) {
-      playerId = conn.hashCode() + "";
-      player = new Player(playerId);
-      while (!players.putNoOverwrite(conn, player)) { // TODO: NOT ADDING TO
-                                                      // PLAYERS HERE???
-        playerId = Math.random() + "";
-        player = new Player(playerId);
+  public String setClientId(Session conn, String clientId) throws InputError {
+    Client client = clients.getBack(new Client(clientId));
+    if (client == null) {
+      clientId = conn.hashCode() + "";
+      client = new Client(clientId);
+      while (!clients.putNoOverwrite(conn, client)) {
+        clientId = Math.random() + "";
+        client = new Client(clientId);
       }
-
-      players.put(conn, player); // I seemed to have to add this here for some
-                                 // reason...
-
-    } else if (!player.isConnected()) {
-      players.put(conn, player);
-      player.toggleConnected();
-      if (player.getLobby() != null) {
-        player.getLobby().playerReconnected(player.getId());
+    } else if (!client.isConnected()) {
+      clients.put(conn, client);
+      client.toggleConnected();
+      if (client.getLobby() != null) {
+        client.getLobby().playerReconnected(client.getId());
       }
     } else {
-      throw new InputError("Stop stealing identities");
+      throw new InputError("Don't steal identities");
     }
-    return player.getId();
+    return client.getId();
   }
 
-  public Player getPlayer(Session conn) {
-    return players.get(conn);
+  public Client getClient(Session conn) {
+    return clients.get(conn);
   }
 
-  public Session getPlayer(String playerId) {
-    return players.getReversed(new Player(playerId));
+  public Session getClient(String playerId) {
+    return clients.getReversed(new Client(playerId));
   }
 
   public List<String> getOpenLobbies() {
@@ -93,45 +97,64 @@ class ServerWorker {
     for (HttpCookie cookie : cookies) {
       if (cookie.getName().equals("client_id")) {
         String cookieVal = cookie.getValue();
-        expiration =
-            Date.from(Instant.ofEpochMilli(Long
-                .parseLong(cookieVal.substring(cookieVal.indexOf(":") + 1))));
+        expiration = Date.from(
+            Instant.ofEpochMilli(
+                Long.parseLong(
+                    cookieVal.substring(cookieVal.indexOf(":") + 1))));
         break;
       }
     }
 
+    Client client = clients.get(conn);
+    if (client != null && client.getLobby() == null) {
+      notInLobbies.remove(client.getId());
+    }
+
     if (expiration.after(new Date())) {
-      Player player = players.get(conn);
-      assert player.isConnected();
-      player.toggleConnected();
+      if (client != null) {
+        assert client.isConnected();
+        client.toggleConnected();
 
-      player.setCookieExpiration(expiration);
-      disconnectedPlayers.add(player);
+        client.setCookieExpiration(expiration);
+        disconnectedClients.add(client);
 
-      if (player.getLobby() != null) {
-        player.getLobby().playerDisconnected(player.getId());
+        if (client.getLobby() != null) {
+          client.getLobby().playerDisconnected(client.getId());
+        }
       }
     } else {
-      players.remove(conn);
+      clients.remove(conn);
     }
   }
 
-  private void checkDisconnectedPlayers() { // TODO: Why do you need this if is
-                                            // removes a player that has expired
-                                            // in the above function?
-    if (!disconnectedPlayers.isEmpty()) {
+  private void checkDisconnectedPlayers() {
+    if (!disconnectedClients.isEmpty()) {
       Date now = new Date();
-      Player p = disconnectedPlayers.poll();
-      while (p != null && p.getCookieExpiration().before(now)) {
-        players.remove(players.getReversed(p));
-        if (!disconnectedPlayers.isEmpty()) {
-          p = disconnectedPlayers.poll();
-        } else {
-          p = null;
+      Client p = disconnectedClients.poll();
+      while (p.getCookieExpiration().before(now)) {
+        clients.remove(clients.getReversed(p));
+        if (disconnectedClients.isEmpty()) {
+          return;
         }
+        p = disconnectedClients.poll();
       }
-      disconnectedPlayers.add(p);
+      disconnectedClients.add(p);
     }
+  }
+
+  private JsonObject allLobbies() {
+    JsonObject jsonObject = new JsonObject();
+    jsonObject.addProperty("command", "all_lobbies");
+    List<String> lobbies = getOpenLobbies();
+    jsonObject.addProperty("error_message", "");
+
+    JsonArray lobbyArray = new JsonArray();
+    for (String id : lobbies) {
+      lobbyArray.add(getLobby(id).toJson(gson));
+    }
+
+    jsonObject.add("payload", lobbyArray);
+    return jsonObject;
   }
 
   public void playerConnected(Session conn) {
@@ -148,14 +171,21 @@ class ServerWorker {
       }
     }
 
-    String toClient = "";
+    // notify client of their id
 
-    Gson gson = new Gson();
+    String toClient = "";
+    String trueId = "";
+
     JsonObject jsonObject = new JsonObject();
     jsonObject.addProperty("command", "notify_id");
     try {
       try {
-        String trueId = setPlayerId(conn, clientId);
+        trueId = setClientId(conn, clientId);
+
+        Client client = clients.get(conn);
+        if (!client.isConnected()) {
+          client.toggleConnected();
+        }
 
         jsonObject.addProperty("client_id", trueId);
         jsonObject.addProperty("error_message", "");
@@ -171,5 +201,38 @@ class ServerWorker {
     } catch (IOException e) {
       e.printStackTrace();
     }
+
+    // if they are not in a lobby, give them a list of lobbies
+
+    Client client = clients.get(conn);
+    if (client != null && client.getLobby() == null) {
+      notInLobbies.put(client.getId(), client);
+    }
+    sendLobbies(client);
+  }
+
+  public void updateLobbylessPlayers() {
+    for (Client client : notInLobbies.values()) {
+      sendLobbies(client);
+    }
+  }
+
+  private void sendLobbies(Client client) {
+    if (client != null) {
+      JsonObject jsonObject = allLobbies();
+      jsonObject.addProperty("command", "get_lobbies");
+      jsonObject.add("payload", allLobbies());
+      jsonObject.addProperty("error_message", "");
+      String toClient = gson.toJson(jsonObject);
+      try {
+        clients.getReversed(client).getRemote().sendString(toClient);
+      } catch (IOException e) {
+        e.printStackTrace();
+      }
+    }
+  }
+
+  public Map<String, Client> lobbylessMap() {
+    return notInLobbies;
   }
 }

@@ -125,7 +125,7 @@ function resize() {
 	}
 }
 
-function startLobby(callback, errCallback) {
+/*function startLobby(callback, errCallback) {
 	serverConn.startLobby(lobbyName.trim(),
 		() => {
 			callback();
@@ -134,22 +134,24 @@ function startLobby(callback, errCallback) {
 			errCallback(error.error_message);
 			displayServerConnError(error);
 		});
-}
+}*/
 
 // game logic handlers
 serverConn.ready(() => {
 	"use strict";
+	
 	serverConn.registerError(displayServerConnError);
+	serverConn.registerAllLobbies(drawLobbies);
 
 	// setup lobbies
-	serverConn.getLobbies((lobbies) => {
+	/*serverConn.getLobbies((lobbies) => {
 		console.log(lobbies)
 		drawLobbies(lobbies);
 		serverConn.registerAllLobbies(drawLobbies);
 	}, (error) => {
 		displayServerConnError(error);
 		serverConn.registerAllLobbies(drawLobbies);
-	});
+	});*/
 });
 
 function drawLobbies(lobbies) {

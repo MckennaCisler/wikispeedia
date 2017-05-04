@@ -16,6 +16,7 @@
 	<script src="https://www.w3schools.com/lib/w3data.js"></script>
 	<link rel="import" href="lib/chat.html">
 	<script src="js/chat.js"></script>
+	<script src="js/alert.js"></script>
 	<script src="js/index.js"></script>
 	
 	<meta name="viewport" content="width=device-width, initial-scale=1">
@@ -48,6 +49,16 @@
 
 	<div class="container-fluid text-center main_content" id="main">
 		<div class="row" id="row_div">
+			<div class="col">
+				<div class="card card-default">
+					<h3 class="card-header">Join a lobby</h3>
+					<div class="card-block">
+						<div class="list-group" id="open_games">
+						</div>
+					</div>
+				</div>
+			</div>
+			<br>
 			<div class="col">
 				<div class="card card-default">
 					<h3 class="card-header">Start a game</h3>
@@ -87,16 +98,6 @@
 						</div>
 
 						<button class="btn my_success" id="start_game">Start your game!</button>
-					</div>
-				</div>
-			</div>
-			<br>
-			<div class="col">
-				<div class="card card-default">
-					<h3 class="card-header">Join a lobby</h3>
-					<div class="card-block">
-						<div class="list-group" id="open_games">
-						</div>
 					</div>
 				</div>
 			</div>

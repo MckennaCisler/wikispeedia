@@ -138,7 +138,7 @@ public final class Main {
         // Setup Spark for main page and extra serving
         SparkServer.setDebug(DEBUG);
         SparkServer.runSparkServer((int) options.valueOf("spark-port"),
-            ImmutableList.of(new WikiMainHandlers(), new WikiPageHandlers()),
+            ImmutableList.of(new WikiPageHandlers(), new WikiMainHandlers()),
             "/static", "src/main/resources/public");
         System.out.println("[ Started Spark ]");
 

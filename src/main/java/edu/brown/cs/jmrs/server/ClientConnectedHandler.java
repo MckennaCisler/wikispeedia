@@ -2,12 +2,12 @@ package edu.brown.cs.jmrs.server;
 
 import org.eclipse.jetty.websocket.api.Session;
 
-class PlayerDisconnectedHandler implements Runnable {
+class ClientConnectedHandler implements Runnable {
 
   private final ServerWorker server;
   private final Session conn;
 
-  public PlayerDisconnectedHandler(ServerWorker server, Session conn) {
+  public ClientConnectedHandler(ServerWorker server, Session conn) {
     this.server = server;
     this.conn = conn;
   }
@@ -15,7 +15,7 @@ class PlayerDisconnectedHandler implements Runnable {
   @Override
   public void run() {
     try {
-      server.playerDisconnected(conn);
+      server.playerConnected(conn);
     } catch (Throwable e) {
       // solely for debugging purposes, as threads do not display exceptions
       // except when calling the value of an associated future:

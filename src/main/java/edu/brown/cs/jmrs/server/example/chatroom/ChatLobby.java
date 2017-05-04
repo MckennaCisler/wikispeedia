@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 import com.google.gson.Gson;
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 
 import edu.brown.cs.jmrs.server.Server;
@@ -112,12 +113,11 @@ public class ChatLobby implements Lobby {
       connectedPlayers.remove(clientId);
     }
   }
-  // @Deprecated in favor of passing a GSON with a registered serialzier around
-  // - see Main.java
-  // @Override
-  // public String toJson() {
-  // JsonObject obj = new JsonObject();
-  // obj.addProperty("id", id);
-  // return new Gson().toJson(obj);
-  // }
+
+   @Override
+   public JsonElement toJson(Gson gson) {
+   JsonObject obj = new JsonObject();
+   obj.addProperty("id", id);
+   return obj;
+   }
 }

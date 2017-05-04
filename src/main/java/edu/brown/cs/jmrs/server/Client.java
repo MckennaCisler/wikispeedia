@@ -4,14 +4,14 @@ import java.util.Date;
 
 import edu.brown.cs.jmrs.server.customizable.Lobby;
 
-class Player implements Comparable<Player> {
+class Client implements Comparable<Client> {
 
   private String  id;
   private Lobby   lobby;
   private boolean connected;
   private Date    cookieExpiration;
 
-  public Player(String id) {
+  public Client(String id) {
     this.id = id;
     connected = true;
   }
@@ -30,8 +30,8 @@ class Player implements Comparable<Player> {
 
   @Override
   public boolean equals(Object o) {
-    if (o instanceof Player) {
-      Player po = (Player) o;
+    if (o instanceof Client) {
+      Client po = (Client) o;
 
       if (po.getId().equals(getId())) {
         return true;
@@ -68,7 +68,7 @@ class Player implements Comparable<Player> {
   }
 
   @Override
-  public int compareTo(Player p) {
+  public int compareTo(Client p) {
     return cookieExpiration.compareTo(p.getCookieExpiration());
   }
 
