@@ -2,6 +2,10 @@
 
 $(document).ready(() => {
 	"use strict";
+	if (!('import' in document.createElement('link'))) {
+		$("#chat_button").hide();
+		return;
+	}
 	let link = document.querySelector('link[rel="import"]');
     let content = link.import;
     // Grab DOM from chat.html's document.
