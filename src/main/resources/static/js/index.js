@@ -37,6 +37,8 @@ $(document).ready(function () {
 		$("#uname_picker").hide();
 		$("#main").show();
 		$("#rules").show();
+		$("#start_game").prop('disabled', false);
+		$("#start_game").html(`Start your game!`);
 	});
 
 	$("#start_game").on('click', () => {
@@ -54,6 +56,10 @@ $(document).ready(function () {
 			} else {
 				mode = GAME_MODES.LEAST_CLICKS;
 			}
+			
+			//make loader show up here
+			$("#start_game").prop('disabled', true);
+			$("#start_game").html(`<div class="loader2"></div>`);
 
 			serverConn.startLobby(lobbyName.trim(),
 				{
@@ -66,7 +72,11 @@ $(document).ready(function () {
 					$("#uname_picker").show();
 					$("#u_header").html(lobbyName);
 				},
-				displayServerConnError);
+				(e) => {
+					$("#start_game").prop('disabled', false);
+					$("#start_game").html(`Start your game!`);
+					displayServerConnError(e);
+				});
 			console.log(lobbyName);
 		}
 	});

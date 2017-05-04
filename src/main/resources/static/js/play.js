@@ -32,11 +32,25 @@ let startTime = new Date().getTime();
 // TODO: Wait for server to be ready
 // TODO: Create a page run script that runs earlier
 $(document).ready(() => {
-  $timer.text("0:00");
-  $title.html("<b>Loading...</b>");
-  $destination.html("<b>Loading...</b>");
-  setInterval(updateTimer, 200);
+	resize();
+	$timer.text("0:00");
+	$title.html("<b>Loading...</b>");
+	$destination.html("<b>Loading...</b>");
+	setInterval(updateTimer, 200);
 });
+
+$(window).resize(resize);
+
+function resize() {
+	"use strict";
+	if ($(window).width() <= 550) {
+		$('#info').removeClass("col-4");
+		$('#article-col').removeClass("col-8");
+	} else {
+		$('#info').addClass("col-4");
+		$('#article-col').addClass("col-8");
+	}
+}
 
 serverConn.ready(() => {
     serverConn.registerError(displayServerConnError);

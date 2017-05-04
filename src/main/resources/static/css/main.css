@@ -6,13 +6,6 @@
 	margin-right: 15px;
 	margin-top: 15px;
 	flex: 1;
-	display: flex;
-	flex-direction: row;
-}
-
-.my_col {
-	display: flex;
-	flex-direction: column;
 }
 
 .f1 {
@@ -202,10 +195,10 @@
 
 .my_success {
 	color: white;
-	background-color: #91e8df;
+	background-color: #83d1c9;
 }
 .my_success:hover {
-	background-color: #83d1c9;
+	background-color: #3CA399;
 }
 
 body {
@@ -292,9 +285,68 @@ h3.card-header {
   }
 }
 
+.loader2 {
+    border: 5px solid #f3f3f3; /* Light grey */
+    border-top: 5px solid black;
+	border-radius: 50%;
+    width: 1.5em;
+    height: 1.5em;
+    animation: spin 2s linear infinite;
+}
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+
 @media(min-width: 900px) {
 	#row_div {
 		margin-left: 2em;
 		margin-right: 2em;
+	}
+}
+
+@media(max-width: 550px) {
+	#history-panel {
+		display: none;
+	}
+	
+	#game-div {
+		display: flex;
+		flex-direction: column;
+	}
+	
+	#history-br {
+		display: none;
+	}
+	
+	#article-col {
+		flex: 1;
+	}
+	
+	.my_col {
+		display: flex;
+		flex-direction: row;
+		justify-content: space-around;
+	}
+	
+	#info > .card > .card-header {
+		display: none;
+	}
+	
+	#info > .card {
+		flex: 0.3;
+	}
+}
+
+@media(min-width: 550px) {
+	#game-div {
+		display: flex;
+		flex-direction: row;
+	}
+	
+	.my_col {
+		display: flex;
+		flex-direction: column;
 	}
 }
