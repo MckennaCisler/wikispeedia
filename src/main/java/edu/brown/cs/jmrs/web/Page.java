@@ -8,6 +8,7 @@ import java.util.concurrent.ExecutionException;
 
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
+import org.jsoup.parser.Parser;
 
 import com.google.common.base.Charsets;
 import com.google.common.base.Objects;
@@ -270,7 +271,8 @@ public class Page implements Node<Page, Link> {
    * @return The cleaned URL.
    */
   protected static String cleanUrl(String u) {
-    return u.replaceAll("\\#.*$", "") // remove anchor tags
+    return Parser.unescapeEntities(u, true) // unescape escaped entries
+        .replaceAll("\\#.*$", "") // remove anchor tags
         .replaceAll("\\?.*$", "") // remove query strings (after tags)
         .replaceAll("\"", ""); // remove quotes (NOT apostrophes)
   }

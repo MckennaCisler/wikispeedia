@@ -5,18 +5,18 @@
 - Visualizations for history and endgame ROHAN
 - Deal with what happens when a player can't be on a page (/waiting for ex.)
   - Add an error callback
-- Going back
+- Going back (history) ROHAN
 ##### NICETIES
 - Least clicks mode
 - Mobile-friendly
-- Deployment
 - Shortest path
   - Deal with ties (using "lists" of winners) for shortest-path mode
   - Integrate WikiGame into lobby
   - Add the shortest-path future to WikiGame
   - Make a two-sided Dijkstra?
-- Hide user's IDs from obvious places (i.e. ALL_PLAYERS) using isCurrentPlayer, etc.
+- Deployment
 ##### STUFF THAT WOULD GIVE US THAT WARM FUZZY FEELING
+- Hide user's IDs from obvious places (i.e. ALL_PLAYERS) using isCurrentPlayer, etc.
 - Chat everywhere
 - Make an intermittent (or parallel... maybe do it while shortest-path finding?) DB-compare method that randomly double-checks a link list and changes it if needed
 - Music

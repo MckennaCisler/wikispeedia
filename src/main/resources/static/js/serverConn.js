@@ -77,7 +77,7 @@ const Command = {
     // Lobby-specific commands
     GET_PLAYERS : {
         name: "get_players",
-        responseName: "return_players",
+        responseName: "all_players",
         type: COMMAND_TYPE.INCOMING,
         construct: (lobby_id) => {
             return { "lobby_id" : lobby_id };

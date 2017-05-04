@@ -137,8 +137,7 @@ public class WikiInterpreter implements CommandInterpreter {
               getPlayerPageInfo(reqWikiPage, lobby));
 
           // on success, check for winner, in which case we'll send an
-          // additional
-          // mass message
+          // additional mass message
           if (!lobby.checkForWinner()) {
             // if there wasn't a winner, update all player's on eachother's
             // status
