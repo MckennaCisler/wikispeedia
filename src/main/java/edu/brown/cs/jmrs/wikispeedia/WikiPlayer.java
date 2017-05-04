@@ -53,15 +53,10 @@ public class WikiPlayer {
    *          This player's unique ID.
    * @param lobby
    *          The lobby this player is in.
-   * @param startPage
-   *          The starting page of this player.
-   * @param goalPage
-   *          The page this player is trying to get to.
    * @param isLeader
    *          Whether this player started their lobby.
    */
-  public WikiPlayer(String id, WikiLobby lobby, WikiPage startPage,
-      WikiPage goalPage, boolean isLeader) {
+  public WikiPlayer(String id, WikiLobby lobby, boolean isLeader) {
     super();
     this.isLeader = isLeader;
     ready = false;
@@ -69,8 +64,8 @@ public class WikiPlayer {
     this.id = id;
     this.name = "";
     this.lobby = lobby;
-    this.startPage = startPage;
-    this.goalPage = goalPage;
+    this.startPage = lobby.getStartPage();
+    this.goalPage = lobby.getGoalPage();
     this.path = new WikiPath(startPage);
   }
 
@@ -149,6 +144,9 @@ public class WikiPlayer {
    *         finished.
    */
   public final synchronized Instant getEndTime() {
+    if (!done()) {
+      throw new IllegalStateException("Player not done, endTime will be null");
+    }
     return endTime;
   }
 
@@ -321,7 +319,7 @@ public class WikiPlayer {
         root.addProperty("endTime", src.getEndTime().toEpochMilli());
       }
       if (src.getLobby().ended()) {
-        root.addProperty("isWinner", src.getLobby().getWinner().equals(src));
+        root.addProperty("isWinner", src.getLobby().getWinners().contains(src));
       }
 
       return root;

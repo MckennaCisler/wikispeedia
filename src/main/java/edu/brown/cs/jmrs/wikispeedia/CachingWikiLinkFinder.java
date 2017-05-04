@@ -25,7 +25,7 @@ import edu.brown.cs.jmrs.web.wikipedia.WikiPageLinkFinder;
  * @author mcisler
  *
  */
-public class CachingWikiEdgeFinder extends WikiPageLinkFinder {
+public class CachingWikiLinkFinder extends WikiPageLinkFinder {
   // TODO: How to prehash?
   private static final DbReader<Link> LINK_READER = new DbReader<>((rs) -> {
     // rs stores two urls (TODO??); use Main cache for insides
@@ -48,10 +48,14 @@ public class CachingWikiEdgeFinder extends WikiPageLinkFinder {
   /**
    * @param conn
    *          The conn to use to query/update the WikiPage and Link database.
+   * @param filters
+   *          A series of filters to ignore links by.
    * @throws SQLException
    *           If the required table could not be created.
    */
-  public CachingWikiEdgeFinder(DbConn conn) throws SQLException {
+  public CachingWikiLinkFinder(DbConn conn, Filter... filters)
+      throws SQLException {
+    super(filters);
     lookup =
         conn.makeQuery("SELECT * FROM links WHERE start=?", LINK_READER, true);
     cacher =

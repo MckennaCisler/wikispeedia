@@ -39,6 +39,11 @@ $(document).ready(function () {
 		$("#rules").show();
 		$("#start_game").prop('disabled', false);
 		$("#start_game").html(`Start your game!`);
+		serverConn.leaveLobby(() => {
+			$("#uname_picker").hide();
+			$("#main").show();
+			$("#rules").show();
+		}, displayServerConnError);
 	});
 
 	$("#start_game").on('click', () => {

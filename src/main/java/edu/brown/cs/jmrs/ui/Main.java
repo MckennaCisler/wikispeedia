@@ -2,7 +2,9 @@ package edu.brown.cs.jmrs.ui;
 
 import java.io.FileNotFoundException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import org.jsoup.nodes.Document;
@@ -19,6 +21,7 @@ import edu.brown.cs.jmrs.server.example.chatroom.ChatInterpreter;
 import edu.brown.cs.jmrs.server.example.chatroom.ChatLobby;
 import edu.brown.cs.jmrs.web.Page;
 import edu.brown.cs.jmrs.web.wikipedia.WikiPage;
+import edu.brown.cs.jmrs.web.wikipedia.WikiPageLinkFinder.Filter;
 import edu.brown.cs.jmrs.wikispeedia.Scraper;
 import edu.brown.cs.jmrs.wikispeedia.WikiLobby;
 import edu.brown.cs.jmrs.wikispeedia.WikiPath;
@@ -101,6 +104,8 @@ public final class Main {
   public static void main(String[] args) throws Exception {
     OptionParser parser = new OptionParser();
     parser.accepts("gui");
+    parser.accepts("spark-port").withRequiredArg().ofType(Integer.class)
+        .defaultsTo(DEFAULT_SPARK_PORT);
     parser.accepts("chat-test");
     parser.accepts("scrape");
     parser.accepts("scrape-start").withRequiredArg().ofType(String.class)
@@ -110,8 +115,7 @@ public final class Main {
         .describedAs("Either 'breadth' or 'random-descent'");
     parser.accepts("scrape-depth").withRequiredArg().ofType(Integer.class)
         .defaultsTo(-1);
-    parser.accepts("spark-port").withRequiredArg().ofType(Integer.class)
-        .defaultsTo(DEFAULT_SPARK_PORT);
+    parser.accepts("scrape-only-english");
 
     OptionSet options;
     try {
@@ -187,9 +191,16 @@ public final class Main {
         wikiDbConn = new DbConn(WIKI_DATABASE_LOC);
         System.out.println("[ Opened Database ]");
 
+        // set optional filters for links
+        List<Filter> filters = new ArrayList<>();
+        if (options.has("scrape-only-english")) {
+          filters.add(Filter.NON_ENGLISH_WIKIPEDIA);
+        }
+
         Scraper scraper =
             new Scraper(wikiDbConn,
-                WikiPage.fromAny((String) options.valueOf("scrape-start")));
+                WikiPage.fromAny((String) options.valueOf("scrape-start")),
+                filters.toArray(new Filter[0]));
 
         scraper.setDepth((int) options.valueOf("scrape-depth"));
 

@@ -49,7 +49,7 @@ public class WikiPageLinkFinder implements LinkFinder<WikiPage> {
    * Constucts a WikiPageLinkFinder.
    *
    * @param filters
-   *          A series
+   *          A series of filters to ignore links by.
    */
   public WikiPageLinkFinder(Filter... filters) {
     this.linkFinderMethod =
