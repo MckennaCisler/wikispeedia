@@ -2,6 +2,7 @@ package edu.brown.cs.jmrs.io.db;
 
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.util.Collection;
 
 /**
  * A class wrapping a SQL Insert OR Insert, including adding created objects to
@@ -29,7 +30,7 @@ public class Insert<T> extends DbStatement<T> {
   }
 
   /**
-   * Inserts using this the prepared statement filled with inputs.
+   * Inserts using this insert's prepared statement filled with inputs.
    *
    * @param object
    *          The object to insert into the database.
@@ -41,6 +42,28 @@ public class Insert<T> extends DbStatement<T> {
       ps.executeUpdate();
     } catch (SQLException e) {
       throw new UncheckedSqlException(e);
+    }
+  }
+
+  /**
+   * Inserts using this insert's prepared statement filled with inputs.
+   *
+   * @param objs
+   *          The series of object to insert into the database in a batch
+   *          command.
+   */
+  public void insertAll(Collection<T> objs) {
+    PreparedStatement ps = getLocalPreparedStatement();
+    try {
+      for (T object : objs) {
+        objectWriter.fill(ps, object);
+        ps.addBatch();
+      }
+
+      ps.executeBatch();
+    } catch (SQLException e) {
+      throw new UncheckedSqlException(e);
+
     }
   }
 }

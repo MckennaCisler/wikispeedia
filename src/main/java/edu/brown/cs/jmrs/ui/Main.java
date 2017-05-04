@@ -105,6 +105,9 @@ public final class Main {
     parser.accepts("scrape");
     parser.accepts("scrape-start").withRequiredArg().ofType(String.class)
         .defaultsTo("Main_Page");
+    parser.accepts("scrape-method").withRequiredArg().ofType(String.class)
+        .defaultsTo("breadth")
+        .describedAs("Either 'breadth' or 'random-descent'");
     parser.accepts("scrape-depth").withRequiredArg().ofType(Integer.class)
         .defaultsTo(-1);
     parser.accepts("spark-port").withRequiredArg().ofType(Integer.class)
@@ -190,7 +193,18 @@ public final class Main {
 
         scraper.setDepth((int) options.valueOf("scrape-depth"));
 
-        scraper.start();
+        switch ((String) options.valueOf("scrape-method")) {
+          case "breadth":
+            scraper.startBreadthFirstScrape();
+            break;
+          case "random-descent":
+            scraper.startRandomDescentScrape();
+            break;
+          default:
+            System.out.println("Invalid scrape option specified");
+            parser.printHelpOn(System.out);
+
+        }
       } finally {
         wikiDbConn.close();
       }

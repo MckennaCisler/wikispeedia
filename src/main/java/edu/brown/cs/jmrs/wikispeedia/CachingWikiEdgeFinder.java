@@ -38,10 +38,12 @@ public class CachingWikiEdgeFinder extends WikiPageLinkFinder {
         ps.setString(1, link.getSource().url());
         ps.setString(2, link.getDestination().url());
       }, "CREATE TABLE IF NOT EXISTS links(" + "start TEXT," + "end TEXT,"
-          + "PRIMARY KEY (start);");
+          + "index_time DATETIME DEFAULT CURRENT_TIMESTAMP,"
+          + "PRIMARY KEY (start, end));"); // + "start-links INT," + "end-links
+                                           // INT"
 
   private final Query<Link> lookup;
-  private final Insert<Link> cacher; // TODO: Will this be here?
+  private final Insert<Link> cacher;
 
   /**
    * @param conn
@@ -52,7 +54,9 @@ public class CachingWikiEdgeFinder extends WikiPageLinkFinder {
   public CachingWikiEdgeFinder(DbConn conn) throws SQLException {
     lookup =
         conn.makeQuery("SELECT * FROM links WHERE start=?", LINK_READER, true);
-    cacher = conn.makeInsert("UPDATE links SET start=?, end=?", LINK_WRITER);
+    cacher =
+        conn.makeInsert("INSERT INTO links (start, end) VALUES (?, ?)",
+            LINK_WRITER);
   }
 
   @Override
@@ -60,8 +64,14 @@ public class CachingWikiEdgeFinder extends WikiPageLinkFinder {
     // try database
     List<Link> links = lookup.query(page.url());
     if (links.isEmpty()) {
-      // grab links using wikipage link finder in normal way
-      return super.links(page);
+      // grab links using WikiPage link finder in normal way
+      Set<String> urls = super.links(page);
+
+      // and cache them as Links
+      cacher.insertAll(
+          Functional.map(urls, (url) -> new Link(page, new WikiPage(url))));
+
+      return urls;
     }
     return new HashSet<>(
         Functional.map(links, (link) -> link.getDestination().url()));
@@ -72,8 +82,13 @@ public class CachingWikiEdgeFinder extends WikiPageLinkFinder {
     // try database
     List<Link> links = lookup.query(page.url());
     if (links.isEmpty()) {
-      // grab links using wikipage link finder in normal way
-      return super.linkedPages(page);
+      // grab links using WikiPage link finder in normal way
+      Set<WikiPage> pages = super.linkedPages(page);
+
+      // and cache them as Links
+      cacher.insertAll(Functional.map(pages, (dest) -> new Link(page, dest)));
+
+      return pages;
     }
     return new HashSet<>(
         Functional.map(links, (link) -> (WikiPage) link.getDestination()));
