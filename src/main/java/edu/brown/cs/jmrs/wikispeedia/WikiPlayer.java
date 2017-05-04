@@ -34,6 +34,7 @@ public class WikiPlayer {
   /**
    * State variables (endTime is only set upon completion).
    */
+  private final boolean isLeader;
   private transient Instant startTime;
   private transient Instant endTime;
   private boolean ready; // for match starting
@@ -56,10 +57,13 @@ public class WikiPlayer {
    *          The starting page of this player.
    * @param goalPage
    *          The page this player is trying to get to.
+   * @param isLeader
+   *          Whether this player started their lobby.
    */
   public WikiPlayer(String id, WikiLobby lobby, WikiPage startPage,
-      WikiPage goalPage) {
+      WikiPage goalPage, boolean isLeader) {
     super();
+    this.isLeader = isLeader;
     ready = false;
     connected = true;
     this.id = id;
@@ -108,6 +112,13 @@ public class WikiPlayer {
    */
   public final WikiLobby getLobby() {
     return lobby;
+  }
+
+  /**
+   * @return Whether this player is the leader of their lobby.
+   */
+  public boolean isLeader() {
+    return isLeader;
   }
 
   /**
@@ -294,6 +305,7 @@ public class WikiPlayer {
       JsonObject root = new JsonObject();
       root.addProperty("id", src.getId());
       root.addProperty("name", src.getName());
+      root.addProperty("isLeader", src.isLeader());
       root.addProperty("ready", src.ready());
       root.addProperty("connected", src.connected());
       root.addProperty("done", src.done());

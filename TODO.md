@@ -5,6 +5,7 @@
 - Levels of difficulty
 - Visualizations for history and endgame
 - Deal with what happens when a player can't be on a page (/waiting for ex.)
+- Going back
 ##### NICETIES
 - Least clicks mode
 - Mobile-friendly

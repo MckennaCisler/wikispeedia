@@ -1,0 +1,348 @@
+[ Opened Database ]
+Found 516 links at page https://en.wikipedia.org/wiki/Solomon_Islands
+Found 136 links at page https://en.wikipedia.org/wiki/Charles_Willson_Peale
+Found 122 links at page https://en.wikipedia.org/wiki/Peale_Museum
+Found 376 links at page https://en.wikipedia.org/wiki/Type_001A_aircraft_carrier
+Found 28 links at page https://en.wikipedia.org/wiki/George_Genyk
+Found 137 links at page https://it.wikipedia.org/wiki/
+Found 473 links at page https://en.wikipedia.org/wiki/Turkish_constitutional_referendum,_2017
+Found 220 links at page https://en.wikipedia.org/wiki/Light_aircraft_carrier
+[ DEBUG : 04-05 04:36:33 ]
+	org.jsoup.HttpStatusException: HTTP error fetching URL. Status=400, URL=https://en.wikipedia.org/wiki/Japanese_aircraft_carrier_Sh%25C5%258Dh%25C5%258D
+
+Found 117 links at page https://nn.wikipedia.org/wiki/
+[ DEBUG : 04-05 04:36:33 ]
+	org.jsoup.HttpStatusException: HTTP error fetching URL. Status=400, URL=https://uk.wikipedia.org/wiki/%25D0%2593%25D0%25BE%25D0%25BB%25D0%25BE%25D0%25B2%25D0%25BD%25D0%25B0_%25D1%2581%25D1%2582%25D0%25BE%25D1%2580%25D1%2596%25D0%25BD%25D0%25BA%25D0%25B0
+
+[ DEBUG : 04-05 04:36:33 ]
+	org.jsoup.HttpStatusException: HTTP error fetching URL. Status=400, URL=https://fr.wikipedia.org/wiki/Wikip%25C3%25A9dia:Accueil_principal
+
+Found 73 links at page https://en.wikipedia.org/wiki/Frankfort,_Kansas
+Found 352 links at page https://en.wikipedia.org/wiki/2017_World_Snooker_Championship
+[ DEBUG : 04-05 04:36:34 ]
+	org.jsoup.HttpStatusException: HTTP error fetching URL. Status=400, URL=https://lv.wikipedia.org/wiki/S%25C4%2581kumlapa
+
+Found 182 links at page https://sh.wikipedia.org/wiki/
+Found 140 links at page https://en.wikipedia.org/wiki/K-99_(Kansas_highway)
+[ DEBUG : 04-05 04:36:34 ]
+	org.jsoup.HttpStatusException: HTTP error fetching URL. Status=400, URL=https://en.wikipedia.org/wiki/Grandmaster%2527s_Palace_(Valletta)
+
+Found 186 links at page https://en.wikipedia.org/wiki/Fleet_carrier
+Found 333 links at page https://en.wikipedia.org/wiki/Himalayas
+Found 64 links at page https://hr.wikipedia.org/wiki/
+Found 157 links at page https://sv.wikipedia.org/wiki/
+Found 844 links at page https://en.wikipedia.org/wiki/Washington,_D.C.
+Found 136 links at page https://en.wikipedia.org/wiki/Eight-thousander
+Found 45 links at page https://de.wikipedia.org/wiki/
+Found 1066 links at page https://en.wikipedia.org/wiki/New_York
+Found 334 links at page https://en.wikipedia.org/wiki/The_Doors
+Found 803 links at page https://en.wikipedia.org/wiki/1776
+[ DEBUG : 04-05 04:36:57 ]
+	org.jsoup.HttpStatusException: HTTP error fetching URL. Status=400, URL=https://zh.wikipedia.org/wiki/Wikipedia:%25E9%25A6%2596%25E9%25A1%25B5
+
+Found 136 links at page https://en.wikipedia.org/wiki/Temperatures_Rising
+[ DEBUG : 04-05 04:37:01 ]
+	org.jsoup.HttpStatusException: HTTP error fetching URL. Status=400, URL=https://sr.wikipedia.org/wiki/%25D0%2593%25D0%25BB%25D0%25B0%25D0%25B2%25D0%25BD%25D0%25B0_%25D1%2581%25D1%2582%25D1%2580%25D0%25B0%25D0%25BD%25D0%25B0
+
+Found 466 links at page https://en.wikipedia.org/wiki/Parliamentary_system
+Found 397 links at page https://en.wikipedia.org/wiki/Coral_Sea
+Found 329 links at page https://en.wikipedia.org/wiki/Bogeyman
+[ DEBUG : 04-05 04:37:36 ]
+	org.jsoup.HttpStatusException: HTTP error fetching URL. Status=400, URL=https://ja.wikipedia.org/wiki/%25E3%2583%25A1%25E3%2582%25A4%25E3%2583%25B3%25E3%2583%259A%25E3%2583%25BC%25E3%2582%25B8
+
+Found 213 links at page https://en.wikipedia.org/wiki/1493
+Found 75 links at page https://no.wikipedia.org/wiki/
+Found 174 links at page https://ca.wikipedia.org/wiki/
+Found 85 links at page https://en.wikipedia.org/wiki/Rembrandt_Peale
+Found 413 links at page https://en.wikipedia.org/wiki/Vinod_Khanna
+Found 505 links at page https://en.wikipedia.org/wiki/New_Guinea
+Found 148 links at page https://en.wikipedia.org/wiki/Mary_Jepkosgei_Keitany
+Found 131 links at page https://en.wikipedia.org/wiki/Parliament_House_(Malta)
+Found 65 links at page https://sl.wikipedia.org/wiki/
+Found 1169 links at page https://en.wikipedia.org/wiki/Deaths_in_2017
+[ DEBUG : 04-05 04:39:00 ]
+	org.jsoup.HttpStatusException: HTTP error fetching URL. Status=400, URL=https://th.wikipedia.org/wiki/%25E0%25B8%25AB%25E0%25B8%2599%25E0%25B9%2589%25E0%25B8%25B2%25E0%25B8%25AB%25E0%25B8%25A5%25E0%25B8%25B1%25E0%25B8%2581
+
+Found 29 links at page https://en.wikipedia.org/wiki/James_Niehues
+Found 158 links at page https://da.wikipedia.org/wiki/
+Found 991 links at page https://en.wikipedia.org/wiki/2015
+Found 1186 links at page https://en.wikipedia.org/wiki/Kansas
+Found 329 links at page https://en.wikipedia.org/wiki/USS_Lexington_(CV-2)
+Found 117 links at page https://tr.wikipedia.org/wiki/
+Found 480 links at page https://en.wikipedia.org/wiki/John_Higgins_(snooker_player)
+Found 122 links at page https://es.wikipedia.org/wiki/
+Found 27 links at page https://en.wikipedia.org/wiki/Annelies_Van_Parys
+Found 152 links at page https://en.wikipedia.org/wiki/Brazo_de_Oro_(wrestler)
+[ DEBUG : 04-05 04:40:42 ]
+	org.jsoup.HttpStatusException: HTTP error fetching URL. Status=400, URL=https://he.wikipedia.org/wiki/%25D7%25A2%25D7%259E%25D7%2595%25D7%2593_%25D7%25A8%25D7%2590%25D7%25A9%25D7%2599
+
+Found 721 links at page https://en.wikipedia.org/wiki/Wikipedia
+Found 219 links at page https://et.wikipedia.org/wiki/
+Found 29 links at page https://en.wikipedia.org/wiki/Sophia_the_Martyr
+Found 177 links at page https://en.wikipedia.org/wiki/Encyclopedia
+Found 81 links at page https://en.wikipedia.org/wiki/Daniel_Wanjiru
+[ DEBUG : 04-05 04:41:17 ]
+	org.jsoup.HttpStatusException: HTTP error fetching URL. Status=400, URL=https://sk.wikipedia.org/wiki/Hlavn%25C3%25A1_str%25C3%25A1nka
+
+[ DEBUG : 04-05 04:41:17 ]
+	org.jsoup.HttpStatusException: HTTP error fetching URL. Status=400, URL=https://ru.wikipedia.org/wiki/%25D0%2597%25D0%25B0%25D0%25B3%25D0%25BB%25D0%25B0%25D0%25B2%25D0%25BD%25D0%25B0%25D1%258F_%25D1%2581%25D1%2582%25D1%2580%25D0%25B0%25D0%25BD%25D0%25B8%25D1%2586%25D0%25B0
+
+Found 95 links at page https://lt.wikipedia.org/wiki/
+Found 344 links at page https://en.wikipedia.org/wiki/Colony_of_Rhode_Island_and_Providence_Plantations
+Found 1375 links at page https://en.wikipedia.org/wiki/World_War_II
+Found 261 links at page https://en.wikipedia.org/wiki/Port_Moresby
+Found 99 links at page https://fi.wikipedia.org/wiki/
+Found 38 links at page https://en.wikipedia.org/wiki/Ueli_Steck
+Found 157 links at page https://ms.wikipedia.org/wiki/
+Found 241 links at page https://en.wikipedia.org/wiki/National_Day_of_Prayer
+Found 94 links at page https://eu.wikipedia.org/wiki/
+[ DEBUG : 04-05 04:42:35 ]
+	org.jsoup.HttpStatusException: HTTP error fetching URL. Status=400, URL=https://cs.wikipedia.org/wiki/Hlavn%25C3%25AD_strana
+
+Found 140 links at page https://id.wikipedia.org/wiki/
+Found 108 links at page https://en.wikipedia.org/wiki/2017_London_Marathon
+Found 1906 links at page https://en.wikipedia.org/wiki/Turkey
+[ DEBUG : 04-05 04:43:36 ]
+	org.jsoup.HttpStatusException: HTTP error fetching URL. Status=400, URL=https://fa.wikipedia.org/wiki/%25D8%25B5%25D9%2581%25D8%25AD%25D9%2587%25D9%2594_%25D8%25A7%25D8%25B5%25D9%2584%25DB%258C
+
+Found 302 links at page https://en.wikipedia.org/wiki/John_of_Gaunt
+Found 519 links at page https://en.wikipedia.org/wiki/Imperial_Japanese_Navy
+Found 637 links at page https://en.wikipedia.org/wiki/Audrey_Hepburn
+[ DEBUG : 04-05 04:44:17 ]
+	org.jsoup.HttpStatusException: HTTP error fetching URL. Status=400, URL=https://el.wikipedia.org/wiki/%25CE%25A0%25CF%258D%25CE%25BB%25CE%25B7:%25CE%259A%25CF%258D%25CF%2581%25CE%25B9%25CE%25B1
+
+[ DEBUG : 04-05 04:44:17 ]
+	org.jsoup.HttpStatusException: HTTP error fetching URL. Status=400, URL=https://ro.wikipedia.org/wiki/Pagina_principal%25C4%2583
+
+Found 627 links at page https://en.wikipedia.org/wiki/Battle_of_Midway
+Found 259 links at page https://en.wikipedia.org/wiki/Harold_Edward_Elliott
+Found 472 links at page https://en.wikipedia.org/wiki/Signals_intelligence
+Found 276 links at page https://en.wikipedia.org/wiki/Wikimedia_Foundation
+[ DEBUG : 04-05 04:45:03 ]
+	org.jsoup.HttpStatusException: HTTP error fetching URL. Status=400, URL=https://vi.wikipedia.org/wiki/Trang_Ch%25C3%25ADnh
+
+Found 420 links at page https://en.wikipedia.org/wiki/Christian_de_Duve
+[ DEBUG : 04-05 04:45:15 ]
+	org.jsoup.HttpStatusException: HTTP error fetching URL. Status=400, URL=https://ar.wikipedia.org/wiki/%25D8%25A7%25D9%2584%25D8%25B5%25D9%2581%25D8%25AD%25D8%25A9_%25D8%25A7%25D9%2584%25D8%25B1%25D8%25A6%25D9%258A%25D8%25B3%25D9%258A%25D8%25A9
+
+Found 510 links at page https://en.wikipedia.org/wiki/Cruiser
+Found 32 links at page https://en.wikipedia.org/wiki/Rubens_Peale
+Found 1571 links at page https://en.wikipedia.org/wiki/1974
+[ DEBUG : 04-05 04:46:14 ]
+	org.jsoup.HttpStatusException: HTTP error fetching URL. Status=400, URL=https://bg.wikipedia.org/wiki/%25D0%259D%25D0%25B0%25D1%2587%25D0%25B0%25D0%25BB%25D0%25BD%25D0%25B0_%25D1%2581%25D1%2582%25D1%2580%25D0%25B0%25D0%25BD%25D0%25B8%25D1%2586%25D0%25B0
+
+Found 32 links at page https://en.wikipedia.org/wiki/Herman_II,_Duke_of_Swabia
+Found 180 links at page https://simple.wikipedia.org/wiki/
+Found 554 links at page https://en.wikipedia.org/wiki/Thirteen_Colonies
+[ DEBUG : 04-05 04:46:37 ]
+	org.jsoup.HttpStatusException: HTTP error fetching URL. Status=400, URL=https://pl.wikipedia.org/wiki/Wikipedia:Strona_g%25C5%2582%25C3%25B3wna
+
+Found 135 links at page https://en.wikipedia.org/wiki/Manaslu
+Found 184 links at page https://en.wikipedia.org/wiki/Scuttling
+Found 1006 links at page https://en.wikipedia.org/wiki/Allies_of_World_War_II
+Found 66 links at page https://en.wikipedia.org/wiki/Muziektheater_Transparant
+Found 100 links at page https://en.wikipedia.org/wiki/James_Moore_(Continental_Army_officer)
+[ DEBUG : 04-05 04:47:19 ]
+	org.jsoup.HttpStatusException: HTTP error fetching URL. Status=400, URL=https://en.wikipedia.org/wiki/2016%25E2%2580%259317_Turkish_purges
+
+Found 143 links at page https://en.wikipedia.org/wiki/Papal_bull
+Found 399 links at page https://en.wikipedia.org/wiki/Royal_Australian_Navy
+[ DEBUG : 04-05 04:47:35 ]
+	org.jsoup.HttpStatusException: HTTP error fetching URL. Status=400, URL=https://pt.wikipedia.org/wiki/Wikip%25C3%25A9dia:P%25C3%25A1gina_principal
+
+Found 1297 links at page https://en.wikipedia.org/wiki/US_Navy
+Found 83 links at page https://nl.wikipedia.org/wiki/
+Found 673 links at page https://en.wikipedia.org/wiki/Guadalcanal_Campaign
+Found 78 links at page https://en.wikipedia.org/wiki/Inter_caetera
+Found 926 links at page https://en.wikipedia.org/wiki/Pope_Alexander_VI
+[ DEBUG : 04-05 04:49:00 ]
+	org.jsoup.HttpStatusException: HTTP error fetching URL. Status=400, URL=https://ko.wikipedia.org/wiki/%25EC%259C%2584%25ED%2582%25A4%25EB%25B0%25B1%25EA%25B3%25BC:%25EB%258C%2580%25EB%25AC%25B8
+
+Found 207 links at page https://en.wikipedia.org/wiki/Labor_movement
+Found 665 links at page https://en.wikipedia.org/wiki/1886
+[ DEBUG : 04-05 04:49:25 ]
+	org.jsoup.HttpStatusException: HTTP error fetching URL. Status=400, URL=https://en.wikipedia.org/wiki/Battle_of_Mosul_(2016%25E2%2580%2593present)
+
+Found 143 links at page https://en.wikipedia.org/wiki/Clathrus_ruber
+Found 57 links at page https://en.wikipedia.org/wiki/Faith,_Hope_and_Charity
+Found 1056 links at page https://en.wikipedia.org/wiki/May_3
+Found 1025 links at page https://en.wikipedia.org/wiki/May_4
+Found 407 links at page https://en.wikipedia.org/wiki/Mark_Selby
+Found 1006 links at page https://en.wikipedia.org/wiki/May_5
+Found 164 links at page https://en.wikipedia.org/wiki/The_Soft_Parade
+[ DEBUG : 04-05 04:51:12 ]
+	org.jsoup.HttpStatusException: HTTP error fetching URL. Status=400, URL=https://en.wikipedia.org/wiki/Japanese_aircraft_carrier_Sh%25C5%258Dkaku
+
+Found 329 links at page https://en.wikipedia.org/wiki/Henry_IV_of_England
+Found 906 links at page https://en.wikipedia.org/wiki/English_language
+Found 54 links at page https://en.wikipedia.org/wiki/Affinity_(medieval)
+[ DEBUG : 04-05 04:51:48 ]
+	org.jsoup.HttpStatusException: HTTP error fetching URL. Status=400, URL=https://en.wikipedia.org/wiki/St_Trophimus%2527_Church,_Eschau
+
+Found 353 links at page https://en.wikipedia.org/wiki/Parliament_of_Malta
+Found 232 links at page https://en.wikipedia.org/wiki/USS_Yorktown_(CV-5)
+Found 1219 links at page https://en.wikipedia.org/wiki/Baltimore
+Found 447 links at page https://en.wikipedia.org/wiki/Richard_II_of_England
+Found 122 links at page https://en.wikipedia.org/wiki/Star_Wars_Day
+Found 321 links at page https://en.wikipedia.org/wiki/National_Gallery_of_Art
+Found 186 links at page https://en.wikipedia.org/wiki/2017_Camp_Shaheen_attack
+Found 175 links at page https://en.wikipedia.org/wiki/Tulagi
+[ DEBUG : 04-05 04:53:13 ]
+	org.jsoup.HttpStatusException: HTTP error fetching URL. Status=400, URL=https://eo.wikipedia.org/wiki/Vikipedio:%25C4%2588efpa%25C4%259Do
+
+Found 62 links at page https://gl.wikipedia.org/wiki/
+Found 591 links at page https://en.wikipedia.org/wiki/Haymarket_affair
+[ DEBUG : 04-05 04:53:32 ]
+	org.jsoup.HttpStatusException: HTTP error fetching URL. Status=400, URL=https://bs.wikipedia.org/wiki/Po%25C4%258Detna_strana
+
+Found 345 links at page https://en.wikipedia.org/wiki/Afghan_National_Army
+Found 397 links at page https://en.wikipedia.org/wiki/List_of_historical_anniversaries
+Found 75 links at page https://en.wikipedia.org/wiki/Boogeyman_2
+Found 160 links at page https://en.wikipedia.org/wiki/Free_content
+Found 734 links at page https://en.wikipedia.org/wiki/Battle_of_the_Coral_Sea
+[ DEBUG : 04-05 04:54:20 ]
+	org.jsoup.HttpStatusException: HTTP error fetching URL. Status=400, URL=https://hu.wikipedia.org/wiki/Kezd%25C5%2591lap
+
+**** Arrived at depth 1; iterating over 31864 links ****
+
+Found 125 links at page https://en.wikipedia.org/wiki/Professional_wrestling_aerial_techniques
+[ DEBUG : 04-05 04:54:24 ]
+	org.jsoup.HttpStatusException: HTTP error fetching URL. Status=400, URL=https://en.wikipedia.org/wiki/Expo_%252774
+
+Found 154 links at page https://en.wikipedia.org/wiki/Ballistic_missile_submarines
+Found 59 links at page https://en.wikipedia.org/wiki/Rudi_Dornbusch
+Found 1162 links at page https://en.wikipedia.org/wiki/Mid-Atlantic_states
+Found 21 links at page https://en.wikipedia.org/wiki/Abraham_S._Fischler
+Found 1542 links at page https://en.wikipedia.org/wiki/1946
+[ DEBUG : 04-05 04:55:45 ]
+	org.jsoup.HttpStatusException: HTTP error fetching URL. Status=400, URL=https://kv.wikipedia.org/wiki/%25D0%259C%25D0%25B5%25D0%25B4%25D1%2588%25D3%25A7%25D1%2580_%25D0%25BB%25D0%25B8%25D1%2581%25D1%2582_%25D0%25B1%25D0%25BE%25D0%25BA
+
+Found 612 links at page https://en.wikipedia.org/wiki/Armenian_Catholic_Church
+Found 1417 links at page https://en.wikipedia.org/wiki/1947
+Found 1493 links at page https://en.wikipedia.org/wiki/1948
+Found 1302 links at page https://en.wikipedia.org/wiki/1949
+Found 18 links at page https://en.wikipedia.org/wiki/Gandhamardhan_hills
+Found 475 links at page https://en.wikipedia.org/wiki/Townsville
+Found 293 links at page https://en.wikipedia.org/wiki/Fort_Leavenworth
+Found 154 links at page https://en.wikipedia.org/wiki/William_Asher
+Found 424 links at page https://en.wikipedia.org/wiki/Leon_Brittan
+Found 1462 links at page https://en.wikipedia.org/wiki/1940
+Found 1513 links at page https://en.wikipedia.org/wiki/1941
+Found 1667 links at page https://en.wikipedia.org/wiki/1942
+Found 1678 links at page https://en.wikipedia.org/wiki/1943
+Found 158 links at page https://en.wikipedia.org/wiki/Col.
+Found 1771 links at page https://en.wikipedia.org/wiki/1944
+Found 1871 links at page https://en.wikipedia.org/wiki/1945
+Found 9 links at page https://en.wikipedia.org/wiki/May_Bird_and_the_Ever_After
+Found 484 links at page https://en.wikipedia.org/wiki/Paula_Radcliffe
+Found 121 links at page https://en.wikipedia.org/wiki/Antelope,_Oregon
+Found 1153 links at page https://en.wikipedia.org/wiki/1935
+Found 380 links at page https://en.wikipedia.org/wiki/Parliament_of_Estonia
+Found 1103 links at page https://en.wikipedia.org/wiki/1936
+Found 1430 links at page https://en.wikipedia.org/wiki/1937
+Found 1454 links at page https://en.wikipedia.org/wiki/1938
+Found 1546 links at page https://en.wikipedia.org/wiki/1939
+Found 145 links at page https://en.wikipedia.org/wiki/Captain_(armed_forces)
+[ DEBUG : 04-05 05:06:54 ]
+	org.jsoup.HttpStatusException: HTTP error fetching URL. Status=400, URL=https://en.wikipedia.org/wiki/Confederation_of_Public_Workers%2527_Unions
+
+Found 59 links at page https://en.wikipedia.org/wiki/Tech_companies_in_New_York
+Found 1231 links at page https://en.wikipedia.org/wiki/1930
+Found 1176 links at page https://en.wikipedia.org/wiki/1931
+Found 69 links at page https://en.wikipedia.org/wiki/Gargantua_and_Pantagruel
+Found 45 links at page https://en.wikipedia.org/wiki/Ray_Gosling
+Found 1281 links at page https://en.wikipedia.org/wiki/1932
+Found 1201 links at page https://en.wikipedia.org/wiki/1933
+Found 175 links at page https://fi.wikipedia.org/wiki/Esteettinen
+Found 1129 links at page https://en.wikipedia.org/wiki/1934
+Found 222 links at page https://en.wikipedia.org/wiki/History_of_encyclopedias
+Found 317 links at page https://en.wikipedia.org/wiki/Antipope
+Found 315 links at page https://da.wikipedia.org/wiki/Holland
+Found 1502 links at page https://en.wikipedia.org/wiki/1968
+Found 1563 links at page https://en.wikipedia.org/wiki/1969
+Found 104 links at page https://en.wikipedia.org/wiki/Calvert_Street_(Baltimore)
+Found 173 links at page https://en.wikipedia.org/wiki/Southwest_Federal_Center
+Found 77 links at page https://fi.wikipedia.org/wiki/Ville_Vallgren
+Found 1518 links at page https://en.wikipedia.org/wiki/1960
+Found 1386 links at page https://en.wikipedia.org/wiki/1961
+Found 337 links at page https://en.wikipedia.org/wiki/Stein_Eriksen
+Found 1515 links at page https://en.wikipedia.org/wiki/1962
+Found 354 links at page https://en.wikipedia.org/wiki/National_Register_of_Historic_Places_listings_in_Ohio
+Found 29 links at page https://en.wikipedia.org/wiki/General_Motors_Presents
+Found 1590 links at page https://en.wikipedia.org/wiki/1963
+Found 1626 links at page https://en.wikipedia.org/wiki/1964
+Found 1589 links at page https://en.wikipedia.org/wiki/1965
+Found 127 links at page https://en.wikipedia.org/wiki/National_Register_of_Historic_Places_listings_in_Kent_County,_Maryland
+Found 1734 links at page https://en.wikipedia.org/wiki/1966
+Found 21 links at page https://simple.wikipedia.org/wiki/Paganism
+Found 1759 links at page https://en.wikipedia.org/wiki/1967
+Found 61 links at page https://en.wikipedia.org/wiki/Litigation_involving_the_Wikimedia_Foundation
+Found 84 links at page https://en.wikipedia.org/wiki/Reichstag_building
+Found 375 links at page https://en.wikipedia.org/wiki/Ethnic_groups_in_Afghanistan
+Found 84 links at page https://en.wikipedia.org/wiki/Next_Turkish_general_election
+Found 265 links at page https://en.wikipedia.org/wiki/Joan_Fontaine
+Found 294 links at page https://en.wikipedia.org/wiki/2017_MotoGP_season
+Found 187 links at page https://en.wikipedia.org/wiki/Collar_of_Esses
+Found 175 links at page https://en.wikipedia.org/wiki/Auxiliary_ship
+Found 913 links at page https://en.wikipedia.org/wiki/Pune
+Found 106 links at page https://en.wikipedia.org/wiki/Farrukh_Ahmad
+Found 658 links at page https://en.wikipedia.org/wiki/Mutualism_(economic_theory)
+Found 1385 links at page https://en.wikipedia.org/wiki/1957
+Found 170 links at page https://en.wikipedia.org/wiki/Bobby_Timmons
+Found 1335 links at page https://en.wikipedia.org/wiki/1958
+Found 1339 links at page https://en.wikipedia.org/wiki/1959
+Found 103 links at page https://en.wikipedia.org/wiki/New_Guinea_Highlands
+Found 271 links at page https://en.wikipedia.org/wiki/Defense_Criminal_Investigative_Service
+Found 133 links at page https://en.wikipedia.org/wiki/Boston_Port_Act
+Found 1225 links at page https://en.wikipedia.org/wiki/1950
+Found 172 links at page https://en.wikipedia.org/wiki/County_seat
+Found 1231 links at page https://en.wikipedia.org/wiki/1951
+Found 10 links at page https://simple.wikipedia.org/wiki/Medicine
+Found 1239 links at page https://en.wikipedia.org/wiki/1952
+Found 1368 links at page https://en.wikipedia.org/wiki/1953
+Found 305 links at page https://en.wikipedia.org/wiki/Malta_Cup
+Found 288 links at page https://en.wikipedia.org/wiki/Satellite_dishes
+Found 34 links at page https://en.wikipedia.org/wiki/McGrath_Foundation
+Found 1242 links at page https://en.wikipedia.org/wiki/1954
+Found 1331 links at page https://en.wikipedia.org/wiki/1955
+Found 1318 links at page https://en.wikipedia.org/wiki/1956
+Found 363 links at page https://en.wikipedia.org/wiki/Anthony_Hamilton_(snooker_player)
+Found 58 links at page https://en.wikipedia.org/wiki/Brut_Chronicle
+Found 174 links at page https://en.wikipedia.org/wiki/Battle_of_Amiens_(1918)
+Found 57 links at page https://en.wikipedia.org/wiki/Battle_of_Tarinkot_(2016)
+Found 67 links at page https://en.wikipedia.org/wiki/UseModWiki
+Found 162 links at page https://en.wikipedia.org/wiki/Service_number_(United_States_Air_Force)
+Found 154 links at page https://en.wikipedia.org/wiki/Peter_of_Castile
+Found 1619 links at page https://en.wikipedia.org/wiki/1982
+Found 1303 links at page https://en.wikipedia.org/wiki/The_Bronx
+Found 1766 links at page https://en.wikipedia.org/wiki/1983
+Found 1617 links at page https://en.wikipedia.org/wiki/1984
+Found 1674 links at page https://en.wikipedia.org/wiki/1985
+Found 471 links at page https://en.wikipedia.org/wiki/Scottish_English
+Found 1763 links at page https://en.wikipedia.org/wiki/1986
+Found 187 links at page https://en.wikipedia.org/wiki/Special_Naval_Landing_Force
+Found 1624 links at page https://en.wikipedia.org/wiki/1987
+Found 1805 links at page https://en.wikipedia.org/wiki/1988
+Found 2061 links at page https://en.wikipedia.org/wiki/1989
+Found 19 links at page https://en.wikipedia.org/wiki/Amberleigh_House
+Found 175 links at page https://en.wikipedia.org/wiki/Mohamed_Abdullahi_Mohamed
+Found 1669 links at page https://en.wikipedia.org/wiki/1980
+Found 116 links at page https://en.wikipedia.org/wiki/Anne_Sexton
+Found 1721 links at page https://en.wikipedia.org/wiki/1981
+[ DEBUG : 04-05 05:35:38 ]
+	org.jsoup.HttpStatusException: HTTP error fetching URL. Status=400, URL=https://en.wikipedia.org/wiki/Val%25C3%25A9ry_Giscard_d%2527Estaing
+
+Found 1137 links at page https://en.wikipedia.org/wiki/Origin_of_life
+Found 566 links at page https://en.wikipedia.org/wiki/Monarchy_of_Denmark
+Found 250 links at page https://en.wikipedia.org/wiki/Security_Intelligence_Agency
+Found 33 links at page https://en.wikipedia.org/wiki/AllMusic
+Found 101 links at page https://en.wikipedia.org/wiki/Gerontius_(bishop_of_Milan)
+Found 43 links at page https://en.wikipedia.org/wiki/USS_Brazos_(AO-4)
+Found 212 links at page https://en.wikipedia.org/wiki/Agreement_on_Technical_Barriers_to_Trade
+Found 54 links at page https://en.wikipedia.org/wiki/HMAS_Moreton
+Found 2132 links at page https://en.wikipedia.org/wiki/1979
+Found 181 links at page https://en.wikipedia.org/wiki/Master_Jet_Base
+Found 219 links at page https://en.wikipedia.org/wiki/Bengali_Wikipedia
+Found 1660 links at page https://en.wikipedia.org/wiki/1971
+Found 271 links at page https://en.wikipedia.org/wiki/Great_Blacks_in_Wax_Museum
+Found 1815 links at page https://en.wikipedia.org/wiki/1972

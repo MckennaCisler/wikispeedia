@@ -35,8 +35,8 @@ function hrefHelper(f, href) {
 }
 
 function displayError(msg, error_code) {
-    // TODO
-    alert(msg);
+    my_alert(msg);
+    //alert(msg);
 }
 
 function clearError() {

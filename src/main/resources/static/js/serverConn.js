@@ -351,14 +351,7 @@ class ServerConn {
         console.log("RECIEVING: ");
         console.log(parsedMsg);
 
-        // if (this.clientId === undefined || // if we are getting and ID now
-        //     parsedMsg.client_id === this.clientId) {
         if (this.pendingResponses.hasOwnProperty(parsedMsg.command)) {
-            // // note we can't really localize an error command to a player
-            // if (parsedMsg.command === Command.ERROR.name ||
-            //     parsedMsg.command === Command.COMMAND_ERROR.name) {
-            //     console.log("\nGot ERROR or COMMAND_ERROR: ");
-            //     console.log(parsedMsg);
             if (parsedMsg.error_message === "") {
                 // note that pendingResponses is a map from command RETURN MESSGAE NAME to the callbacks
                 // that should be called on the return message, so we can reference these all in one line

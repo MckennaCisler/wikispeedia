@@ -116,8 +116,12 @@ public class WikiLobby implements Lobby {
           "Game has already started, cannot add player.");
       return;
     }
+    // first is leader
+    boolean isLeader = this.players.size() == 0;
+
     this.players.put(playerId,
-        new WikiPlayer(playerId, this, startPage, goalPage));
+        new WikiPlayer(playerId, this, startPage, goalPage, isLeader));
+
     Command.sendAllPlayers(this);
   }
 
@@ -138,10 +142,10 @@ public class WikiLobby implements Lobby {
     players.get(clientId).setConnected(false);
     Command.sendAllPlayers(this);
   }
-  
+
   @Override
   public JsonElement toJson(Gson gson) {
-	  return gson.toJsonTree(this);
+    return gson.toJsonTree(this);
   }
 
   /****************************************/
