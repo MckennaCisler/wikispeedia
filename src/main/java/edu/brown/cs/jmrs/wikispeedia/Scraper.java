@@ -10,6 +10,7 @@ import java.util.Set;
 import edu.brown.cs.jmrs.io.db.DbConn;
 import edu.brown.cs.jmrs.web.LinkFinder;
 import edu.brown.cs.jmrs.web.wikipedia.WikiPage;
+import edu.brown.cs.jmrs.web.wikipedia.WikiPageLinkFinder.Filter;
 
 /**
  * A basic wikipedia page scraper.
@@ -22,7 +23,6 @@ public class Scraper {
   // underestimate
   private static final int AVG_LINKS_PER_PAGE = 100;
 
-  private final DbConn conn;
   private final WikiPage startPage;
   private int depth;
   private LinkFinder<WikiPage> linkFinder;
@@ -32,14 +32,16 @@ public class Scraper {
    *          The DbConn of the wikipedia database.
    * @param startPage
    *          The WikiPage to start at.
+   * @param filters
+   *          A series of filters to ignore links by.
    * @throws SQLException
    *           If the database could not be loaded or was malformed.
    */
-  public Scraper(DbConn wikiDbConn, WikiPage startPage) throws SQLException {
-    conn = wikiDbConn;
+  public Scraper(DbConn wikiDbConn, WikiPage startPage, Filter... filters)
+      throws SQLException {
     this.startPage = startPage;
     depth = -1;
-    linkFinder = new CachingWikiEdgeFinder(wikiDbConn);
+    linkFinder = new CachingWikiLinkFinder(wikiDbConn, filters);
   }
 
   /**

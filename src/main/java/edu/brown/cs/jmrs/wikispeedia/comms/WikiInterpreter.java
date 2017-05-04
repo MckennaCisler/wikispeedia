@@ -1,8 +1,6 @@
 package edu.brown.cs.jmrs.wikispeedia.comms;
 
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.gson.JsonObject;
@@ -42,19 +40,7 @@ public class WikiInterpreter implements CommandInterpreter {
         break;
 
       case GET_SETTINGS:
-        Map<Object, Object> settings = new HashMap<>();
-        settings.put("start", lobby.getStartPage());
-        settings.put("goal", lobby.getGoalPage());
-        if (commandPayload.get("state").getAsInt() == Command.GameState.ENDED
-            .ordinal()) {
-          settings.put("start_time", lobby.getStartTime());
-          settings.put("end_time", lobby.getStartTime());
-          settings.put("winner", lobby.getWinner());
-        } else if (commandPayload.get("state")
-            .getAsInt() == Command.GameState.STARTED.ordinal()) {
-          settings.put("start_time", lobby.getStartTime());
-        }
-        Command.RETURN_SETTINGS.send(lobby.getServer(), clientId, settings);
+        Command.RETURN_SETTINGS.send(lobby.getServer(), clientId, lobby);
         break;
 
       case FORCE_BEGIN_GAME:

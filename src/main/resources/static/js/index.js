@@ -34,9 +34,11 @@ $(document).ready(function () {
 	});
 
 	$("#back_main").on('click', () => {
-		$("#uname_picker").hide();
-		$("#main").show();
-		$("#rules").show();
+		serverConn.leaveLobby(() => {
+			$("#uname_picker").hide();
+			$("#main").show();
+			$("#rules").show();
+		}, displayServerConnError);
 	});
 
 	$("#start_game").on('click', () => {

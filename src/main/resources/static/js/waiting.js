@@ -110,9 +110,9 @@ $(document).ready(() => {
 		// Get current lobby settings
 		serverConn.getSettings("", GAME_STATE.WAITING, (settings) => {
 	 		// Get articles
-			serverConn.getPage(settings.start.name, (article) => {
+			serverConn.getPage(settings.startPage.name, (article) => {
 				drawFirstPage(article);
-				serverConn.getPage(settings.goal.name, drawSecondPage, displayServerConnError);
+				serverConn.getPage(settings.goalPage.name, drawSecondPage, displayServerConnError);
 			}, displayServerConnError);
 		}, displayServerConnError);
 
@@ -130,7 +130,7 @@ $(document).ready(() => {
 		// $blurb2.text(firstSentence(article.blurb));
 	}
 
-	let playersFake = [{name : "Rohan", id : "a"}, {name : "McKenna", id : "b"}, {name : "Jacob", id : "c"}, {name : "Sean", id : "d"}];
+	//let playersFake = [{name : "Rohan", id : "a"}, {name : "McKenna", id : "b"}, {name : "Jacob", id : "c"}, {name : "Sean", id : "d"}];
 	function drawPlayers(players) {
 		"use strict";
 		// example line: <li class="list-group-item"><input type="checkbox" id="u0" checked disabled> You</li>

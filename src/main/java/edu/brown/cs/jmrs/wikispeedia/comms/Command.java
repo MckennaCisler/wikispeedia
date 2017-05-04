@@ -234,7 +234,7 @@ public enum Command {
    *          The lobby to get players and winner from.
    */
   public static void sendEndGame(WikiLobby lobby) {
-    Command.END_GAME.sendToAll(lobby, lobby.getWinner());
+    Command.END_GAME.sendToAll(lobby, lobby.getWinners());
   }
 
   /**

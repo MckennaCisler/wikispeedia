@@ -113,3 +113,5 @@ All of this information is put together on a presentation linked here: https://d
   - `--scrape` To simply scrape Wikipedia and populate database caches
   - `--scrape-depth <depth>` The depth at which to stop scraping. Defaults to infinity.
   - `--scrape-start <wiki page title>` The page to start from when scraping. Defaults to "Main_Page"
+  - `--scrape-method <breadth | random_descent>` The method to use while scraping; breadth will try every page at every depth starting from start, while random descent will go depth-first, choosing a random link at each level.
+  - `--scrape-only-english` Limits links to those in the English Wikipedia

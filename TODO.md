@@ -2,9 +2,9 @@
 ##### NECESSITIES
 - <b>Fix bugs</b>
 - Loading icons
-- Levels of difficulty
-- Visualizations for history and endgame
+- Visualizations for history and endgame ROHAN
 - Deal with what happens when a player can't be on a page (/waiting for ex.)
+  - Add an error callback
 - Going back
 ##### NICETIES
 - Least clicks mode
@@ -25,7 +25,7 @@
 
 #### Deadlines:
 - <b>Adversary TA Meeting (Wednesday, 4/26)</b>
-- <b>Done with coding (Saturday, 5/6)</b>
+- <b>Done with coding (Saturday, 5/6)<  /b>
 - <b>Practice presentation w/ Erica (Sunday, 5/7)</b>
 - <b>Demo (Monday, 5/8)</b>
 

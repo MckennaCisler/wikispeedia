@@ -1,8 +1,7 @@
 package edu.brown.cs.jmrs.wikispeedia;
 
 import java.time.Instant;
-
-import com.google.common.base.Optional;
+import java.util.Set;
 
 import edu.brown.cs.jmrs.web.ContentFormatter;
 import edu.brown.cs.jmrs.web.LinkFinder;
@@ -43,9 +42,9 @@ public interface WikiGameMode {
    *
    * @param lobby
    *          The lobby to check.
-   * @return Whether there was a winner.
+   * @return A set of all winners (in case of tie), whether they
    */
-  Optional<WikiPlayer> checkForWinner(WikiLobby lobby);
+  Set<WikiPlayer> checkForWinners(WikiLobby lobby);
 
   /**
    * @param wikiLobby
