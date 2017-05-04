@@ -66,12 +66,6 @@ const Command = {
           return { "lobby_id" : lobby_id };
       }
     },
-    GET_LOBBIES: {
-      name: "get_lobbies",
-      responseName: "all_lobbies",
-      type: COMMAND_TYPE.INCOMING, // explicitly label as not SERVER bcs. we want it to return with the list
-      construct: () => { return {} }
-    },
     COMMAND_ERROR: {
         name: "command_error",
         type: COMMAND_TYPE.SERVER, // but OUTGOING really
@@ -294,10 +288,6 @@ class ServerConn {
 
     joinLobby(lobby_id, callback, errCallback) {
         this._send(Command.JOIN_LOBBY, callback, errCallback, [lobby_id]);
-    }
-
-    getLobbies(callback, errCallback) {
-        this._send(Command.GET_LOBBIES, callback, errCallback, []);
     }
 
     /**

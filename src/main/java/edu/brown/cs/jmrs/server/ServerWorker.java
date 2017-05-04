@@ -22,17 +22,15 @@ import edu.brown.cs.jmrs.server.customizable.Lobby;
 
 class ServerWorker {
 
-  private Server                           server;
-  private LobbyManager                     lobbies;
+  private Server server;
+  private LobbyManager lobbies;
   private ConcurrentBiMap<Session, Client> clients;
-  private Map<String, Client>              notInLobbies;
-  private Queue<Client>                    disconnectedClients;
-  private Gson                             gson;
+  private Map<String, Client> notInLobbies;
+  private Queue<Client> disconnectedClients;
+  private Gson gson;
 
-  public ServerWorker(
-      Server server,
-      BiFunction<Server, String, ? extends Lobby> lobbyFactory,
-      Gson gson) {
+  public ServerWorker(Server server,
+      BiFunction<Server, String, ? extends Lobby> lobbyFactory, Gson gson) {
     this.server = server;
     lobbies = new LobbyManager(lobbyFactory);
     clients = new ConcurrentBiMap<>();
@@ -97,10 +95,9 @@ class ServerWorker {
     for (HttpCookie cookie : cookies) {
       if (cookie.getName().equals("client_id")) {
         String cookieVal = cookie.getValue();
-        expiration = Date.from(
-            Instant.ofEpochMilli(
-                Long.parseLong(
-                    cookieVal.substring(cookieVal.indexOf(":") + 1))));
+        expiration =
+            Date.from(Instant.ofEpochMilli(Long
+                .parseLong(cookieVal.substring(cookieVal.indexOf(":") + 1))));
         break;
       }
     }
@@ -145,11 +142,11 @@ class ServerWorker {
   private JsonObject allLobbies() {
     JsonObject jsonObject = new JsonObject();
     jsonObject.addProperty("command", "all_lobbies");
-    List<String> lobbies = getOpenLobbies();
+    List<String> lobbs = getOpenLobbies();
     jsonObject.addProperty("error_message", "");
 
     JsonArray lobbyArray = new JsonArray();
-    for (String id : lobbies) {
+    for (String id : lobbs) {
       lobbyArray.add(getLobby(id).toJson(gson));
     }
 
@@ -219,13 +216,9 @@ class ServerWorker {
 
   private void sendLobbies(Client client) {
     if (client != null) {
-      JsonObject jsonObject = allLobbies();
-      jsonObject.addProperty("command", "get_lobbies");
-      jsonObject.add("payload", allLobbies());
-      jsonObject.addProperty("error_message", "");
-      String toClient = gson.toJson(jsonObject);
       try {
-        clients.getReversed(client).getRemote().sendString(toClient);
+        clients.getReversed(client).getRemote()
+            .sendString(gson.toJson(allLobbies()));
       } catch (IOException e) {
         e.printStackTrace();
       }

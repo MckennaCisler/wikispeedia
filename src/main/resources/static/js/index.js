@@ -38,7 +38,7 @@ $(document).ready(function () {
 		$("#main").show();
 		$("#rules").show();
 	});
-	
+
 	$("#start_game").on('click', () => {
 		if ($("#game_name").val() === "") {
 			$("#game_name").effect("highlight", {
@@ -47,7 +47,7 @@ $(document).ready(function () {
 		} else {
 			isMaking = true;
 			lobbyName = $("#game_name").val();
-			
+
 			let mode;
 			if (document.getElementById("time").checked) {
 				mode = GAME_MODES.TIME_TRIAL;
@@ -139,7 +139,7 @@ function resize() {
 // game logic handlers
 serverConn.ready(() => {
 	"use strict";
-	
+
 	serverConn.registerError(displayServerConnError);
 	serverConn.registerAllLobbies(drawLobbies);
 
