@@ -159,7 +159,6 @@ serverConn.whenReadyToRecieve(() => {
 
 serverConn.whenReadyToSend(() => {
 	"use strict";
-
 	serverConn.leaveLobby();
 });
 

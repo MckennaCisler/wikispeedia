@@ -188,15 +188,16 @@ class ServerConn {
         // constants
         this.COMMAND_TIMEOUT = 10000; // some can take a while
         this.CLIENT_ID_COOKIE_EXPIRATION = 60;
+        this.STOP_LOGGING_RECIEVED_MESSAGES_TIMEOUT = 5000;
 
         this.clientId = "";
-        this.readyToRecieve = false;
         this.readyToSend = false;
+        this.logRecievedMessages = true;
         this.ws = new WebSocket("ws://" + source);
         this.ws.onopen = this.ws_onopen.bind(this);
         this.ws.onmessage = this.ws_onmessage.bind(this);
         this.ws.onclose = this.ws_onclose.bind(this);
-        this.allReadyCallbacksRegisteredTimeout;
+        this.stopLoggingRecievedMessagesTimer;
 
         /**
          * Map from Command name to an object of
@@ -209,6 +210,8 @@ class ServerConn {
             "command": { type: COMMAND_TYPE.SERVER }, // all we need
             "callback": (message) => {
                 this._setId(message.client_id);
+
+                // ready to send because we have our id
                 this.readyToSend = true;
 
                 // call the ready callbacks added before we got here
@@ -217,7 +220,9 @@ class ServerConn {
                 }
             },
             "errCallback" : () => {}, // no reason
-            "timeout" : null          // no reason
+            "timeout" : window.setTimeout(() => {
+                displayError("Could not connect to server... please reload the page");
+            }, this.COMMAND_TIMEOUT)
         }
 
         /**
@@ -352,68 +357,48 @@ class ServerConn {
     }
 
     /**
-     * Register callbacks here register as listeners to send messages
+     * Register callbacks here register as listeners to send messages.
+     * They will be called immediately, but will also be sent previous messages in case some came before.
      */
     whenReadyToRecieve(callback) {
-        if (!this.readyToRecieve) {
-          // since we're not ready for recieving things, defer until we are
-          this.readyToRecieveCallbacks.push(callback);
-        } else {
-          // just call it if we are ready
-          callback();
+        callback();
 
-          // ALSO, reprocess messages recieved before we got notify_id
-          // in case the readyToRecieve callback was expecting them
-          for (let i = 0; i < this.recievedMessages.length; i++) {
-              this.ws_onmessage(this.recievedMessages[i]);
-          }
+        // ALSO, reprocess messages recieved before we got notify_id
+        // in case the readyToRecieve callback was expecting them
+        console.log("RE-PROCESSING MESSAGES: ")
+        for (let i = 0; i < this.recievedMessages.length; i++) {
+            this.process_message(this.recievedMessages[i]);
         }
+
+        // wait until all ready callbacks are done (give a timeout)
+        // to stop logging recieved messages (to save on memory)
+        window.clearTimeout(this.stopLoggingRecievedMessagesTimer);
+        this.stopLoggingRecievedMessagesTimer = window.setTimeout(() => {
+          this.logRecievedMessages = false;
+          console.log("Stopped storing messages for late readyToRecieve callbacks")
+        }, this.STOP_LOGGING_RECIEVED_MESSAGES_TIMEOUT);
     }
-
-    // // we don't want this to happen; things have already been set up
-    // console.log("ERROR: ready callback registered after serverConn was setup");
-
-    // fullyReady() {
-    //   if (this.client_id !== null) {
-    //     // call the ready callbacks added before we got here
-    //     for (let i = 0; i < this.preReadyCallbacks.length; i++) {
-    //         this.preReadyCallbacks[i]();
-    //     }
-    //
-    //
-    //
-    //     // note we're ready so any further ready callbacks added (and messages recieved) are called immediately.
-    //     this.readyNow = true;
-    //   } else {
-    //     // if we still haven't recieved id, defer until we have
-    //     this.allReadyCallbacksRegisteredTimeout = window.setTimeout(this.fullyReady.bind(this), this.AFTER_READY_REGISTER_FULLY_READY_TIMEOUT);
-    //   }
-    // }
-
-    // // whenever we get a ready callback, reset the timeout that will trigger a full ready state
-    // // i.e. will call all ready callbacks and then "re-recieve" all messages received before this
-    // window.clearTimeout(this.allReadyCallbacksRegisteredTimeout);
-    // this.allReadyCallbacksRegisteredTimeout = window.setTimeout(this.fullyReady.bind(this), this.AFTER_READY_REGISTER_FULLY_READY_TIMEOUT);
 
     /**
      * Primary WebSocket interpreters
      */
     ws_onopen() {
-      for (let i = 0; i < this.readyToRecieveCallbacks.length; i++) {
-          this.readyToRecieveCallbacks[i]();
-      }
-      this.readyToRecieve = true;
     };
 
     ws_onmessage(jsonMsg) {
+      const parsedMsg = JSON.parse(jsonMsg.data);
+      console.log(`RECIEVING: ${parsedMsg.command}`);
+
+      // continue to process it (we seperate into a function becasue this is what recievedMessages calls)
+      this.process_message(parsedMsg);
 
       // add recievedMessages to a list to be called in case some new callback wanting readiness for recieving
-      // was added after we got some messages
-      this.recievedMessages.push(jsonMsg);
+      // was added after we got some messages (stop after a certain amount of time)
+      if (this.logRecievedMessages && parsedMsg.command !== "notify_id") { this.recievedMessages.push(parsedMsg); }
+    }
 
-      const parsedMsg = JSON.parse(jsonMsg.data);
-
-      console.log("RECIEVING: ");
+    process_message(parsedMsg) {
+      console.log("PROCESSING: ");
       console.log(parsedMsg);
 
       if (this.pendingResponses.hasOwnProperty(parsedMsg.command)) {
@@ -438,7 +423,7 @@ class ServerConn {
               window.clearTimeout(actions.timeout);
               if (actions.errCallback !== undefined) { actions.errCallback(parsedMsg); }
 
-              console.log("\nGot error: ");
+              console.log("\nGOT_ERROR: ");
               console.log(parsedMsg);
           }
       } else if (parsedMsg.error_message !== undefined && parsedMsg.error_message !== "") {
@@ -450,7 +435,7 @@ class ServerConn {
     }
 
     ws_onclose() {
-        // TODO : what in the world to do?
+      console.log("INFO: Connection was closed");
     }
 
     _send(command, callback, errCallback, args) {

@@ -106,8 +106,8 @@ $(document).ready(() => {
 	serverConn.whenReadyToRecieve(() => {
 		"use strict";
 
-		serverConn.registerError(displayServerConnError);
 		serverConn.registerAllPlayers(drawPlayers);
+		serverConn.registerError(displayServerConnError);
 		serverConn.registerBeginGame(startGame);
 	});
 
