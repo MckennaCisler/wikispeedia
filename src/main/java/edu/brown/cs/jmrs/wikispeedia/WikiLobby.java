@@ -291,7 +291,7 @@ public class WikiLobby implements Lobby {
    * @return The default LinkFinder for all lobbies, setup in this lobby.
    */
   public LinkFinder<WikiPage> getDefaultLinkFinder() {
-    return defaultLinkFinder;
+    return DEFAULT_LINK_FINDER;
   }
 
   /**
