@@ -90,13 +90,13 @@ const Command = {
         construct: () => { return {} }
     },
     GET_SETTINGS : {
-		name: "get_settings",
-        responseName: "return_settings",
-		type: COMMAND_TYPE.INCOMING,
-		construct: (lobby_id, state) => {
-            return { "lobby_id" : lobby_id, "state": state};
-        }
-	},
+  		name: "get_settings",
+          responseName: "return_settings",
+  		type: COMMAND_TYPE.INCOMING,
+  		construct: (lobby_id, state) => {
+              return { "lobby_id" : lobby_id, "state": state};
+          }
+  	},
     FORCE_BEGIN_GAME: {
         name: "force_begin_game",
         responseName: "begin_game",
@@ -104,72 +104,78 @@ const Command = {
         construct: () => { return {} }
     },
     GET_PAGE : {
-		name: "get_page",
-        responseName: "return_get_page",
-		type: COMMAND_TYPE.INCOMING,
-		construct: (page_name) => {
-            return { "page_name" : page_name };
-        }
-	},
+  		name: "get_page",
+      responseName: "return_get_page",
+  		type: COMMAND_TYPE.INCOMING,
+  		construct: (page_name) => {
+              return { "page_name" : page_name };
+          }
+    },
     // Player-specific commands
     SET_USERNAME : {
-		name: "set_username",
-        responseName: "return_set_username",
-		type: COMMAND_TYPE.INCOMING,
-		construct: (username) => {
-            return {"username" : username };
-        }
-	},
+  		name: "set_username",
+      responseName: "return_set_username",
+  		type: COMMAND_TYPE.INCOMING,
+  		construct: (username) => {
+              return {"username" : username };
+          }
+	  },
     SET_PLAYER_STATE : {
-		name: "set_player_state",
-        responseName: "return_set_player_state",
-		type: COMMAND_TYPE.INCOMING,
-		construct: (state) => {
-            return {"state" : state };
-        }
-	},
+  		name: "set_player_state",
+      responseName: "return_set_player_state",
+  		type: COMMAND_TYPE.INCOMING,
+  		construct: (state) => {
+              return {"state" : state };
+          }
+	  },
     GOTO_PAGE : {
-		name: "goto_page",
-        responseName: "return_goto_page",
-		type: COMMAND_TYPE.INCOMING,
-		construct: (page_name, initial) => {
-            return {
-              "page_name" : page_name,
-              "initial" : initial
-            };
-        }
-	},
+  		name: "goto_page",
+      responseName: "return_goto_page",
+  		type: COMMAND_TYPE.INCOMING,
+  		construct: (page_name, initial) => {
+              return {
+                "page_name" : page_name,
+                "initial" : initial
+              };
+          }
+	  },
+    GO_BACK_PAGE : {
+  		name: "go_back_page",
+      responseName: "return_goto_page",
+  		type: COMMAND_TYPE.INCOMING,
+  		construct: () => { return {} }
+	  },
     GET_PATH : {
-		name: "get_path",
-        responseName: "return_path",
-		type: COMMAND_TYPE.INCOMING,
-        construct: (player_id) => {
-            return {"player_id" : player_id}
-        }
-	},
+  		name: "get_path",
+      responseName: "return_path",
+  		type: COMMAND_TYPE.INCOMING,
+          construct: (player_id) => {
+              return {"player_id" : player_id}
+          }
+	  },
     /**
      * RESPONSEs to INCOMING Commands. (MOST are stored as references in the GET_ objects)
      */
     // Lobby-specific commands
     ERROR : {
-		name: "error",
+  		name: "error",
+  		type: COMMAND_TYPE.OUTGOING,
+	  },
+
+  /**
+   * OUTGOING Server Commands.
+   */
+  ALL_LOBBIES: {
+ 		name: "all_lobbies",
+ 		type: COMMAND_TYPE.OUTGOING,
+ 	},
+  ALL_PLAYERS: {
+		name: "all_players",
 		type: COMMAND_TYPE.OUTGOING,
 	},
-
-    /**
-     * OUTGOING Server Commands.
-     */
-    ALL_LOBBIES: {
-   		name: "all_lobbies",
-   		type: COMMAND_TYPE.OUTGOING,
-   	},
-    ALL_PLAYERS: {
-  		name: "all_players",
-  		type: COMMAND_TYPE.OUTGOING,
-  	},
-    BEGIN_GAME : {
- 		name: "begin_game",
- 		type: COMMAND_TYPE.OUTGOING,
+  BEGIN_GAME : {
+		name: "begin_game",
+		type: COMMAND_TYPE.OUTGOING,
  	},
     END_GAME : {
 		name: "end_game",
@@ -337,12 +343,6 @@ class ServerConn {
      * Primary WebSocket interpreters
      */
     ws_onopen() {
-
-
-        // TODO: This
-        // TODO: is just
-        // TOOD: temporary
-        // this.startLobby("HARD CODED CRAZY LIT LOBBY", () => console.log("Lobby started"), () => console.log("Lobby failed to start"));
     };
 
     ws_onmessage(jsonMsg) {
@@ -360,10 +360,12 @@ class ServerConn {
                 window.clearTimeout(actions.timeout);
 
                 // if this is NOT a server command, just apply the callback on the payload too keep a nice interface
-                if (actions.command.type !== COMMAND_TYPE.SERVER) {
-                    actions.callback(parsedMsg.payload);
-                } else {
-                    actions.callback(parsedMsg);
+                if (actions.callback !== undefined) {
+                  if (actions.command.type !== COMMAND_TYPE.SERVER) {
+                      actions.callback(parsedMsg.payload);
+                  } else {
+                      actions.callback(parsedMsg);
+                  }
                 }
             } else {
                 // (but give any command type access to the top-level error_message)
@@ -375,7 +377,8 @@ class ServerConn {
                 console.log(parsedMsg);
             }
         } else if (parsedMsg.error_message !== undefined && parsedMsg.error_message !== "") {
-          this.pendingResponses[Command.ERROR.name].callback(parsedMsg);
+          const errCallback = this.pendingResponses[Command.ERROR.name].callback;
+          if (errCallback !== undefined) { errCallback(parsedMsg); }
         } else {
             console.log("\nUnknown command recieved: ");
             console.log(parsedMsg);

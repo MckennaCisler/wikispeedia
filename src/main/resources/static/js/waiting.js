@@ -104,7 +104,7 @@ $(document).ready(() => {
 
 		// Get player states
 		serverConn.registerAllPlayers(drawPlayers);
-		serverConn.getPlayers(drawPlayers, displayServerConnError);
+		serverConn.getPlayers("", drawPlayers, displayServerConnError); // get the players in THIS lobby
 		serverConn.registerBeginGame(startGame); // TODO: Game will be 5s off in time!!!!
 
 		// Get current lobby settings

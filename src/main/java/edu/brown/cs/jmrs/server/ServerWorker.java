@@ -51,9 +51,6 @@ class ServerWorker {
     } else if (!client.isConnected()) {
       clients.put(conn, client);
       client.toggleConnected();
-      if (client.getLobby() != null) {
-        client.getLobby().playerReconnected(client.getId());
-      }
     } else {
       throw new InputError("Don't steal identities");
     }
@@ -179,11 +176,6 @@ class ServerWorker {
       try {
         trueId = setClientId(conn, clientId);
 
-        Client client = clients.get(conn);
-        if (!client.isConnected()) {
-          client.toggleConnected();
-        }
-
         jsonObject.addProperty("client_id", trueId);
         jsonObject.addProperty("error_message", "");
         toClient = gson.toJson(jsonObject);
@@ -199,11 +191,16 @@ class ServerWorker {
       e.printStackTrace();
     }
 
-    // if they are not in a lobby, give them a list of lobbies
-
     Client client = clients.get(conn);
-    if (client != null && client.getLobby() == null) {
-      notInLobbies.put(client.getId(), client);
+    if (client != null) {
+      // if they are not in a lobby, give them a list of lobbies
+      if (client.getLobby() == null) {
+        notInLobbies.put(client.getId(), client);
+      } else {
+        // if they are already in a lobby and thus reconnecting, note that
+        // they're reconnecing
+        client.getLobby().playerReconnected(client.getId());
+      }
     }
     sendLobbies(client);
   }

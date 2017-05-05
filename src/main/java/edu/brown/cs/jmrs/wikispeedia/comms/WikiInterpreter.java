@@ -1,6 +1,7 @@
 package edu.brown.cs.jmrs.wikispeedia.comms;
 
 import java.io.IOException;
+import java.util.NoSuchElementException;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.gson.JsonObject;
@@ -71,6 +72,10 @@ public class WikiInterpreter implements CommandInterpreter {
         gotoPageHandler(lobby, clientId, command);
         break;
 
+      case GO_BACK_PAGE:
+        goBackPageHandler(lobby, clientId);
+        break;
+
       case GET_PATH:
         WikiPlayer player = lobby.getPlayer(clientId);
         Command.RETURN_PATH.send(lobby.getServer(), clientId, player.getPath());
@@ -102,7 +107,7 @@ public class WikiInterpreter implements CommandInterpreter {
               WikiPage.fromAny(identifier, Main.WIKI_PAGE_DOC_CACHE), lobby));
     } catch (IOException e) {
       Command.RETURN_GET_PAGE.send(lobby.getServer(), clientId,
-          ImmutableMap.of(), String.format("Error in accessing page %s: %s",
+          ImmutableMap.of(), String.format("Could not access page %s: %s",
               identifier, e.getMessage()));
     }
   }
@@ -111,7 +116,7 @@ public class WikiInterpreter implements CommandInterpreter {
       JsonObject command) {
     WikiPlayer player = lobby.getPlayer(clientId);
     WikiPage curPlayerPage = player.getCurPage();
-    JsonObject curPageInfo = new JsonObject();
+    JsonObject curPageInfo = getCurPlayerPageInfo(lobby, player);
 
     assert command.get("payload").isJsonObject();
 
@@ -140,28 +145,56 @@ public class WikiInterpreter implements CommandInterpreter {
           // additional mass message
           if (!lobby.checkForWinner()) {
             // if there wasn't a winner, update all player's on eachother's
-            // status
-            // (i.e. when one moves)
+            // status (i.e. when one moves)
             Command.sendAllPlayers(lobby);
           }
 
         } else {
           // if we can't go to the page, revert to the previous current
           Command.RETURN_GOTO_PAGE.send(lobby.getServer(), clientId,
-              getPlayerPageInfo(curPlayerPage, lobby),
-              String.format("Player cannot move from page %s to %s",
+              curPageInfo, String.format("Cannot move from page %s to %s",
                   curPlayerPage.getName(), reqPage));
         }
-        curPageInfo = getPlayerPageInfo(curPlayerPage, lobby);
+
       }
     } catch (IOException e) {
       Command.RETURN_GOTO_PAGE.send(lobby.getServer(), clientId, curPageInfo,
-          String.format("Error in accessing page %s: %s",
-              curPlayerPage.getName(), e.getMessage()));
+          String.format("Could not access page %s: %s", curPlayerPage.getName(),
+              e.getMessage()));
 
     } catch (IllegalStateException es) {
       Command.RETURN_GOTO_PAGE.send(lobby.getServer(), clientId, curPageInfo,
           es.getMessage());
+    }
+  }
+
+  private void goBackPageHandler(WikiLobby lobby, String clientId) {
+    WikiPlayer player = lobby.getPlayer(clientId);
+    JsonObject curPageInfo = getCurPlayerPageInfo(lobby, player);
+
+    try {
+      WikiPage prevPage = player.goBackPage();
+
+      Command.RETURN_GOTO_PAGE.send(lobby.getServer(), clientId,
+          getPlayerPageInfo(prevPage, lobby));
+
+    } catch (NoSuchElementException e) {
+      Command.RETURN_GOTO_PAGE.send(lobby.getServer(), clientId, curPageInfo,
+          e.getMessage());
+
+    } catch (IOException ioe) {
+      Command.RETURN_GOTO_PAGE.send(lobby.getServer(), clientId, curPageInfo,
+          "Cannot go back to previous page: " + ioe.getMessage());
+    }
+  }
+
+  private JsonObject getCurPlayerPageInfo(WikiLobby lobby, WikiPlayer player) {
+    WikiPage curPlayerPage = player.getCurPage();
+    try {
+      return getPlayerPageInfo(curPlayerPage, lobby);
+    } catch (IOException e1) {
+      // we're just gonna have to send null if this happens
+      return null;
     }
   }
 

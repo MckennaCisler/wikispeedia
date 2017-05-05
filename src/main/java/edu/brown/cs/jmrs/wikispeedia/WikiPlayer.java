@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.lang.reflect.Type;
 import java.time.Duration;
 import java.time.Instant;
+import java.util.NoSuchElementException;
 import java.util.Objects;
 import java.util.Set;
 
@@ -267,16 +268,7 @@ public class WikiPlayer {
    *           If the curPage page cannot be accessed.
    */
   public synchronized boolean goToPage(WikiPage page) throws IOException {
-    if (!lobby.started()) {
-      throw new IllegalStateException(
-          String.format("Player %s's lobby has not started", name));
-    } else if (lobby.ended()) {
-      throw new IllegalStateException(
-          String.format("Player %s's lobby has ended", name));
-    } else if (done()) {
-      throw new IllegalStateException(
-          String.format("Player %s has already reached the goal", name));
-    }
+    checkLobbyState();
 
     // we assume that the curPage page has been cached already (speed issue)
     if (lobby.getLinkFinder().linkedPages(getCurPage()).contains(page)) {
@@ -287,6 +279,34 @@ public class WikiPlayer {
       return true;
     }
     return false;
+  }
+
+  /**
+   * @return The previous page the user was at.
+   * @throws IOException
+   *           If there was no previous page.
+   */
+  public synchronized WikiPage goBackPage() throws IOException {
+    checkLobbyState();
+
+    if (path.size() > 0) {
+      path.remove(path.size() - 1);
+      return path.get(path.size() - 1).getPage();
+
+    } else {
+      throw new NoSuchElementException("No pages were previously visited");
+    }
+  }
+
+  private void checkLobbyState() {
+    if (!lobby.started()) {
+      throw new IllegalStateException("Lobby has not started");
+    } else if (lobby.ended()) {
+      throw new IllegalStateException("Lobby has ended");
+    } else if (done()) {
+      throw new IllegalStateException(
+          String.format("Player %s has already reached the goal", name));
+    }
   }
 
   /**

@@ -5,10 +5,15 @@
 - Deal with what happens when a player can't be on a page (/waiting for ex.)
   - Add an error callback
 - Going back (history) ROHAN
+- Wikipedia RATE LIMIT
+- Documentation
+  - Stuff in docs folder
+  - Demo Presentation
 ##### NICETIES
 - Mobile-friendly
+- Fix game generation (disallow duplicates)
 - Shortest path
-  - Deal with ties (using "lists" of winners) for shortest-path mode
+  - Deal with ties (using "lists"  of winners) for shortest-path mode
   - Integrate WikiGame into lobby
   - Add the shortest-path future to WikiGame
   - Make a two-sided Dijkstra?
