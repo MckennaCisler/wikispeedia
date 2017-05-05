@@ -8,7 +8,9 @@ $(document).ready(function () {
 	"use strict";
 	resize();
 	$('[data-toggle="tooltip"]').tooltip();
-
+	setCookie('timePlayed', '');
+	setCookie('songChoice', '');
+	//document.cookie = 'timePlayed=; expires=Thu, 01 Jan 1970 00:00:01 GMT;';
 	$("#advanced_ops").hide();
 	$("#difficulty_slider").slider();
 	$("#advanced").on('click', () => {
@@ -42,6 +44,11 @@ $(document).ready(function () {
 			$("#rules").show();
 			$(`#${lobbyName}`).remove();
 		}, displayServerConnError);
+	});
+	
+	$("#music-select").change(() => {
+		let mval = document.getElementById("music-select").options.selectedIndex;
+		setCookie('songChoice', mval);
 	});
 
 	$("#start_game").on('click', () => {
@@ -91,9 +98,11 @@ $(document).ready(function () {
 			}, 1000);
 
 		} else if (lobbyName !== "") {
+			// TODO: make the audio cookie
 			if (isMaking) {
 				// only have to do this, lobby was created & joined earlier
 				serverConn.setUsername($("#uname").val(), () => {
+					setCookie('timePlayed', audio.currentTime);
 					window.location.href = "waiting";
 				}, displayServerConnError);
 
@@ -101,6 +110,7 @@ $(document).ready(function () {
 				serverConn.joinLobby(lobbyName.trim(),
 				() => {
 					serverConn.setUsername($("#uname").val(), () => {
+						setCookie('timePlayed', audio.currentTime);
 						window.location.href = "waiting";
 					}, displayServerConnError);
 				},
@@ -165,13 +175,17 @@ function drawLobbies(lobbies) {
 	"use strict";
 	$("#open_games").html("");
 	if (lobbies.length === 0) {
-		$("#open_games").append("<p>No games were found, you'll have to make your own!</p>");
-		$("#open_games").addClass("none-found");
+		$(document).ready(() => {
+			$("#open_games").html("No games were found, you'll have to make your own!");
+			$("#open_games").addClass("none-found");
+		});
 	} else {
-		$("#open_games").removeClass("none-found");
-		for (let i = 0; i < lobbies.length; i++) {
-			$("#open_games").append('<li class="alobby list-group-item list-group-item-action" id="' +
-				lobbies[i].id + '">' + lobbies[i].id + '</li>');
-		}
+		$(document).ready(() => {
+			$("#open_games").removeClass("none-found");
+			for (let i = 0; i < lobbies.length; i++) {
+				$("#open_games").append('<li class="alobby list-group-item list-group-item-action" id="' +
+					lobbies[i].id + '">' + lobbies[i].id + '</li>');
+			}
+		});
 	}
 }

@@ -48,6 +48,7 @@ function decrement(pid) {
 	"use strict";
 	if ($("#counter").html() === "0") {
 		clearInterval(pid);
+		setCookie('timePlayed', audio.currentTime);
 		window.location.replace("play");
 	} else {
 		$("#counter").html($("#counter").html() - 1);

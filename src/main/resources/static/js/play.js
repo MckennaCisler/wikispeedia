@@ -55,6 +55,7 @@ function resize() {
 serverConn.whenReadyToRecieve(() => {
     serverConn.registerError(displayServerConnError);
     serverConn.registerEndGame(() => {
+		setCookie('timePlayed', audio.currentTime);
         window.location.href = "end";
     });
 });
