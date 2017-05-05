@@ -1,0 +1,57 @@
+/*! * * * * * * * * * * * * * * * * * * * *\
+  CSShake :: shake
+  v1.5.0
+  CSS classes to move your DOM
+  (c) 2015 @elrumordelaluz
+  http://elrumordelaluz.github.io/csshake/
+  Licensed under MIT
+  Adapted by Jacob Leiken (jleiken)
+\* * * * * * * * * * * * * * * * * * * * */
+.shake {
+  display: inline-block;
+  transform-origin: center center; }
+
+.shake-freeze,
+.shake-constant.shake-constant--hover:hover,
+.shake-trigger:hover .shake-constant.shake-constant--hover {
+  animation-play-state: paused; }
+
+.shake-freeze:hover,
+.shake-trigger:hover .shake-freeze, .shake:hover,
+.shake-trigger:hover .shake {
+  animation-play-state: running; }
+
+@keyframes shake {
+  8% {
+    transform: translate(0, 1px); }
+  10% {
+    transform: translate(0, .5px); }
+  24% {
+    transform: translate(0, -1px); }
+  26% {
+    transform: translate(0, -.5px); }
+  40% {
+    transform: translate(0, 1px); }
+  42% {
+    transform: translate(0, .5px); }
+  56% {
+    transform: translate(0, -1px); }
+  58% {
+    transform: translate(0, -.5px); }
+  72% {
+    transform: translate(0, 1px); }
+  74% {
+    transform: translate(0, .5px); }
+  88% {
+    transform: translate(0, -1px); }
+  90% {
+    transform: translate(0, -.5px);
+  }
+ }
+
+.shake:hover,
+.shake-trigger:hover .shake, .shake.shake-freeze, .shake.shake-constant {
+  animation-name: shake;
+  animation-duration: 5s;
+  animation-timing-function: ease-in-out;
+  animation-iteration-count: infinite; }
