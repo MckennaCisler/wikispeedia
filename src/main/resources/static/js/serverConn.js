@@ -190,11 +190,13 @@ class ServerConn {
         this.CLIENT_ID_COOKIE_EXPIRATION = 60;
 
         this.clientId = "";
-        this.readyNow = false;
+        this.readyToRecieve = false;
+        this.readyToSend = false;
         this.ws = new WebSocket("ws://" + source);
         this.ws.onopen = this.ws_onopen.bind(this);
         this.ws.onmessage = this.ws_onmessage.bind(this);
         this.ws.onclose = this.ws_onclose.bind(this);
+        this.allReadyCallbacksRegisteredTimeout;
 
         /**
          * Map from Command name to an object of
@@ -206,37 +208,28 @@ class ServerConn {
         this.pendingResponses["notify_id"] =  {
             "command": { type: COMMAND_TYPE.SERVER }, // all we need
             "callback": (message) => {
-
                 this._setId(message.client_id);
+                this.readyToSend = true;
 
-                // call ready callbacks added before we got here
-                for (let i = 0; i < this.preReadyCallbacks.length; i++) {
-                    this.preReadyCallbacks[i]();
-                }
-
-                // note we're ready so any further ready callbacks added (and messages recieved) are called immediately.
-                this.readyNow = true;
-
-                console.log(this.preReadyMsgs);
-
-                for (let i = 0; i < this.preReadyMsgs.length; i++) {
-                    this.ws_onmessage(this.preReadyMsgs[i]);
+                // call the ready callbacks added before we got here
+                for (let i = 0; i < this.readyToSendCallbacks.length; i++) {
+                    this.readyToSendCallbacks[i]();
                 }
             },
             "errCallback" : () => {}, // no reason
             "timeout" : null          // no reason
         }
 
+        /**
+         * callbacks called once websocket is ready for sending messages (after obtaining client id)
+         */
+        this.readyToSendCallbacks = [];
+        this.readyToRecieveCallbacks = [];
 
         /**
-         * callbacks called once websocket is ready
+         * Messages queued in case a callback is added expecting to get them.
          */
-        this.preReadyCallbacks = [];
-
-        /**
-         * Messages queued that were sent before the serverConn was ready.
-         */
-        this.preReadyMsgs = [];
+        this.recievedMessages = [];
     }
 
     _setId(id) {
@@ -345,64 +338,115 @@ class ServerConn {
         }
     }
 
-
-    ready(callback) {
-        if (!this.readyNow) {
-          // if we're not ready for registering things, defer until we are
-          this.preReadyCallbacks.push(callback);
+    /**
+     * Register callbacks here that send messages immediately (or on some later handler)
+     */
+    whenReadyToSend(callback) {
+        if (!this.readyToSend) {
+          // since we're not ready for sending things, defer until we are
+          this.readyToSendCallbacks.push(callback);
         } else {
-          // otherwise, just call it now
+          // just call it if we are ready
           callback();
         }
     }
 
     /**
+     * Register callbacks here register as listeners to send messages
+     */
+    whenReadyToRecieve(callback) {
+        if (!this.readyToRecieve) {
+          // since we're not ready for recieving things, defer until we are
+          this.readyToRecieveCallbacks.push(callback);
+        } else {
+          // just call it if we are ready
+          callback();
+
+          // ALSO, reprocess messages recieved before we got notify_id
+          // in case the readyToRecieve callback was expecting them
+          for (let i = 0; i < this.recievedMessages.length; i++) {
+              this.ws_onmessage(this.recievedMessages[i]);
+          }
+        }
+    }
+
+    // // we don't want this to happen; things have already been set up
+    // console.log("ERROR: ready callback registered after serverConn was setup");
+
+    // fullyReady() {
+    //   if (this.client_id !== null) {
+    //     // call the ready callbacks added before we got here
+    //     for (let i = 0; i < this.preReadyCallbacks.length; i++) {
+    //         this.preReadyCallbacks[i]();
+    //     }
+    //
+    //
+    //
+    //     // note we're ready so any further ready callbacks added (and messages recieved) are called immediately.
+    //     this.readyNow = true;
+    //   } else {
+    //     // if we still haven't recieved id, defer until we have
+    //     this.allReadyCallbacksRegisteredTimeout = window.setTimeout(this.fullyReady.bind(this), this.AFTER_READY_REGISTER_FULLY_READY_TIMEOUT);
+    //   }
+    // }
+
+    // // whenever we get a ready callback, reset the timeout that will trigger a full ready state
+    // // i.e. will call all ready callbacks and then "re-recieve" all messages received before this
+    // window.clearTimeout(this.allReadyCallbacksRegisteredTimeout);
+    // this.allReadyCallbacksRegisteredTimeout = window.setTimeout(this.fullyReady.bind(this), this.AFTER_READY_REGISTER_FULLY_READY_TIMEOUT);
+
+    /**
      * Primary WebSocket interpreters
      */
     ws_onopen() {
+      for (let i = 0; i < this.readyToRecieveCallbacks.length; i++) {
+          this.readyToRecieveCallbacks[i]();
+      }
+      this.readyToRecieve = true;
     };
 
     ws_onmessage(jsonMsg) {
-        const parsedMsg = JSON.parse(jsonMsg.data);
-        if (!this.readyNow && parsedMsg.command !== "notify_id") {
-          this.preReadyMsgs.push(jsonMsg);
-        } else {
 
-          console.log("RECIEVING: ");
-          console.log(parsedMsg);
+      // add recievedMessages to a list to be called in case some new callback wanting readiness for recieving
+      // was added after we got some messages
+      this.recievedMessages.push(jsonMsg);
 
-          if (this.pendingResponses.hasOwnProperty(parsedMsg.command)) {
-              if (parsedMsg.error_message === "") {
-                  // note that pendingResponses is a map from command RETURN MESSGAE NAME to the callbacks
-                  // that should be called on the return message, so we can reference these all in one line
-                  // without a switch statement
-                  const actions = this.pendingResponses[parsedMsg.command];
-                  window.clearTimeout(actions.timeout);
+      const parsedMsg = JSON.parse(jsonMsg.data);
 
-                  // if this is NOT a server command, just apply the callback on the payload too keep a nice interface
-                  if (actions.callback !== undefined) {
-                    if (actions.command.type !== COMMAND_TYPE.SERVER) {
-                        actions.callback(parsedMsg.payload);
-                    } else {
-                        actions.callback(parsedMsg);
-                    }
-                  }
-              } else {
-                  // (but give any command type access to the top-level error_message)
-                  const actions = this.pendingResponses[parsedMsg.command];
-                  window.clearTimeout(actions.timeout);
-                  if (actions.errCallback !== undefined) { actions.errCallback(parsedMsg); }
+      console.log("RECIEVING: ");
+      console.log(parsedMsg);
 
-                  console.log("\nGot error: ");
-                  console.log(parsedMsg);
+      if (this.pendingResponses.hasOwnProperty(parsedMsg.command)) {
+          if (parsedMsg.error_message === "") {
+              // note that pendingResponses is a map from command RETURN MESSGAE NAME to the callbacks
+              // that should be called on the return message, so we can reference these all in one line
+              // without a switch statement
+              const actions = this.pendingResponses[parsedMsg.command];
+              window.clearTimeout(actions.timeout);
+
+              // if this is NOT a server command, just apply the callback on the payload too keep a nice interface
+              if (actions.callback !== undefined) {
+                if (actions.command.type !== COMMAND_TYPE.SERVER) {
+                    actions.callback(parsedMsg.payload);
+                } else {
+                    actions.callback(parsedMsg);
+                }
               }
-          } else if (parsedMsg.error_message !== undefined && parsedMsg.error_message !== "") {
-            const errCallback = this.pendingResponses[Command.ERROR.name].callback;
-            if (errCallback !== undefined) { errCallback(parsedMsg); }
           } else {
-              console.log("\n(The above was an unknown (or unregistered) command: '" + parsedMsg.command + "')");
+              // (but give any command type access to the top-level error_message)
+              const actions = this.pendingResponses[parsedMsg.command];
+              window.clearTimeout(actions.timeout);
+              if (actions.errCallback !== undefined) { actions.errCallback(parsedMsg); }
+
+              console.log("\nGot error: ");
+              console.log(parsedMsg);
           }
-        }
+      } else if (parsedMsg.error_message !== undefined && parsedMsg.error_message !== "") {
+        const errCallback = this.pendingResponses[Command.ERROR.name].callback;
+        if (errCallback !== undefined) { errCallback(parsedMsg); }
+      } else {
+          console.log("\n(The above was an unknown (or unregistered) command: '" + parsedMsg.command + "')");
+      }
     }
 
     ws_onclose() {

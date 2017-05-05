@@ -150,23 +150,17 @@ function resize() {
 }*/
 
 // game logic handlers
-serverConn.ready(() => {
+serverConn.whenReadyToRecieve(() => {
 	"use strict";
 
 	serverConn.registerAllLobbies(drawLobbies);
 	serverConn.registerError(displayServerConnError);
+});
+
+serverConn.whenReadyToSend(() => {
+	"use strict";
 
 	serverConn.leaveLobby();
-
-	// setup lobbies
-	/*serverConn.getLobbies((lobbies) => {
-		console.log(lobbies)
-		drawLobbies(lobbies);
-		serverConn.registerAllLobbies(drawLobbies);
-	}, (error) => {
-		displayServerConnError(error);
-		serverConn.registerAllLobbies(drawLobbies);
-	});*/
 });
 
 function drawLobbies(lobbies) {

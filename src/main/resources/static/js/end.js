@@ -8,7 +8,7 @@ let setWinner = false;
 $(document).ready(() => {
 });
 
-serverConn.ready(() => {
+serverConn.whenReadyToRecieve(() => {
 	serverConn.registerError(displayServerConnError);
 
 	// TODO: get everything interfacing with the server
@@ -18,6 +18,41 @@ serverConn.ready(() => {
 
 	$winner.html("Loading...");
 	playersCallback(fakePlayers);
+});
+
+serverConn.whenReadyToSend(() => {
+	serverConn.getPlayers("", playersCallback, displayServerConnError);
+	serverConn.getSettings("", (lobby) => {
+		// @rjha
+		// @rjha
+		// @rjha
+		// @rjha
+		// @rjha
+		// @rjha
+		// @rjha
+		// @rjha
+		// @rjha
+		// @rjha
+		// @rjha
+		// @rjha
+		// @rjha
+		// Here you'll get stuff like this (where src is a lobby with those properties):
+		// (I don't know if you want anything)
+		// lobby.addProperty("id", src.id);
+    //   lobby.add("startPage", Main.GSON.toJsonTree(src.getStartPage()));
+    //   lobby.add("goalPage", Main.GSON.toJsonTree(src.getGoalPage()));
+    //   lobby.addProperty("started", src.started());
+    //   lobby.addProperty("ended", src.ended());
+    //   if (src.started()) {
+    //     lobby.addProperty("startTime", src.getStartTime().toEpochMilli());
+    //     lobby.addProperty("playTime", src.getPlayTime().toMillis());
+    //   }
+    //   if (src.ended()) {
+    //     lobby.addProperty("endTime", src.getEndTime().toEpochMilli());
+    //     TECHINCALLY THIS IS HERE BUT EACH PLAYER HAS AN isWinner ATTRIBUTE: lobby.add("winners", Main.GSON.toJsonTree(src.getWinners()));
+    //     // TODO: Shortest / known path
+    //   }
+	}, displayServerConnError);
 });
 
 // Updates the player to time map and redraws the results

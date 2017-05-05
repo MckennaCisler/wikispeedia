@@ -103,15 +103,17 @@ $(document).ready(() => {
 	});
 
 	// game logic handlers
-	serverConn.ready(() => {
+	serverConn.whenReadyToRecieve(() => {
 		"use strict";
 
 		serverConn.registerError(displayServerConnError);
-
-		// Get player states
 		serverConn.registerAllPlayers(drawPlayers);
+		serverConn.registerBeginGame(startGame);
+	});
+
+	serverConn.whenReadyToSend(() => {
+		// Get player states
 		serverConn.getPlayers("", drawPlayers, displayServerConnError); // get the players in THIS lobby
-		serverConn.registerBeginGame(startGame); // TODO: Game will be 5s off in time!!!!
 
 		// Get current lobby settings
 		serverConn.getSettings("", GAME_STATE.WAITING, (settings) => {
@@ -121,7 +123,6 @@ $(document).ready(() => {
 				serverConn.getPage(settings.goalPage.name, drawSecondPage, displayServerConnError);
 			}, displayServerConnError);
 		}, displayServerConnError);
-
 	});
 
 	function drawFirstPage(article) {
