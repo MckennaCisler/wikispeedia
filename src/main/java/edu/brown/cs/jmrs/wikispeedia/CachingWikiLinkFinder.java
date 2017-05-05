@@ -59,7 +59,8 @@ public class CachingWikiLinkFinder extends WikiPageLinkFinder {
     lookup =
         conn.makeQuery("SELECT * FROM links WHERE start=?", LINK_READER, true);
     cacher =
-        conn.makeInsert("INSERT INTO links (start, end) VALUES (?, ?)",
+        conn.makeInsert(
+            "INSERT OR IGNORE INTO links (start, end) VALUES (?, ?)",
             LINK_WRITER);
   }
 

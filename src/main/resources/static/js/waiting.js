@@ -105,13 +105,14 @@ $(document).ready(() => {
 	// game logic handlers
 	serverConn.whenReadyToRecieve(() => {
 		"use strict";
-
 		serverConn.registerError(displayServerConnError);
-		serverConn.registerAllPlayers(drawPlayers);
 		serverConn.registerBeginGame(startGame);
 	});
 
 	serverConn.whenReadyToSend(() => {
+		// wait until we have client id to register this one
+		serverConn.registerAllPlayers(drawPlayers);
+
 		// Get player states
 		serverConn.getPlayers("", drawPlayers, displayServerConnError); // get the players in THIS lobby
 

@@ -134,7 +134,7 @@ public final class Main {
 
         // Setup websocket lobby server (which will use Spark)
         Server server = new Server((serv, str) -> {
-          return new WikiLobby(serv, str);
+          return new WikiLobby(serv, str, wikiDbConn);
         }, new WikiInterpreter(), GSON);
         Spark.webSocket("/websocket", server);
         System.out.println("[ Started Websocket ]");
@@ -232,8 +232,6 @@ public final class Main {
     if (DEBUG) {
       System.out.println(String.format("[ DEBUG : %s ]\n\r\t%s\n\r",
           new SimpleDateFormat("dd-MM HH:mm:ss").format(new Date()), info));
-    } else {
-      // TODO: Pipe to logfile
     }
   }
 
@@ -245,5 +243,13 @@ public final class Main {
    */
   public static void debugLog(Object obj) {
     debugLog(obj.toString());
+  }
+
+  /**
+   * @return The current dbConn, ensured not to be null.
+   */
+  public static synchronized DbConn getWikiDbConn() {
+    assert wikiDbConn != null;
+    return wikiDbConn;
   }
 }

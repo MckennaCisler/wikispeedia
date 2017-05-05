@@ -152,14 +152,12 @@ function resize() {
 // game logic handlers
 serverConn.whenReadyToRecieve(() => {
 	"use strict";
-
 	serverConn.registerAllLobbies(drawLobbies);
 	serverConn.registerError(displayServerConnError);
 });
 
 serverConn.whenReadyToSend(() => {
 	"use strict";
-
 	serverConn.leaveLobby();
 });
 
