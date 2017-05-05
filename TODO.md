@@ -3,7 +3,7 @@
 - <b>Fix bugs</b>
 - Visualizations for history and endgame ROHAN
 - Deal with what happens when a player can't be on a page (/waiting for ex.)
-  - Add an error callback
+  - Add a "close error" callback
 - Going back (history) ROHAN
 - Wikipedia RATE LIMIT
 - Documentation
@@ -11,10 +11,9 @@
   - Demo Presentation
 ##### NICETIES
 - Mobile-friendly
-- Fix game generation (disallow duplicates)
+- Fix game generation
+  - DON'T bridge between them?
 - Shortest path
-  - Deal with ties (using "lists"  of winners) for shortest-path mode
-  - Integrate WikiGame into lobby
   - Add the shortest-path future to WikiGame
   - Make a two-sided Dijkstra?
 - Deployment

@@ -152,14 +152,18 @@ public class WikiLobby implements Lobby {
 
   @Override
   public void playerReconnected(String clientId) {
-    players.get(clientId).setConnected(true);
-    Command.sendAllPlayers(this);
+    if (players.containsKey(clientId)) {
+      players.get(clientId).setConnected(true);
+      Command.sendAllPlayers(this);
+    }
   }
 
   @Override
   public void playerDisconnected(String clientId) {
-    players.get(clientId).setConnected(false);
-    Command.sendAllPlayers(this);
+    if (players.containsKey(clientId)) {
+      players.get(clientId).setConnected(false);
+      Command.sendAllPlayers(this);
+    }
   }
 
   @Override

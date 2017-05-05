@@ -96,6 +96,12 @@ $(document).ready(() => {
 		startGame();
 	});
 
+	$("#leave").on('click', () => {
+		serverConn.leaveLobby(() => {
+			window.location.href = "/";
+		}, displayServerConnError)
+	});
+
 	// game logic handlers
 	serverConn.ready(() => {
 		"use strict";

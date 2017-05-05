@@ -268,6 +268,11 @@ class ServerConn {
         this._send(Command.GOTO_PAGE, callback, errCallback, ["", true]);
     }
 
+    goBackPage(callback, errCallback) {
+        this._send(Command.GO_BACK_PAGE, callback, errCallback);
+    }
+
+
     getPage(page_name, callback, errCallback) {
         this._send(Command.GET_PAGE, callback, errCallback, [page_name]);
     }

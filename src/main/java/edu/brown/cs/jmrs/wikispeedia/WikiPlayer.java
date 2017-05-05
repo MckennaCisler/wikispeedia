@@ -289,7 +289,7 @@ public class WikiPlayer {
   public synchronized WikiPage goBackPage() throws IOException {
     checkLobbyState();
 
-    if (path.size() > 0) {
+    if (path.size() > 1) {
       path.remove(path.size() - 1);
       return path.get(path.size() - 1).getPage();
 

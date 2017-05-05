@@ -3,12 +3,13 @@ package edu.brown.cs.jmrs.web;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.UnsupportedEncodingException;
 import java.net.URL;
+import java.net.URLDecoder;
 import java.util.concurrent.ExecutionException;
 
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
-import org.jsoup.parser.Parser;
 
 import com.google.common.base.Charsets;
 import com.google.common.base.Objects;
@@ -271,10 +272,14 @@ public class Page implements Node<Page, Link> {
    * @return The cleaned URL.
    */
   protected static String cleanUrl(String u) {
-    return Parser.unescapeEntities(u, true) // unescape escaped entries
-        .replaceAll("\\#.*$", "") // remove anchor tags
-        .replaceAll("\\?.*$", "") // remove query strings (after tags)
-        .replaceAll("\"", ""); // remove quotes (NOT apostrophes)
+    try {
+      return URLDecoder.decode(u, "UTF-8") // unescape escaped entries
+          .replaceAll("\\#.*$", "") // remove anchor tags
+          .replaceAll("\\?.*$", "") // remove query strings (after tags)
+          .replaceAll("\"", ""); // remove quotes (NOT apostrophes)
+    } catch (UnsupportedEncodingException e) {
+      throw new AssertionError("UTF-8 not available", e);
+    }
   }
 
   @Override

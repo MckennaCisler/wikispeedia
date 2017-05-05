@@ -198,7 +198,7 @@ class ServerWorker {
         notInLobbies.put(client.getId(), client);
       } else {
         // if they are already in a lobby and thus reconnecting, note that
-        // they're reconnecing
+        // they're reconnecting
         client.getLobby().playerReconnected(client.getId());
       }
     }
