@@ -218,14 +218,16 @@ public class WikiPlayer {
    *          The time the player should be considered to have finished if they
    *          did finish.
    * @return Whether the player was done after checking.
+   * @throws IOException
+   *           If the pages could not be fully accessed for checking.
    */
-  synchronized boolean checkIfDone(Instant endTimeIfSo) {
+  synchronized boolean checkIfDone(Instant endTimeIfSo) throws IOException {
     if (done()) {
       throw new IllegalStateException(
           String.format("Player %s has already reached the goal", name));
     }
 
-    if (getCurPage().equals(goalPage)) {
+    if (getCurPage().equalAfterRedirect(goalPage)) {
       this.endTime = endTimeIfSo;
       return true;
     }

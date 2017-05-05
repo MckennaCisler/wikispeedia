@@ -79,7 +79,7 @@ public class TimeTrialGameMode implements WikiGameMode {
     }
     // get winner's end time
     for (WikiPlayer player : wikiLobby.getPlayers()) {
-      if (wikiLobby.getWinners().equals(player)) {
+      if (wikiLobby.getWinners().contains(player)) {
         return player.getEndTime();
       }
     }

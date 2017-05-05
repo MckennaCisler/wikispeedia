@@ -302,4 +302,24 @@ public class Page implements Node<Page, Link> {
     Page other = (Page) obj;
     return url.equals(other.url);
   }
+
+  /**
+   * An equals method that compares the final (potentially redirected) urls of
+   * the pages.
+   *
+   * @param page
+   *          The page to compare to this one.
+   * @return Whether this page equals page.
+   * @throws IOException
+   *           If either page could not be accessed.
+   */
+  public boolean equalAfterRedirect(Page page) throws IOException {
+    if (this == page) {
+      return true;
+    }
+    if (page == null) {
+      return false;
+    }
+    return finalUrl().equals(page.finalUrl());
+  }
 }
