@@ -57,13 +57,16 @@ serverConn.whenReadyToRecieve(() => {
     serverConn.registerEndGame(() => {
         window.location.href = "end";
     });
-    serverConn.registerAllPlayers(drawHistoryCallback);
 });
 
 serverConn.whenReadyToSend(() => {
     hasDrawnPlayerList = false;
     // $destination.html("<b>" + titleFromHref(end) + "</b>");
     currHistory = serverConn.clientId; // the player whose history is currently displayed
+
+		// wait until we have client id to register this one
+		serverConn.registerAllPlayers(drawHistoryCallback);
+
     serverConn.getPlayers(drawHistoryCallback);
     serverConn.goToInitialPage(drawPage, errorPage);
 });
@@ -140,7 +143,6 @@ function historyChange(newHistory, newHistoryName) {
 }
 
 function drawHistoryCallback(players) {
-	console.log(serverConn.clientId)
   for (let i = 0; i < players.length; i++) {
     player = players[i];
     playerPaths.set(player.id, player.path);

@@ -351,13 +351,14 @@ class ServerConn {
           // since we're not ready for sending things, defer until we are
           this.readyToSendCallbacks.push(callback);
         } else {
-          // just call it if we are ready
-          callback();
+          // just call it if we are ready (and send any messages that may have been sent
+          // before this was ready, in case someone simply needed the client id)
+          this.whenReadyToRecieve(callback);
         }
     }
 
     /**
-     * Register callbacks here register as listeners to send messages.
+     * Register callbacks here if you don't need to wait for the client id.
      * They will be called immediately, but will also be sent previous messages in case some came before.
      */
     whenReadyToRecieve(callback) {
