@@ -68,14 +68,13 @@ public class Query<T> extends DbStatement<T> {
    *          prepared statement.
    * @return The list of returned objects from the query.
    */
-  public List<T> query(Object... inputs) {
+  public synchronized List<T> query(Object... inputs) {
     ObjArray hashableInputs = new ObjArray(inputs);
     if (save) {
       return fullyQueryResponse.get(hashableInputs);
     } else {
       return queryDb(hashableInputs);
     }
-
   }
 
   private List<T> queryDb(ObjArray inputs) {
@@ -106,7 +105,7 @@ public class Query<T> extends DbStatement<T> {
         try {
           rs.close();
         } catch (SQLException e) {
-          System.out.println("ERROR: closing result set");
+          System.out.println("ERROR: closing result set failed");
         }
       }
     }

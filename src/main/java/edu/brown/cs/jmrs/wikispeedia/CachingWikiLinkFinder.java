@@ -5,6 +5,8 @@ import java.sql.SQLException;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
 
 import edu.brown.cs.jmrs.collect.Functional;
 import edu.brown.cs.jmrs.io.db.DbConn;
@@ -26,12 +28,12 @@ import edu.brown.cs.jmrs.web.wikipedia.WikiPageLinkFinder;
  *
  */
 public class CachingWikiLinkFinder extends WikiPageLinkFinder {
-  // TODO: How to prehash?
+  private static final int NUM_DB_CACHING_THREADS = 2;
   private static final DbReader<Link> LINK_READER = new DbReader<>((rs) -> {
-    // rs stores two urls (TODO??); use Main cache for insides
+    // rs stores two urls; use Main cache for insides
     return new Link(new WikiPage(rs.getString(1), Main.WIKI_PAGE_DOC_CACHE),
         new WikiPage(rs.getString(2), Main.WIKI_PAGE_DOC_CACHE));
-  });
+  }); // don't do prehash because there are so many possible pages
 
   private static final DbWriter<Link> LINK_WRITER =
       new DbWriter<>((ps, link) -> {
@@ -41,6 +43,8 @@ public class CachingWikiLinkFinder extends WikiPageLinkFinder {
           + "index_time DATETIME DEFAULT CURRENT_TIMESTAMP,"
           + "PRIMARY KEY (start, end));"); // + "start-links INT," + "end-links
                                            // INT"
+
+  private final Executor cachingWorkers;
 
   private final Query<Link> lookup;
   private final Insert<Link> cacher;
@@ -62,6 +66,7 @@ public class CachingWikiLinkFinder extends WikiPageLinkFinder {
         conn.makeInsert(
             "INSERT OR IGNORE INTO links (start, end) VALUES (?, ?)",
             LINK_WRITER);
+    cachingWorkers = Executors.newFixedThreadPool(NUM_DB_CACHING_THREADS);
   }
 
   @Override
@@ -72,9 +77,9 @@ public class CachingWikiLinkFinder extends WikiPageLinkFinder {
       // grab links using WikiPage link finder in normal way
       Set<String> urls = super.links(page);
 
-      // and cache them as Links
-      cacher.insertAll(
-          Functional.map(urls, (url) -> new Link(page, new WikiPage(url))));
+      // and cache them as Links (deferring to other thread)
+      cachingWorkers.execute(new CacherWorker(
+          Functional.map(urls, (url) -> new Link(page, new WikiPage(url)))));
 
       return urls;
     }
@@ -91,7 +96,8 @@ public class CachingWikiLinkFinder extends WikiPageLinkFinder {
       Set<WikiPage> pages = super.linkedPages(page);
 
       // and cache them as Links
-      cacher.insertAll(Functional.map(pages, (dest) -> new Link(page, dest)));
+      cachingWorkers.execute(new CacherWorker(
+          Functional.map(pages, (dest) -> new Link(page, dest))));
 
       return pages;
     }
@@ -104,7 +110,12 @@ public class CachingWikiLinkFinder extends WikiPageLinkFinder {
     List<Link> links = lookup.query(node.url());
     if (links.isEmpty()) {
       // grab edges using wikipage link finder in normal way
-      return super.edges(node);
+      Set<Link> edges = super.edges(node);
+
+      // and cache them
+      cachingWorkers.execute(new CacherWorker(edges));
+
+      return edges;
     }
     return new HashSet<>(links);
   }
@@ -113,5 +124,25 @@ public class CachingWikiLinkFinder extends WikiPageLinkFinder {
   public Number edgeValue(Link edge) {
     // TODO? (This is actually REALLY HARD)
     return 1;
+  }
+
+  /**
+   * A simple runnable to enable deferring of database storage. Allows for quick
+   * responses to queries while also doing the heavy work of DB storage.
+   *
+   * @author mcisler
+   *
+   */
+  private class CacherWorker implements Runnable {
+    private final Set<Link> linksToCache;
+
+    CacherWorker(Set<Link> linksToCache) {
+      this.linksToCache = linksToCache;
+    }
+
+    @Override
+    public void run() {
+      cacher.insertAll(linksToCache);
+    }
   }
 }
