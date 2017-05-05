@@ -353,6 +353,7 @@ class ServerConn {
         } else {
           // just call it if we are ready (and send any messages that may have been sent
           // before this was ready, in case someone simply needed the client id)
+          // callback();
           this.whenReadyToRecieve(callback);
         }
     }
