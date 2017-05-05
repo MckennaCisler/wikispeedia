@@ -11,13 +11,12 @@
   - Demo Presentation
 ##### NICETIES
 - Mobile-friendly
-- Fix game generation
-  - DON'T bridge between them?
 - Shortest path
   - Add the shortest-path future to WikiGame
   - Make a two-sided Dijkstra?
 - Deployment
 ##### STUFF THAT WOULD GIVE US THAT WARM FUZZY FEELING
+- Improve game generation
 - Hide user's IDs from obvious places (i.e. ALL_PLAYERS) using isCurrentPlayer, etc.
 - Chat everywhere
 - Make an intermittent (or parallel... maybe do it while shortest-path finding?) DB-compare method that randomly double-checks a link list and changes it if needed

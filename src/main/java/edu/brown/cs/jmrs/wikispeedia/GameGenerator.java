@@ -58,7 +58,7 @@ public final class GameGenerator {
    * "equivalent". Increasing it may make generation slower and more
    * memory-intensive.
    */
-  private static final double OBSCURITY_EQUAL_RANGE = 0.05;
+  private static final double OBSCURITY_EQUAL_RANGE = 0.1;
 
   /**
    * The expected largest number of Wikipedia links on a page (under the
@@ -91,7 +91,8 @@ public final class GameGenerator {
 
     do {
       start = pageWithObscurity(obscurity);
-      goal = goDownFromRetrying(start, obscurityFilter(obscurity));
+      goal = pageWithObscurity(obscurity);
+      // goDownFromRetrying(start, obscurityFilter(obscurity));
     } while (start.equals(goal));
     return new WikiGame(start, goal);
   }

@@ -19,6 +19,7 @@ import com.google.gson.JsonObject;
 
 import edu.brown.cs.jmrs.collect.ConcurrentBiMap;
 import edu.brown.cs.jmrs.server.customizable.Lobby;
+import edu.brown.cs.jmrs.ui.Main;
 
 class ServerWorker {
 
@@ -216,6 +217,7 @@ class ServerWorker {
       try {
         clients.getReversed(client).getRemote()
             .sendString(gson.toJson(allLobbies()));
+        Main.debugLog("Open lobbies: " + getOpenLobbies());
       } catch (IOException e) {
         e.printStackTrace();
       }

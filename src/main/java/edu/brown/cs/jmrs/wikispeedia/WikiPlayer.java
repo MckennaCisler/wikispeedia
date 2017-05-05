@@ -330,7 +330,6 @@ public class WikiPlayer {
       root.add("startPage", Main.GSON.toJsonTree(src.startPage));
       root.add("goalPage", Main.GSON.toJsonTree(src.goalPage));
       root.add("path", Main.GSON.toJsonTree(src.path));
-      Main.debugLog(Main.GSON.toJsonTree(src.path));
       if (src.getLobby().started()) {
         root.addProperty("startTime", src.getStartTime().toEpochMilli());
         root.addProperty("playTime", src.getPlayTime().toMillis());

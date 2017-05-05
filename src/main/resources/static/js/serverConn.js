@@ -206,6 +206,7 @@ class ServerConn {
         this.pendingResponses["notify_id"] =  {
             "command": { type: COMMAND_TYPE.SERVER }, // all we need
             "callback": (message) => {
+
                 this._setId(message.client_id);
 
                 // call ready callbacks added before we got here
@@ -213,8 +214,14 @@ class ServerConn {
                     this.preReadyCallbacks[i]();
                 }
 
-                // note we're ready so any further ready callbacks added are called immediately.
+                // note we're ready so any further ready callbacks added (and messages recieved) are called immediately.
                 this.readyNow = true;
+
+                console.log(this.preReadyMsgs);
+
+                for (let i = 0; i < this.preReadyMsgs.length; i++) {
+                    this.ws_onmessage(this.preReadyMsgs[i]);
+                }
             },
             "errCallback" : () => {}, // no reason
             "timeout" : null          // no reason
@@ -225,6 +232,11 @@ class ServerConn {
          * callbacks called once websocket is ready
          */
         this.preReadyCallbacks = [];
+
+        /**
+         * Messages queued that were sent before the serverConn was ready.
+         */
+        this.preReadyMsgs = [];
     }
 
     _setId(id) {
@@ -352,43 +364,45 @@ class ServerConn {
 
     ws_onmessage(jsonMsg) {
         const parsedMsg = JSON.parse(jsonMsg.data);
-
-        console.log("RECIEVING: ");
-        console.log(parsedMsg);
-
-        if (this.pendingResponses.hasOwnProperty(parsedMsg.command)) {
-            if (parsedMsg.error_message === "") {
-                // note that pendingResponses is a map from command RETURN MESSGAE NAME to the callbacks
-                // that should be called on the return message, so we can reference these all in one line
-                // without a switch statement
-                const actions = this.pendingResponses[parsedMsg.command];
-                window.clearTimeout(actions.timeout);
-
-                // if this is NOT a server command, just apply the callback on the payload too keep a nice interface
-                if (actions.callback !== undefined) {
-                  if (actions.command.type !== COMMAND_TYPE.SERVER) {
-                      actions.callback(parsedMsg.payload);
-                  } else {
-                      actions.callback(parsedMsg);
-                  }
-                }
-            } else {
-                // (but give any command type access to the top-level error_message)
-                const actions = this.pendingResponses[parsedMsg.command];
-                window.clearTimeout(actions.timeout);
-                if (actions.errCallback !== undefined) { actions.errCallback(parsedMsg); }
-
-                console.log("\nGot error: ");
-                console.log(parsedMsg);
-            }
-        } else if (parsedMsg.error_message !== undefined && parsedMsg.error_message !== "") {
-          const errCallback = this.pendingResponses[Command.ERROR.name].callback;
-          if (errCallback !== undefined) { errCallback(parsedMsg); }
+        if (!this.readyNow && parsedMsg.command !== "notify_id") {
+          this.preReadyMsgs.push(jsonMsg);
         } else {
-            console.log("\nUnknown command recieved: ");
-            console.log(parsedMsg);
+
+          console.log("RECIEVING: ");
+          console.log(parsedMsg);
+
+          if (this.pendingResponses.hasOwnProperty(parsedMsg.command)) {
+              if (parsedMsg.error_message === "") {
+                  // note that pendingResponses is a map from command RETURN MESSGAE NAME to the callbacks
+                  // that should be called on the return message, so we can reference these all in one line
+                  // without a switch statement
+                  const actions = this.pendingResponses[parsedMsg.command];
+                  window.clearTimeout(actions.timeout);
+
+                  // if this is NOT a server command, just apply the callback on the payload too keep a nice interface
+                  if (actions.callback !== undefined) {
+                    if (actions.command.type !== COMMAND_TYPE.SERVER) {
+                        actions.callback(parsedMsg.payload);
+                    } else {
+                        actions.callback(parsedMsg);
+                    }
+                  }
+              } else {
+                  // (but give any command type access to the top-level error_message)
+                  const actions = this.pendingResponses[parsedMsg.command];
+                  window.clearTimeout(actions.timeout);
+                  if (actions.errCallback !== undefined) { actions.errCallback(parsedMsg); }
+
+                  console.log("\nGot error: ");
+                  console.log(parsedMsg);
+              }
+          } else if (parsedMsg.error_message !== undefined && parsedMsg.error_message !== "") {
+            const errCallback = this.pendingResponses[Command.ERROR.name].callback;
+            if (errCallback !== undefined) { errCallback(parsedMsg); }
+          } else {
+              console.log("\n(The above was an unknown (or unregistered) command: '" + parsedMsg.command + "')");
+          }
         }
-        // }
     }
 
     ws_onclose() {

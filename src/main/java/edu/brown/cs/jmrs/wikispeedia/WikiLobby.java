@@ -219,6 +219,10 @@ public class WikiLobby implements Lobby {
         entry.getValue().setEndTime(getEndTime());
       }
     }
+
+    Main.debugLog(String.format(
+        "Lobby %s finished; \n\twinners: %s \n\tplayTime: %s\n\tendTime: %s",
+        id, getWinners(), getPlayTime(), getEndTime()));
   }
 
   /**

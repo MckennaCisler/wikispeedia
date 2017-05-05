@@ -153,8 +153,8 @@ function resize() {
 serverConn.ready(() => {
 	"use strict";
 
-	serverConn.registerError(displayServerConnError);
 	serverConn.registerAllLobbies(drawLobbies);
+	serverConn.registerError(displayServerConnError);
 
 	serverConn.leaveLobby();
 
