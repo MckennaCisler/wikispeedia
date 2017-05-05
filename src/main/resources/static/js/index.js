@@ -34,15 +34,13 @@ $(document).ready(function () {
 	});
 
 	$("#back_main").on('click', () => {
-		$("#uname_picker").hide();
-		$("#main").show();
-		$("#rules").show();
-		$("#start_game").prop('disabled', false);
-		$("#start_game").html(`Start your game!`);
 		serverConn.leaveLobby(() => {
+			$("#start_game").prop('disabled', false);
+			$("#start_game").html(`Start your game!`);
 			$("#uname_picker").hide();
 			$("#main").show();
 			$("#rules").show();
+			$(`#${lobbyName}`).remove();
 		}, displayServerConnError);
 	});
 
@@ -61,7 +59,7 @@ $(document).ready(function () {
 			} else {
 				mode = GAME_MODES.LEAST_CLICKS;
 			}
-			
+
 			//make loader show up here
 			$("#start_game").prop('disabled', true);
 			$("#start_game").html(`<div class="loader2"></div>`);
@@ -152,21 +150,17 @@ function resize() {
 }*/
 
 // game logic handlers
-serverConn.ready(() => {
+serverConn.whenReadyToRecieve(() => {
 	"use strict";
 
-	serverConn.registerError(displayServerConnError);
 	serverConn.registerAllLobbies(drawLobbies);
+	serverConn.registerError(displayServerConnError);
+});
 
-	// setup lobbies
-	/*serverConn.getLobbies((lobbies) => {
-		console.log(lobbies)
-		drawLobbies(lobbies);
-		serverConn.registerAllLobbies(drawLobbies);
-	}, (error) => {
-		displayServerConnError(error);
-		serverConn.registerAllLobbies(drawLobbies);
-	});*/
+serverConn.whenReadyToSend(() => {
+	"use strict";
+
+	serverConn.leaveLobby();
 });
 
 function drawLobbies(lobbies) {

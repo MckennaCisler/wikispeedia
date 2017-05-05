@@ -44,19 +44,21 @@ public final class GameGenerator {
    *
    * Smaller values lead to greater depth searches with less consideration of
    * each page's links. It is essentially the chance that a given link on a page
-   * will be skipped, so 1 will just check a single link on a page and 0 will
-   * check all links.
+   * will be skipped, so 0.99 will approach checking a single link on a page and
+   * 0 will check all links.
+   *
+   * NOTE: Do not set to exactly 1, because the generation will never stop.
    *
    * Decreasing it may make generation slower and more memory-intensive.
    */
-  private static final double DEPTH_BREADTH_SEARCH_RATIO = 0.9;
+  private static final double DEPTH_BREADTH_SEARCH_RATIO = 0.5;
 
   /**
    * the distance (inclusive) between two obscurity value to be considered
    * "equivalent". Increasing it may make generation slower and more
    * memory-intensive.
    */
-  private static final double OBSCURITY_EQUAL_RANGE = 0.05;
+  private static final double OBSCURITY_EQUAL_RANGE = 0.1;
 
   /**
    * The expected largest number of Wikipedia links on a page (under the
@@ -84,9 +86,18 @@ public final class GameGenerator {
    * @return The WikiGame defined by both pages.
    */
   public static WikiGame withObscurity(double obscurity) {
-    WikiPage start = pageWithObscurity(obscurity);
-    return new WikiGame(start,
-        goDownFromRetrying(start, obscurityFilter(obscurity)));
+    WikiPage start;
+    WikiPage goal;
+
+    do {
+      start = pageWithObscurity(obscurity);
+      goal = pageWithObscurity(obscurity);
+      // goDownFromRetrying(start, obscurityFilter(obscurity));
+
+      // simple equality is probably fine because we likely reached them from
+      // the same page
+    } while (start.equals(goal));
+    return new WikiGame(start, goal);
   }
 
   /**

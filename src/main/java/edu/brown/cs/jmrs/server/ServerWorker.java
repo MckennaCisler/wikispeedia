@@ -19,6 +19,7 @@ import com.google.gson.JsonObject;
 
 import edu.brown.cs.jmrs.collect.ConcurrentBiMap;
 import edu.brown.cs.jmrs.server.customizable.Lobby;
+import edu.brown.cs.jmrs.ui.Main;
 
 class ServerWorker {
 
@@ -51,9 +52,6 @@ class ServerWorker {
     } else if (!client.isConnected()) {
       clients.put(conn, client);
       client.toggleConnected();
-      if (client.getLobby() != null) {
-        client.getLobby().playerReconnected(client.getId());
-      }
     } else {
       throw new InputError("Don't steal identities");
     }
@@ -179,11 +177,6 @@ class ServerWorker {
       try {
         trueId = setClientId(conn, clientId);
 
-        Client client = clients.get(conn);
-        if (!client.isConnected()) {
-          client.toggleConnected();
-        }
-
         jsonObject.addProperty("client_id", trueId);
         jsonObject.addProperty("error_message", "");
         toClient = gson.toJson(jsonObject);
@@ -199,11 +192,16 @@ class ServerWorker {
       e.printStackTrace();
     }
 
-    // if they are not in a lobby, give them a list of lobbies
-
     Client client = clients.get(conn);
-    if (client != null && client.getLobby() == null) {
-      notInLobbies.put(client.getId(), client);
+    if (client != null) {
+      // if they are not in a lobby, give them a list of lobbies
+      if (client.getLobby() == null) {
+        notInLobbies.put(client.getId(), client);
+      } else {
+        // if they are already in a lobby and thus reconnecting, note that
+        // they're reconnecting
+        client.getLobby().playerReconnected(client.getId());
+      }
     }
     sendLobbies(client);
   }
@@ -219,6 +217,7 @@ class ServerWorker {
       try {
         clients.getReversed(client).getRemote()
             .sendString(gson.toJson(allLobbies()));
+        Main.debugLog("Open lobbies: " + getOpenLobbies());
       } catch (IOException e) {
         e.printStackTrace();
       }

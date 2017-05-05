@@ -90,13 +90,13 @@ const Command = {
         construct: () => { return {} }
     },
     GET_SETTINGS : {
-		name: "get_settings",
-        responseName: "return_settings",
-		type: COMMAND_TYPE.INCOMING,
-		construct: (lobby_id, state) => {
-            return { "lobby_id" : lobby_id, "state": state};
-        }
-	},
+  		name: "get_settings",
+          responseName: "return_settings",
+  		type: COMMAND_TYPE.INCOMING,
+  		construct: (lobby_id, state) => {
+              return { "lobby_id" : lobby_id, "state": state};
+          }
+  	},
     FORCE_BEGIN_GAME: {
         name: "force_begin_game",
         responseName: "begin_game",
@@ -104,72 +104,78 @@ const Command = {
         construct: () => { return {} }
     },
     GET_PAGE : {
-		name: "get_page",
-        responseName: "return_get_page",
-		type: COMMAND_TYPE.INCOMING,
-		construct: (page_name) => {
-            return { "page_name" : page_name };
-        }
-	},
+  		name: "get_page",
+      responseName: "return_get_page",
+  		type: COMMAND_TYPE.INCOMING,
+  		construct: (page_name) => {
+              return { "page_name" : page_name };
+          }
+    },
     // Player-specific commands
     SET_USERNAME : {
-		name: "set_username",
-        responseName: "return_set_username",
-		type: COMMAND_TYPE.INCOMING,
-		construct: (username) => {
-            return {"username" : username };
-        }
-	},
+  		name: "set_username",
+      responseName: "return_set_username",
+  		type: COMMAND_TYPE.INCOMING,
+  		construct: (username) => {
+              return {"username" : username };
+          }
+	  },
     SET_PLAYER_STATE : {
-		name: "set_player_state",
-        responseName: "return_set_player_state",
-		type: COMMAND_TYPE.INCOMING,
-		construct: (state) => {
-            return {"state" : state };
-        }
-	},
+  		name: "set_player_state",
+      responseName: "return_set_player_state",
+  		type: COMMAND_TYPE.INCOMING,
+  		construct: (state) => {
+              return {"state" : state };
+          }
+	  },
     GOTO_PAGE : {
-		name: "goto_page",
-        responseName: "return_goto_page",
-		type: COMMAND_TYPE.INCOMING,
-		construct: (page_name, initial) => {
-            return {
-              "page_name" : page_name,
-              "initial" : initial
-            };
-        }
-	},
+  		name: "goto_page",
+      responseName: "return_goto_page",
+  		type: COMMAND_TYPE.INCOMING,
+  		construct: (page_name, initial) => {
+              return {
+                "page_name" : page_name,
+                "initial" : initial
+              };
+          }
+	  },
+    GO_BACK_PAGE : {
+  		name: "go_back_page",
+      responseName: "return_goto_page",
+  		type: COMMAND_TYPE.INCOMING,
+  		construct: () => { return {} }
+	  },
     GET_PATH : {
-		name: "get_path",
-        responseName: "return_path",
-		type: COMMAND_TYPE.INCOMING,
-        construct: (player_id) => {
-            return {"player_id" : player_id}
-        }
-	},
+  		name: "get_path",
+      responseName: "return_path",
+  		type: COMMAND_TYPE.INCOMING,
+          construct: (player_id) => {
+              return {"player_id" : player_id}
+          }
+	  },
     /**
      * RESPONSEs to INCOMING Commands. (MOST are stored as references in the GET_ objects)
      */
     // Lobby-specific commands
     ERROR : {
-		name: "error",
+  		name: "error",
+  		type: COMMAND_TYPE.OUTGOING,
+	  },
+
+  /**
+   * OUTGOING Server Commands.
+   */
+  ALL_LOBBIES: {
+ 		name: "all_lobbies",
+ 		type: COMMAND_TYPE.OUTGOING,
+ 	},
+  ALL_PLAYERS: {
+		name: "all_players",
 		type: COMMAND_TYPE.OUTGOING,
 	},
-
-    /**
-     * OUTGOING Server Commands.
-     */
-    ALL_LOBBIES: {
-   		name: "all_lobbies",
-   		type: COMMAND_TYPE.OUTGOING,
-   	},
-    ALL_PLAYERS: {
-  		name: "all_players",
-  		type: COMMAND_TYPE.OUTGOING,
-  	},
-    BEGIN_GAME : {
- 		name: "begin_game",
- 		type: COMMAND_TYPE.OUTGOING,
+  BEGIN_GAME : {
+		name: "begin_game",
+		type: COMMAND_TYPE.OUTGOING,
  	},
     END_GAME : {
 		name: "end_game",
@@ -184,11 +190,13 @@ class ServerConn {
         this.CLIENT_ID_COOKIE_EXPIRATION = 60;
 
         this.clientId = "";
-        this.readyNow = false;
+        this.readyToRecieve = false;
+        this.readyToSend = false;
         this.ws = new WebSocket("ws://" + source);
         this.ws.onopen = this.ws_onopen.bind(this);
         this.ws.onmessage = this.ws_onmessage.bind(this);
         this.ws.onclose = this.ws_onclose.bind(this);
+        this.allReadyCallbacksRegisteredTimeout;
 
         /**
          * Map from Command name to an object of
@@ -201,24 +209,27 @@ class ServerConn {
             "command": { type: COMMAND_TYPE.SERVER }, // all we need
             "callback": (message) => {
                 this._setId(message.client_id);
+                this.readyToSend = true;
 
-                // call ready callbacks added before we got here
-                for (let i = 0; i < this.preReadyCallbacks.length; i++) {
-                    this.preReadyCallbacks[i]();
+                // call the ready callbacks added before we got here
+                for (let i = 0; i < this.readyToSendCallbacks.length; i++) {
+                    this.readyToSendCallbacks[i]();
                 }
-
-                // note we're ready so any further ready callbacks added are called immediately.
-                this.readyNow = true;
             },
             "errCallback" : () => {}, // no reason
             "timeout" : null          // no reason
         }
 
+        /**
+         * callbacks called once websocket is ready for sending messages (after obtaining client id)
+         */
+        this.readyToSendCallbacks = [];
+        this.readyToRecieveCallbacks = [];
 
         /**
-         * callbacks called once websocket is ready
+         * Messages queued in case a callback is added expecting to get them.
          */
-        this.preReadyCallbacks = [];
+        this.recievedMessages = [];
     }
 
     _setId(id) {
@@ -261,6 +272,11 @@ class ServerConn {
     goToInitialPage(callback, errCallback) {
         this._send(Command.GOTO_PAGE, callback, errCallback, ["", true]);
     }
+
+    goBackPage(callback, errCallback) {
+        this._send(Command.GO_BACK_PAGE, callback, errCallback);
+    }
+
 
     getPage(page_name, callback, errCallback) {
         this._send(Command.GET_PAGE, callback, errCallback, [page_name]);
@@ -322,65 +338,115 @@ class ServerConn {
         }
     }
 
-
-    ready(callback) {
-        if (!this.readyNow) {
-          // if we're not ready for registering things, defer until we are
-          this.preReadyCallbacks.push(callback);
+    /**
+     * Register callbacks here that send messages immediately (or on some later handler)
+     */
+    whenReadyToSend(callback) {
+        if (!this.readyToSend) {
+          // since we're not ready for sending things, defer until we are
+          this.readyToSendCallbacks.push(callback);
         } else {
-          // otherwise, just call it now
+          // just call it if we are ready
           callback();
         }
     }
 
     /**
+     * Register callbacks here register as listeners to send messages
+     */
+    whenReadyToRecieve(callback) {
+        if (!this.readyToRecieve) {
+          // since we're not ready for recieving things, defer until we are
+          this.readyToRecieveCallbacks.push(callback);
+        } else {
+          // just call it if we are ready
+          callback();
+
+          // ALSO, reprocess messages recieved before we got notify_id
+          // in case the readyToRecieve callback was expecting them
+          for (let i = 0; i < this.recievedMessages.length; i++) {
+              this.ws_onmessage(this.recievedMessages[i]);
+          }
+        }
+    }
+
+    // // we don't want this to happen; things have already been set up
+    // console.log("ERROR: ready callback registered after serverConn was setup");
+
+    // fullyReady() {
+    //   if (this.client_id !== null) {
+    //     // call the ready callbacks added before we got here
+    //     for (let i = 0; i < this.preReadyCallbacks.length; i++) {
+    //         this.preReadyCallbacks[i]();
+    //     }
+    //
+    //
+    //
+    //     // note we're ready so any further ready callbacks added (and messages recieved) are called immediately.
+    //     this.readyNow = true;
+    //   } else {
+    //     // if we still haven't recieved id, defer until we have
+    //     this.allReadyCallbacksRegisteredTimeout = window.setTimeout(this.fullyReady.bind(this), this.AFTER_READY_REGISTER_FULLY_READY_TIMEOUT);
+    //   }
+    // }
+
+    // // whenever we get a ready callback, reset the timeout that will trigger a full ready state
+    // // i.e. will call all ready callbacks and then "re-recieve" all messages received before this
+    // window.clearTimeout(this.allReadyCallbacksRegisteredTimeout);
+    // this.allReadyCallbacksRegisteredTimeout = window.setTimeout(this.fullyReady.bind(this), this.AFTER_READY_REGISTER_FULLY_READY_TIMEOUT);
+
+    /**
      * Primary WebSocket interpreters
      */
     ws_onopen() {
-
-
-        // TODO: This
-        // TODO: is just
-        // TOOD: temporary
-        // this.startLobby("HARD CODED CRAZY LIT LOBBY", () => console.log("Lobby started"), () => console.log("Lobby failed to start"));
+      for (let i = 0; i < this.readyToRecieveCallbacks.length; i++) {
+          this.readyToRecieveCallbacks[i]();
+      }
+      this.readyToRecieve = true;
     };
 
     ws_onmessage(jsonMsg) {
-        const parsedMsg = JSON.parse(jsonMsg.data);
 
-        console.log("RECIEVING: ");
-        console.log(parsedMsg);
+      // add recievedMessages to a list to be called in case some new callback wanting readiness for recieving
+      // was added after we got some messages
+      this.recievedMessages.push(jsonMsg);
 
-        if (this.pendingResponses.hasOwnProperty(parsedMsg.command)) {
-            if (parsedMsg.error_message === "") {
-                // note that pendingResponses is a map from command RETURN MESSGAE NAME to the callbacks
-                // that should be called on the return message, so we can reference these all in one line
-                // without a switch statement
-                const actions = this.pendingResponses[parsedMsg.command];
-                window.clearTimeout(actions.timeout);
+      const parsedMsg = JSON.parse(jsonMsg.data);
 
-                // if this is NOT a server command, just apply the callback on the payload too keep a nice interface
+      console.log("RECIEVING: ");
+      console.log(parsedMsg);
+
+      if (this.pendingResponses.hasOwnProperty(parsedMsg.command)) {
+          if (parsedMsg.error_message === "") {
+              // note that pendingResponses is a map from command RETURN MESSGAE NAME to the callbacks
+              // that should be called on the return message, so we can reference these all in one line
+              // without a switch statement
+              const actions = this.pendingResponses[parsedMsg.command];
+              window.clearTimeout(actions.timeout);
+
+              // if this is NOT a server command, just apply the callback on the payload too keep a nice interface
+              if (actions.callback !== undefined) {
                 if (actions.command.type !== COMMAND_TYPE.SERVER) {
                     actions.callback(parsedMsg.payload);
                 } else {
                     actions.callback(parsedMsg);
                 }
-            } else {
-                // (but give any command type access to the top-level error_message)
-                const actions = this.pendingResponses[parsedMsg.command];
-                window.clearTimeout(actions.timeout);
-                if (actions.errCallback !== undefined) { actions.errCallback(parsedMsg); }
+              }
+          } else {
+              // (but give any command type access to the top-level error_message)
+              const actions = this.pendingResponses[parsedMsg.command];
+              window.clearTimeout(actions.timeout);
+              if (actions.errCallback !== undefined) { actions.errCallback(parsedMsg); }
 
-                console.log("\nGot error: ");
-                console.log(parsedMsg);
-            }
-        } else if (parsedMsg.error_message !== undefined && parsedMsg.error_message !== "") {
-          this.pendingResponses[Command.ERROR.name].callback(parsedMsg);
-        } else {
-            console.log("\nUnknown command recieved: ");
-            console.log(parsedMsg);
-        }
-        // }
+              console.log("\nGot error: ");
+              console.log(parsedMsg);
+          }
+      } else if (parsedMsg.error_message !== undefined && parsedMsg.error_message !== "") {
+        const errCallback = this.pendingResponses[Command.ERROR.name].callback;
+        if (errCallback !== undefined) { errCallback(parsedMsg); }
+      } else {
+          console.log("\n(The above was an unknown (or unregistered) command: '" + parsedMsg.command + "')");
+      }
     }
 
     ws_onclose() {

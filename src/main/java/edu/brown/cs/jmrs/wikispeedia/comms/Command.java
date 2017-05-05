@@ -32,6 +32,7 @@ public enum Command {
   SET_USERNAME("set_username", CommandType.INCOMING, "username"), //
   SET_PLAYER_STATE("set_player_state", CommandType.INCOMING, "state"), //
   GOTO_PAGE("goto_page", CommandType.INCOMING, "page_name"), //
+  GO_BACK_PAGE("go_back_page", CommandType.INCOMING), //
   GET_PATH("get_path", CommandType.INCOMING), //
   // GET_LINKS("get_links", CommandType.INCOMING);
   /**
@@ -88,10 +89,16 @@ public enum Command {
     this.args = args;
   }
 
+  /**
+   * @return The raw command name.
+   */
   public String command() {
     return command;
   }
 
+  /**
+   * @return Arguments to this command.
+   */
   public String[] args() {
     return args;
   }
@@ -223,7 +230,8 @@ public enum Command {
    *          The lobby to get players from.
    */
   public static void sendAllPlayers(WikiLobby lobby) {
-    Main.debugLog("All players: " + lobby.getPlayers());
+    Main.debugLog(String.format("All players in lobby '%s': %s", lobby,
+        lobby.getPlayers()));
     List<WikiPlayer> connectedPlayers =
         Functional.filter(lobby.getPlayers(), WikiPlayer::connected);
     Command.ALL_PLAYERS.sendToAll(lobby, connectedPlayers);

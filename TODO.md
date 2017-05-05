@@ -3,23 +3,23 @@
 - <b>Fix bugs</b>
 - Visualizations for history and endgame ROHAN
 - Deal with what happens when a player can't be on a page (/waiting for ex.)
-  - Add an error callback
+  - Add a "close error" callback
 - Going back (history) ROHAN
+- Wikipedia RATE LIMIT
+- Documentation
+  - Stuff in docs folder
+  - Demo Presentation
 ##### NICETIES
-- Mobile-friendly
 - Shortest path
-  - Deal with ties (using "lists" of winners) for shortest-path mode
-  - Integrate WikiGame into lobby
   - Add the shortest-path future to WikiGame
   - Make a two-sided Dijkstra?
 - Deployment
 ##### STUFF THAT WOULD GIVE US THAT WARM FUZZY FEELING
-- Hide user's IDs from obvious places (i.e. ALL_PLAYERS) using isCurrentPlayer, etc.
-- Chat everywhere
+- Improve game generation
+- Chat everywhere? SEAN
 - Make an intermittent (or parallel... maybe do it while shortest-path finding?) DB-compare method that randomly double-checks a link list and changes it if needed
 - Music
-- Design work
-- Add small REPL parser to hang main thread.
+- Hide user's IDs from obvious places (i.e. ALL_PLAYERS) using isCurrentPlayer, etc.
 
 #### Deadlines:
 - <b>Adversary TA Meeting (Wednesday, 4/26)</b>

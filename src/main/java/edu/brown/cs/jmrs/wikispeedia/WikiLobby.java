@@ -96,7 +96,7 @@ public class WikiLobby implements Lobby {
       gameMode = new LeastClicksGameMode();
 
     } else {
-      throw new IllegalArgumentException("Invalid GameMode specified.");
+      throw new IllegalArgumentException("Invalid game mode specified");
     }
 
     // generate page from difficulty
@@ -133,7 +133,7 @@ public class WikiLobby implements Lobby {
   public void addClient(String playerId) {
     if (started()) {
       Command.sendError(server, playerId,
-          "Game has already started, cannot add player.");
+          "Game has already started, cannot add player");
       return;
     }
     // first is leader
@@ -152,14 +152,18 @@ public class WikiLobby implements Lobby {
 
   @Override
   public void playerReconnected(String clientId) {
-    players.get(clientId).setConnected(true);
-    Command.sendAllPlayers(this);
+    if (players.containsKey(clientId)) {
+      players.get(clientId).setConnected(true);
+      Command.sendAllPlayers(this);
+    }
   }
 
   @Override
   public void playerDisconnected(String clientId) {
-    players.get(clientId).setConnected(false);
-    Command.sendAllPlayers(this);
+    if (players.containsKey(clientId)) {
+      players.get(clientId).setConnected(false);
+      Command.sendAllPlayers(this);
+    }
   }
 
   @Override
@@ -192,9 +196,8 @@ public class WikiLobby implements Lobby {
   public void start() {
     for (Entry<String, WikiPlayer> entry : players.entrySet()) {
       if (!entry.getValue().ready()) {
-        Command.sendError(server, entry.getKey(), String
-            .format("Player %s is not ready", entry.getValue().getName()));
-        return;
+        throw new IllegalStateException(String.format("Player %s is not ready",
+            entry.getValue().getName()));
       }
     }
     // this is how we determine whether started
@@ -216,6 +219,10 @@ public class WikiLobby implements Lobby {
         entry.getValue().setEndTime(getEndTime());
       }
     }
+
+    Main.debugLog(String.format(
+        "Lobby %s finished; \n\twinners: %s \n\tplayTime: %s\n\tendTime: %s",
+        id, getWinners(), getPlayTime(), getEndTime()));
   }
 
   /**
@@ -335,7 +342,7 @@ public class WikiLobby implements Lobby {
    */
   public Set<WikiPlayer> getWinners() {
     if (!ended()) {
-      throw new IllegalStateException("Lobby has not ended.");
+      throw new IllegalStateException("Lobby has not ended");
     }
     return winners;
   }
@@ -363,7 +370,7 @@ public class WikiLobby implements Lobby {
    */
   public Duration getPlayTime() {
     if (!started()) {
-      throw new IllegalStateException("Lobby not started.");
+      throw new IllegalStateException("Lobby has not started");
     }
     return Duration.between(startTime, ended() ? getEndTime() : Instant.now());
   }
@@ -375,7 +382,7 @@ public class WikiLobby implements Lobby {
    */
   public Instant getStartTime() {
     if (!started()) {
-      throw new IllegalStateException("Lobby not started.");
+      throw new IllegalStateException("Lobby has not started");
     }
     return startTime;
   }

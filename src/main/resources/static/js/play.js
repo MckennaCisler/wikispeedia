@@ -52,17 +52,18 @@ function resize() {
 	}
 }
 
-serverConn.ready(() => {
+serverConn.whenReadyToRecieve(() => {
     serverConn.registerError(displayServerConnError);
-
     serverConn.registerEndGame(() => {
         window.location.href = "end";
     });
+    serverConn.registerAllPlayers(drawHistoryCallback);
+});
 
+serverConn.whenReadyToSend(() => {
     hasDrawnPlayerList = false;
     // $destination.html("<b>" + titleFromHref(end) + "</b>");
     currHistory = serverConn.clientId; // the player whose history is currently displayed
-    serverConn.registerAllPlayers(drawHistoryCallback);
     serverConn.getPlayers(drawHistoryCallback);
     serverConn.goToInitialPage(drawPage, errorPage);
 });
