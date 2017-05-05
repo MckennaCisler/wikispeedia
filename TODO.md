@@ -10,17 +10,15 @@
   - Stuff in docs folder
   - Demo Presentation
 ##### NICETIES
-- Mobile-friendly
 - Shortest path
   - Add the shortest-path future to WikiGame
   - Make a two-sided Dijkstra?
 - Deployment
 ##### STUFF THAT WOULD GIVE US THAT WARM FUZZY FEELING
 - Improve game generation
-- Chat everywhere
+- Chat everywhere? SEAN
 - Make an intermittent (or parallel... maybe do it while shortest-path finding?) DB-compare method that randomly double-checks a link list and changes it if needed
 - Music
-- Design work
 - Hide user's IDs from obvious places (i.e. ALL_PLAYERS) using isCurrentPlayer, etc.
 
 #### Deadlines:
