@@ -68,7 +68,7 @@ public class Query<T> extends DbStatement<T> {
    *          prepared statement.
    * @return The list of returned objects from the query.
    */
-  public synchronized List<T> query(Object... inputs) {
+  public List<T> query(Object... inputs) {
     ObjArray hashableInputs = new ObjArray(inputs);
     if (save) {
       return fullyQueryResponse.get(hashableInputs);

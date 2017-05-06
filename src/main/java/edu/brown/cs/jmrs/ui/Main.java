@@ -84,10 +84,14 @@ public final class Main {
           .build(new Page.Loader());
 
   /**
-   * DbConn for database Link cache.
+   * DbConn and constants for database Link cache and associated LinkFinder.
    */
   static final String WIKI_DATABASE_LOC = "data/wikipedia.sqlite3";
   private static DbConn wikiDbConn;
+  private static final int NUM_DB_CACHING_THREADS = 1;
+  // Runtime.getRuntime().availableProcessors();
+  private static final double CACHING_EXECUTION_PERCENTAGE = 0.99;
+  private static final long CACHING_WAIT_TIMEOUT = 10; // Seconds
 
   private Main() {
     // override default constructor

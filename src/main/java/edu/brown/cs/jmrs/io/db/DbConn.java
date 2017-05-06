@@ -7,8 +7,6 @@ import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.HashSet;
-import java.util.Set;
 
 /**
  * Provides a simpler interface to normal SQL database calls, as well as
@@ -17,13 +15,9 @@ import java.util.Set;
  * @author mcisler
  */
 public class DbConn implements AutoCloseable {
-  private final ThreadLocal<Connection> conn;
-  // set of all thread connections for single thread closing
-  private final Set<Connection> conns;
-  /*
-   * Maps from query to a cache of the output returned by a query callback on a
-   * particular input.
-   */
+  // there can only be one connection to the database:
+  // http://stackoverflow.com/a/10707791
+  private final Connection conn;
 
   /**
    * Constructs a DbConn out of the provided Sqlite3 database, to be ready for
@@ -41,7 +35,6 @@ public class DbConn implements AutoCloseable {
   public DbConn(String path)
       throws ClassNotFoundException, FileNotFoundException {
     Class.forName("org.sqlite.JDBC");
-    conns = new HashSet<>();
 
     // try to open the database (don't use ones that aren't there yet)
     if (path.lastIndexOf('.') == -1
@@ -52,19 +45,19 @@ public class DbConn implements AutoCloseable {
       throw new FileNotFoundException("Database not found at " + path);
     }
 
-    String urlToDB = "jdbc:sqlite:" + path;
-    conn = ThreadLocal.withInitial(() -> {
-      try {
-        Connection c = DriverManager.getConnection(urlToDB);
-        try (Statement stat = c.createStatement()) {
-          stat.executeUpdate("PRAGMA foreign_keys = ON;");
-        }
-        conns.add(c);
-        return c;
-      } catch (SQLException e) {
-        throw new UncheckedSqlException(e);
+    conn = createConn("jdbc:sqlite:" + path);
+  }
+
+  private Connection createConn(String url) {
+    try {
+      Connection c = DriverManager.getConnection(url);
+      try (Statement stat = c.createStatement()) {
+        stat.executeUpdate("PRAGMA foreign_keys = ON;");
       }
-    });
+      return c;
+    } catch (SQLException e) {
+      throw new UncheckedSqlException(e);
+    }
   }
 
   /**
@@ -81,7 +74,7 @@ public class DbConn implements AutoCloseable {
   public <T> Query<T> makeQuery(final String query, DbReader<T> reader) {
     ThreadLocal<PreparedStatement> p = ThreadLocal.withInitial(() -> {
       try {
-        return conn.get().prepareStatement(query);
+        return conn.prepareStatement(query);
       } catch (SQLException e) {
         throw new UncheckedSqlException(e);
       }
@@ -108,7 +101,7 @@ public class DbConn implements AutoCloseable {
       boolean save) {
     ThreadLocal<PreparedStatement> p = ThreadLocal.withInitial(() -> {
       try {
-        return conn.get().prepareStatement(query);
+        return conn.prepareStatement(query);
       } catch (SQLException e) {
         throw new UncheckedSqlException(e);
       }
@@ -131,19 +124,17 @@ public class DbConn implements AutoCloseable {
       DbWriter<T> writer) throws SQLException {
     ThreadLocal<PreparedStatement> p = ThreadLocal.withInitial(() -> {
       try {
-        return conn.get().prepareStatement(insertStatement);
+        return conn.prepareStatement(insertStatement);
       } catch (SQLException e) {
         throw new UncheckedSqlException(e);
       }
     });
-    writer.setup(conn.get());
+    writer.setup(conn);
     return new Insert<T>(p, writer);
   }
 
   @Override
   public void close() throws Exception {
-    for (Connection c : conns) {
-      c.close();
-    }
+    conn.close();
   }
 }
