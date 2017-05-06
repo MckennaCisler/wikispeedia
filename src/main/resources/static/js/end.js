@@ -1,5 +1,5 @@
-let $winner = $("#winner");
-let $leaderboard = $("#leaderboard");
+//  let $("#winner");
+// let $("#leaderboard") = $("#leaderboard");
 let fakeId = 1;
 
 let currSeconds = 0;
@@ -28,22 +28,34 @@ let player3 = {"id" : 3, "name" : "sean", "done" : true, "startPage" : cat, "end
 let player4 = {"id" : 4, "name" : "jacob", "done" : true, "startPage" : cat, "endPage" : dog, "path" : [cat, english, spanish, greek, italian, portuguese, spanish, dog], "playtime" : 1.4};
 
 let fakePlayers = [player1, player2, player3, player4];
+let docReady = false;
+let serverReady = false;
 
 $(document).ready(() => {
+	docReady = true;
+	/// $("#winner").html("Loading...");
+	// playersCallback(fakePlayers);
+
+	if (serverReady) {
+		serverConn.registerAllPlayers(playersCallback);
+	}
 });
 
 serverConn.whenReadyToRecieve(() => {
+	console.log("HERE");
 	serverConn.registerError(displayServerConnErrorRedirectHome);
 
 	// TODO: get everything interfacing with the server
-	// serverConn.registerAllPlayers("", playersCallback, displayServerConnError);
-	$winner.html("Loading...");
-	playersCallback(fakePlayers);
+	if (docReady) {
+		serverConn.registerAllPlayers(playersCallback);
+	} else {
+		serverReady = true;
+	}
 });
 
 serverConn.whenReadyToSend(() => {
 	serverConn.getPlayers("", playersCallback, displayServerConnError);
-	serverConn.getSettings("", (lobby) => {
+	//serverConn.getSettings("", (lobby) => {
 		// @rjha
 		// @rjha
 		// @rjha
@@ -73,7 +85,7 @@ serverConn.whenReadyToSend(() => {
     //     TECHINCALLY THIS IS HERE BUT EACH PLAYER HAS AN isWinner ATTRIBUTE: lobby.add("winners", Main.GSON.toJsonTree(src.getWinners()));
     //     // TODO: Shortest / known path
     //   }
-	}, displayServerConnError);
+	//}, displayServerConnError);
 });
 
 // Updates the player to time map and redraws the results
@@ -104,9 +116,12 @@ function updateTime() {
 
 // Draws the results
 function drawResults(players) {
+	console.log("PLAYERS");
+	console.log(players);
 	playersSorted = players.sort( function(a, b) {return a.playtime - b.playtime} );
 	if (!setWinner && playersSorted.length > 0) {
-		$winner.html(`<b> ${playersSorted[0].name} wins! </b>`);
+		console.log($("#winner"));
+		$("#winner").html(`<b> ${playersSorted[0].name} wins! </b>`);
 	}
 
 	for (let i = 0; i < playersSorted.length; i++) {
@@ -118,14 +133,14 @@ function drawResults(players) {
 
 		let style = "";
 		if (i == 0) {
-			$leaderboard.html("");
+			$("#leaderboard").html("");
 			style = "table-success";
 		} else if (!player.done) {
 			style = "table-danger";
 		}
 
-		$el = $(`<tr><td>${nameHtml}</td><td>${minutesToStr(player.playtime)}</td></tr>`)
-						.appendTo($leaderboard)
+		$el = $(`<tr><td>${nameHtml}</td><td>${millisecondsToStr(player.playTime)}</td></tr>`)
+						.appendTo($("#leaderboard"))
 						.attr("class", "" + style);
 
 		if (!player.done) {
