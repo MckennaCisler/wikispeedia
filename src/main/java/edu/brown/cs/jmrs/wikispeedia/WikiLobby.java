@@ -202,14 +202,18 @@ public class WikiLobby implements Lobby {
   /**
    * Start the game by setting a start time. Players cannot join after this.
    *
+   * @param force
+   *          Whether to force a start, i.e. ignore non-ready players.
    * @throws IllegalStateException
    *           if a player is not ready.
    */
-  public void start() {
-    for (Entry<String, WikiPlayer> entry : players.entrySet()) {
-      if (!entry.getValue().ready()) {
-        throw new IllegalStateException(String.format("Player %s is not ready",
-            entry.getValue().getName()));
+  public void start(boolean force) {
+    if (!force) {
+      for (Entry<String, WikiPlayer> entry : players.entrySet()) {
+        if (!entry.getValue().ready()) {
+          throw new IllegalStateException(String
+              .format("Player %s is not ready", entry.getValue().getName()));
+        }
       }
     }
     // this is how we determine whether started
@@ -257,7 +261,7 @@ public class WikiLobby implements Lobby {
     Command.sendAllPlayers(this);
 
     if (allReady) {
-      start();
+      start(false);
       Command.sendBeginGame(this);
     }
 

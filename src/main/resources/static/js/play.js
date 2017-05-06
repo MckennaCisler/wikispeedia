@@ -71,6 +71,14 @@ serverConn.whenReadyToSend(() => {
     // serverConn.getPlayers(newUpdate);
     serverConn.goToInitialPage(drawPage, errorPage);
 		serverConn.getSettings("", GAME_STATE.STARTED, settingsCallback, settingsError);
+
+		window.onpopstate = (function(event) {
+			if (event.state.href !== undefined) {
+		  	serverConn.goBackPage(event.state.href, drawPage, errorPage);
+			} else {
+				console.log("Unknown state was popped");
+			}
+		}).bind(this);
 });
 
 ///
@@ -109,6 +117,9 @@ function drawPage(page) {
   href = page.href;
   title = titleFromHref(href);
 
+	// add to browser history
+	history.pushState({"href": href}, "", "");
+
   if (href != currHref) {
     $title.html("<b>" + title + "</b>");
     $article.html(html);
@@ -122,6 +133,7 @@ function drawPage(page) {
 // Error callback
 function errorPage(error) {
   displayError("Couldn't go to page: " + error.error_message);
+	drawPage(error.payload);
 }
 
 // Replaces the links with callbacks

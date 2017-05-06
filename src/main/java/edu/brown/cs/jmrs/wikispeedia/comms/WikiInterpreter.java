@@ -46,7 +46,7 @@ public class WikiInterpreter implements CommandInterpreter {
 
       case FORCE_BEGIN_GAME:
         try {
-          lobby.start();
+          lobby.start(true);
           Command.sendBeginGame(lobby);
         } catch (IllegalStateException e) {
           Command.sendBeginGame(lobby, e.getMessage());
@@ -186,7 +186,8 @@ public class WikiInterpreter implements CommandInterpreter {
             player.getPath().get(player.getPath().size() - 1).getPage().url();
       }
 
-      Main.debugLog(player.getName() + " going back to " + reqPage);
+      Main.debugLog(String.format("%s going back to %s; history: %s",
+          player.getName(), reqPage, player.getPath()));
 
       WikiPage reqPrevPage =
           WikiPage.fromAny(reqPage, Main.WIKI_PAGE_DOC_CACHE);

@@ -163,6 +163,11 @@ public class WikiPath extends ArrayList<Visit> {
       Visit other = (Visit) obj;
       return other.arrivalTime == arrivalTime && other.page.equals(page);
     }
+
+    @Override
+    public String toString() {
+      return String.format("%s at %s", page, arrivalTime);
+    }
   }
 
   /**
