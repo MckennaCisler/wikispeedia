@@ -284,20 +284,27 @@ public class WikiPlayer {
   }
 
   /**
-   * @return The previous page the user was at.
+   * @param page
+   *          The page in the player's history to go to
    * @throws IOException
-   *           If there was no previous page.
+   *           If there was no previous page or the given page was not in the
+   *           player's history
    */
-  public synchronized WikiPage goBackPage() throws IOException {
+  public synchronized void goBackPage(WikiPage page) throws IOException {
     checkLobbyState();
 
-    if (path.size() > 1) {
-      path.remove(path.size() - 1);
-      return path.get(path.size() - 1).getPage();
-
-    } else {
-      throw new NoSuchElementException("No pages were previously visited");
+    if (!path.contains(page)) {
+      throw new NoSuchElementException(String
+          .format("Page %s not in player %s's history", page.getName(), name));
     }
+
+    WikiPage prevPage;
+    do {
+      prevPage = path.remove(path.size() - 1).getPage();
+    } while (path.size() > 0 && !prevPage.equals(page));
+
+    // it should be in there
+    assert path.size() > 0;
   }
 
   private void checkLobbyState() {
