@@ -41,7 +41,7 @@ public class Scraper {
       throws SQLException {
     this.startPage = startPage;
     depth = -1;
-    // linkFinder = new CachingWikiLinkFinder(wikiDbConn, filters);
+    linkFinder = new CachingWikiLinkFinder(wikiDbConn, filters);
   }
 
   /**
