@@ -21,7 +21,7 @@ public class WikiBodyFormatter implements ContentFormatter<WikiPage> {
     root.select(".geography").remove();
 
     // and coordinates tags
-    root.select(".coordinates").remove();
+    root.select("#coordinates").remove();
 
     return root;
   }
