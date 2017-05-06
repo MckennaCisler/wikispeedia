@@ -73,7 +73,7 @@ public class WikiInterpreter implements CommandInterpreter {
         break;
 
       case GO_BACK_PAGE:
-        goBackPageHandler(lobby, clientId);
+        goBackPageHandler(lobby, clientId, command);
         break;
 
       case GET_PATH:
@@ -168,15 +168,34 @@ public class WikiInterpreter implements CommandInterpreter {
     }
   }
 
-  private void goBackPageHandler(WikiLobby lobby, String clientId) {
+  private void goBackPageHandler(WikiLobby lobby, String clientId,
+      JsonObject command) {
     WikiPlayer player = lobby.getPlayer(clientId);
     JsonObject curPageInfo = getCurPlayerPageInfo(lobby, player);
+    assert command.get("payload").isJsonObject();
 
     try {
-      WikiPage prevPage = player.goBackPage();
+
+      String reqPage;
+      if (command.get("payload").getAsJsonObject().has("page_name")) {
+        reqPage =
+            command.get("payload").getAsJsonObject().get("page_name")
+                .getAsString();
+      } else {
+        reqPage =
+            player.getPath().get(player.getPath().size() - 1).getPage().url();
+      }
+
+      Main.debugLog(player.getName() + " going back to " + reqPage);
+
+      WikiPage reqPrevPage =
+          WikiPage.fromAny(reqPage, Main.WIKI_PAGE_DOC_CACHE);
+
+      // try to go back; it'll throw a NoSuchElementException on failure
+      player.goBackPage(reqPrevPage);
 
       Command.RETURN_GOTO_PAGE.send(lobby.getServer(), clientId,
-          getPlayerPageInfo(prevPage, lobby));
+          getPlayerPageInfo(reqPrevPage, lobby));
 
     } catch (NoSuchElementException e) {
       Command.RETURN_GOTO_PAGE.send(lobby.getServer(), clientId, curPageInfo,

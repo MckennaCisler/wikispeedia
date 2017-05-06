@@ -8,27 +8,25 @@
 	flex: 1;
 }
 
+#update-panel {
+	flex : 1;
+}
+
 .f1 {
 	flex: 1 auto;
 }
 
-#history {
-	text-align: left;
+#update-label {
+	text-align: center;
 	font-size: small;
 }
 
-#history-label {
-	text-align: left;
+#updates {
 	font-size: small;
 }
 
-#history-dropdown {
-	font-size: x-small;
-	border-color: #e52d27;
-}
-
-#history-panel {
-	
+#update-p {
+	overflow-y: scroll;
 }
 
 #destination {
@@ -310,30 +308,30 @@ h3.card-header {
 	#history-panel {
 		display: none;
 	}
-	
+
 	#game-div {
 		display: flex;
 		flex-direction: column;
 	}
-	
+
 	#history-br {
 		display: none;
 	}
-	
+
 	#article-col {
 		flex: 1;
 	}
-	
+
 	.my_col {
 		display: flex;
 		flex-direction: row;
 		justify-content: space-around;
 	}
-	
+
 	#info > .card > .card-header {
 		display: none;
 	}
-	
+
 	#info > .card {
 		flex: 0.3;
 	}
@@ -344,7 +342,7 @@ h3.card-header {
 		display: flex;
 		flex-direction: row;
 	}
-	
+
 	.my_col {
 		display: flex;
 		flex-direction: column;

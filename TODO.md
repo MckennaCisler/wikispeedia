@@ -10,6 +10,8 @@
 ##### NECESSITIES
 - <b>Fix bugs</b>
   - BLOCKING 1000 Bug
+  - Check that we use equalsAfterRedirect
+  - check that going to pages works with apostrophes, etc. (ACROSS server-client actions)
 - Visualizations for history and endgame ROHAN
 - Going back (history) ROHAN
 - Wikipedia RATE LIMIT

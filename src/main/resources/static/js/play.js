@@ -5,18 +5,12 @@
 ///
 
 // TODO: Maybe some race conditions here
-const $history = $("#history");
+const $updates = $("#updates");
 const $destination = $("#destination");
 const $timer = $("#timer");
-const $historyDropdown = $("#history-dropdown");
-const $historyDropdownList = $("#history-dropdown-list");
 
 const $title = $("#title");
 const $article = $("#article");
-
-let ding = new Audio('lib/assets/ding.mp3');
-let currHistory;
-let currHistoryName;
 
 // Player info
 let playerPaths = new Map();
@@ -39,6 +33,7 @@ $(document).ready(() => {
 	$timer.text("0:00");
 	$title.html("<b>Loading...</b>");
 	$destination.html("<b>Loading...</b>");
+	$updates.append("<i>Game started</i>");
 	setInterval(updateTimer, 200);
 
 	if (setDestinationWhenReady) {
@@ -61,6 +56,7 @@ function resize() {
 
 serverConn.whenReadyToRecieve(() => {
     serverConn.registerError(displayServerConnErrorRedirectHome);
+		serverConn.registerAllPlayers(newUpdate);
     serverConn.registerEndGame(() => {
 		setCookie('timePlayed', audio.currentTime);
         window.location.href = "end";
@@ -72,8 +68,7 @@ serverConn.whenReadyToSend(() => {
     currHistory = serverConn.clientId; // the player whose history is currently displayed
 
 		// wait until we have client id to register this one
-		// serverConn.registerAllPlayers(drawHistoryCallback);
-    // serverConn.getPlayers(drawHistoryCallback);
+    // serverConn.getPlayers(newUpdate);
     serverConn.goToInitialPage(drawPage, errorPage);
 		serverConn.getSettings("", GAME_STATE.STARTED, settingsCallback, settingsError);
 });
@@ -120,11 +115,6 @@ function drawPage(page) {
     $article.scrollTop(0);
     cleanHtml();
 
-		/*
-    if (currHistory == serverConn.clientId) {
-      drawHistory();
-    } */
-
     currHref = href;
   }
 }
@@ -165,75 +155,30 @@ function cleanHtml() {
 // History
 ///
 
-/*
-function historyChange(newHistory, newHistoryName) {
-  currHistory = newHistory;
-  currHistoryName = newHistoryName;
-  drawHistory();
-}
-
-function drawHistoryCallback(players) {
+function newUpdate(players) {
   for (let i = 0; i < players.length; i++) {
-    player = players[i];
+    let player = players[i];
+		let newPath = player.path;
+		let oldPath = playerPaths.get(player.id);
+		let oldPathLength = 0;
+
+		if (oldPath != undefined) {
+			oldPathLength = oldPath.length;
+		}
+
+		for (let j = oldPathLength; j < newPath.length; j++) {
+			page = newPath[j];
+			if (j != 0) {
+	 			if (player.id == serverConn.clientId) {
+					$updates.prepend(`<i>You visited ${"\"" + titleFromHref(page.page.name) + "\""}<br></i>`);
+				} else {
+					$updates.prepend(player.name + ` visited ${"\"" + titleFromHref(page.page.name) + "\""}<br>`);
+				}
+			}
+		}
+
     playerPaths.set(player.id, player.path);
-
-    if (!hasDrawnPlayerList) {
-      // Something like this: <li><a href="javascript:historyChange('Player 1')"><b>Me</b></a></li>
-      playerHtml = "";
-      if (player.id == serverConn.clientId) {
-        playerHtml = "<b>Me</b>";
-      } else {
-        playerHtml = player.name;
-      }
-
-      $historyDropdownList.append(
-        "<li><a href=\""
-        + hrefHelper("historyChange", player.id + "', '" + player.name)
-        + "\">" + playerHtml + "</a></li>");
-    }
   }
-
-  if (!hasDrawnPlayerList) {
-    hasDrawnPlayerList = true;
-  }
-
-  drawHistory();
-}
-
-function drawHistory() {
-  playerHistory = playerPaths.get(currHistory);
-	console.log("PLAYER HISTORY");
-	console.log(playerHistory);
-  html = "";
-  if (playerHistory.path.length > 0) {
-    startIndex = 0;
-    if (playerHistory.path.length > 8) {
-      startIndex = playerHistory.path.length - 6;
-      html = html + "<i>(" + startIndex + " articles before)</i><br>";
-    }
-
-    for (i = startIndex; i < playerHistory.path.length - 1; i++) {
-      html = html + titleFromHref(playerHistory.path[i].url) + "<br>";
-    }
-
-    html = html + "<b>" + titleFromHref(playerHistory[playerHistory.path.length - 1].url) + "</b>";
-  }
-
-  $history.html(html);
-
-  if (currHistory != serverConn.clientId) {
-    $historyDropdown.html(currHistoryName + "'s progress");
-  } else {
-    $historyDropdown.html("<b>My progress</b>");
-  }
-} */
-
-///
-// New history idea
-///
-
-function drawHistoryCallbackNew(players) {
-
 }
 
 ///

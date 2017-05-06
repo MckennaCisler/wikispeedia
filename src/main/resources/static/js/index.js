@@ -173,7 +173,6 @@ serverConn.whenReadyToSend(() => {
 
 function drawLobbies(lobbies) {
 	"use strict";
-	$("#open_games").html("");
 	if (lobbies.length === 0) {
 		$(document).ready(() => {
 			$("#open_games").html("No games were found, you'll have to make your own!");
@@ -182,10 +181,12 @@ function drawLobbies(lobbies) {
 	} else {
 		$(document).ready(() => {
 			$("#open_games").removeClass("none-found");
+			let textStr = "";
 			for (let i = 0; i < lobbies.length; i++) {
-				$("#open_games").append('<li class="alobby list-group-item list-group-item-action" id="' +
-					lobbies[i].id + '">' + lobbies[i].id + '</li>');
+				textStr += '<li class="alobby list-group-item list-group-item-action" id="' +
+					lobbies[i].id + '">' + lobbies[i].id + '</li>';
 			}
+			$("#open_games").html(textStr);
 		});
 	}
 }
