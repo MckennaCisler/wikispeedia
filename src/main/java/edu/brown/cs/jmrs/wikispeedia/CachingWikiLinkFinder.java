@@ -186,8 +186,8 @@ public class CachingWikiLinkFinder extends WikiPageLinkFinder {
    *
    */
   class CacherWorker implements Runnable {
-    private static final int INITIAL_BATCH_SIZE = 1000;
-    private static final int BATCH_SIZES_TO_AVG = 5;
+    private static final int INITIAL_BATCH_SIZE = 250; // keep it low on startup
+    private static final double BATCH_SIZES_TO_AVG = 2;
     private double desiredExecutionTime;
 
     private final BlockingQueue<Link> linksToCache;
@@ -211,13 +211,11 @@ public class CachingWikiLinkFinder extends WikiPageLinkFinder {
     @Override
     public void run() {
       try {
-
         Set<Link> buffer = new HashSet<>(curBatchSize);
-        System.out.println("Grabbing buffer of " + curBatchSize + " out of "
-            + linksToCache.size());
         for (int i = 0; i < curBatchSize; i++) {
           buffer.add(linksToCache.take());
         }
+        Main.debugLog("\tCaching buffer of " + curBatchSize);
         long start = System.currentTimeMillis();
         cacher.insertAll(buffer);
         long duration = System.currentTimeMillis() - start;
@@ -225,10 +223,11 @@ public class CachingWikiLinkFinder extends WikiPageLinkFinder {
         // adjust current value by deviation (ratio) off desired
         // average last ten values (weight the new one ony a bit and the old
         // (average) higher)
-        double newBatchSize = (duration / desiredExecutionTime) * curBatchSize;
+        double newBatchSize =
+            (desiredExecutionTime / (double) duration) * curBatchSize;
         curBatchSize =
-            (int) newBatchSize * 1 / BATCH_SIZES_TO_AVG
-                + curBatchSize * (BATCH_SIZES_TO_AVG - 1) / BATCH_SIZES_TO_AVG;
+            (int) (newBatchSize * 1.0 / BATCH_SIZES_TO_AVG + curBatchSize
+                * (BATCH_SIZES_TO_AVG - 1.0) / BATCH_SIZES_TO_AVG);
       } catch (Throwable e) {
         e.printStackTrace();
       }
@@ -277,7 +276,7 @@ public class CachingWikiLinkFinder extends WikiPageLinkFinder {
      */
     void addLinks(Collection<Link> links) {
       linksToCache.addAll(links);
-      System.out.println("Added " + links.size() + " links for caching; now at "
+      Main.debugLog("\tAdded " + links.size() + " links for caching; now at "
           + linksToCache.size());
     }
   }
