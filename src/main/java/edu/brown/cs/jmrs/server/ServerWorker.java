@@ -19,25 +19,30 @@ import com.google.gson.JsonObject;
 
 import edu.brown.cs.jmrs.collect.ConcurrentBiMap;
 import edu.brown.cs.jmrs.server.customizable.Lobby;
+import edu.brown.cs.jmrs.server.threading.MessageQueue;
 import edu.brown.cs.jmrs.ui.Main;
 
 class ServerWorker {
 
-  private Server server;
-  private LobbyManager lobbies;
+  private Server                           server;
+  private LobbyManager                     lobbies;
   private ConcurrentBiMap<Session, Client> clients;
-  private Map<String, Client> notInLobbies;
-  private Queue<Client> disconnectedClients;
-  private Gson gson;
+  private Map<String, Client>              notInLobbies;
+  private Queue<Client>                    disconnectedClients;
+  private Gson                             gson;
+  private MessageQueue                     messageQueue;
 
-  public ServerWorker(Server server,
-      BiFunction<Server, String, ? extends Lobby> lobbyFactory, Gson gson) {
+  public ServerWorker(
+      Server server,
+      BiFunction<Server, String, ? extends Lobby> lobbyFactory,
+      Gson gson) {
     this.server = server;
     lobbies = new LobbyManager(lobbyFactory);
     clients = new ConcurrentBiMap<>();
     notInLobbies = new ConcurrentHashMap<>();
     disconnectedClients = new PriorityBlockingQueue<>();
     this.gson = gson;
+    messageQueue = new MessageQueue();
   }
 
   public String setClientId(Session conn, String clientId) throws InputError {
@@ -64,6 +69,10 @@ class ServerWorker {
 
   public Session getClient(String playerId) {
     return clients.getReversed(new Client(playerId));
+  }
+
+  public void sendToClient(Session client, String message) {
+    messageQueue.send(client, message);
   }
 
   public List<String> getOpenLobbies() {
@@ -93,9 +102,10 @@ class ServerWorker {
     for (HttpCookie cookie : cookies) {
       if (cookie.getName().equals("client_id")) {
         String cookieVal = cookie.getValue();
-        expiration =
-            Date.from(Instant.ofEpochMilli(Long
-                .parseLong(cookieVal.substring(cookieVal.indexOf(":") + 1))));
+        expiration = Date.from(
+            Instant.ofEpochMilli(
+                Long.parseLong(
+                    cookieVal.substring(cookieVal.indexOf(":") + 1))));
         break;
       }
     }
@@ -174,22 +184,18 @@ class ServerWorker {
     JsonObject jsonObject = new JsonObject();
     jsonObject.addProperty("command", "notify_id");
     try {
-      try {
-        trueId = setClientId(conn, clientId);
+      trueId = setClientId(conn, clientId);
 
-        jsonObject.addProperty("client_id", trueId);
-        jsonObject.addProperty("error_message", "");
-        toClient = gson.toJson(jsonObject);
-        conn.getRemote().sendString(toClient);
+      jsonObject.addProperty("client_id", trueId);
+      jsonObject.addProperty("error_message", "");
+      toClient = gson.toJson(jsonObject);
+      sendToClient(conn, toClient);
 
-      } catch (InputError e) {
-        jsonObject.addProperty("client_id", "");
-        jsonObject.addProperty("error_message", e.getMessage());
-        toClient = gson.toJson(jsonObject);
-        conn.getRemote().sendString(toClient);
-      }
-    } catch (IOException e) {
-      e.printStackTrace();
+    } catch (InputError e) {
+      jsonObject.addProperty("client_id", "");
+      jsonObject.addProperty("error_message", e.getMessage());
+      toClient = gson.toJson(jsonObject);
+      sendToClient(conn, toClient);
     }
 
     Client client = clients.get(conn);
