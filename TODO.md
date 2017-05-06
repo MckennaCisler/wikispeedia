@@ -1,29 +1,24 @@
 #### General todo
+##### Documentation
+- Stuff in docs folder
+- Demo Presentation
+- Difficulties / challenges
+  - Mckennna - Race condition
+  - Sean - Cookies / websockets?
+  - Jacob - Attractive interface
+  - Rohan - Visualizaton?
 ##### NECESSITIES
 - <b>Fix bugs</b>
   - BLOCKING 1000 Bug
 - Visualizations for history and endgame ROHAN
-- Fix content formatter
-- Deal with what happens when a player can't be on a page (/waiting for ex.)
-  - Add a "close error" callback
 - Going back (history) ROHAN
-- Documentation
-  - Stuff in docs folder
-  - Demo Presentation
-  - Difficulties / challenges
-    - Mckennna - Race condition
-    - Sean - Cookies / websockets?
-    - Jacob - Attractive interface
-    - Rohan - Visualizaton?
-  - Wikipedia RATE LIMIT
+- Wikipedia RATE LIMIT
 ##### NICETIES
 - Shortest path
   - Add the shortest-path future to WikiGame
   - Make a two-sided Dijkstra?
-- Deployment
 ##### STUFF THAT WOULD GIVE US THAT WARM FUZZY FEELING
 - Make an intermittent (or parallel... maybe do it while shortest-path finding?) DB-compare method that randomly double-checks a link list and changes it if needed
-- Music
 - Hide user's IDs from obvious places (i.e. ALL_PLAYERS) using isCurrentPlayer, etc.
 - Chat everywhere? SEAN
 

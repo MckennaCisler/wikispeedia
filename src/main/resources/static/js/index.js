@@ -45,7 +45,7 @@ $(document).ready(function () {
 			$(`#${lobbyName}`).remove();
 		}, displayServerConnError);
 	});
-	
+
 	$("#music-select").change(() => {
 		let mval = document.getElementById("music-select").options.selectedIndex;
 		setCookie('songChoice', mval);
