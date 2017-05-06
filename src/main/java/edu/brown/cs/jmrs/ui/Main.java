@@ -221,7 +221,9 @@ public final class Main {
 
         }
       } finally {
-        wikiDbConn.close();
+        if (wikiDbConn != null) {
+          wikiDbConn.close();
+        }
       }
     }
   }

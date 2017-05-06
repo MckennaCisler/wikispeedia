@@ -43,8 +43,9 @@ public class CachingWikiLinkFinder extends WikiPageLinkFinder {
         ps.setString(2, link.getDestination().url());
       }, "CREATE TABLE IF NOT EXISTS links(" + "start TEXT," + "end TEXT,"
           + "index_time DATETIME DEFAULT CURRENT_TIMESTAMP,"
-          + "PRIMARY KEY (start, end));"); // + "start-links INT," + "end-links
-                                           // INT"
+          + "PRIMARY KEY (start, end));"
+          + "CREATE INDEX IF NOT EXISTS start_index ON links (start);");
+  // +"start-links INT,"+"end-links INT"
 
   private final CacherService cacherService;
 
@@ -85,15 +86,13 @@ public class CachingWikiLinkFinder extends WikiPageLinkFinder {
    * @param cacheWorkerExecutionPercentage
    *          The desired percentage of CPU time the DB caching worker threads
    *          use.
-   * @param numThreads
-   *          The number of caching workers to spawn.
    * @param filters
    *          A series of filters to ignore links by.
    * @throws SQLException
    *           If the required table could not be created.
    */
   public CachingWikiLinkFinder(DbConn conn,
-      double cacheWorkerExecutionPercentage, int numThreads, Filter... filters)
+      double cacheWorkerExecutionPercentage, Filter... filters)
       throws SQLException {
     super(filters);
     lookup =
@@ -104,8 +103,7 @@ public class CachingWikiLinkFinder extends WikiPageLinkFinder {
             LINK_WRITER);
 
     // create worker that does batch sizes estimated to take up the desired time
-    cacherService =
-        new CacherService(cacheWorkerExecutionPercentage, numThreads);
+    cacherService = new CacherService(cacheWorkerExecutionPercentage);
   }
 
   @Override
@@ -257,8 +255,8 @@ public class CachingWikiLinkFinder extends WikiPageLinkFinder {
      * @param numThreads
      *          The number of threads to use in the ExecutorService.
      */
-    CacherService(double desiredExecutionPercentage, int numThreads) {
-      super(numThreads);
+    CacherService(double desiredExecutionPercentage) {
+      super(1); // 1 thread
       assert desiredExecutionPercentage > 0 && desiredExecutionPercentage < 1;
 
       linksToCache = new LinkedBlockingQueue<>();
@@ -267,13 +265,10 @@ public class CachingWikiLinkFinder extends WikiPageLinkFinder {
 
       Runnable worker = new CacherWorker(linksToCache, desiredExecutionTime);
 
-      for (int i = 0; i < numThreads; i++) {
-        // schedule at staggered times
-        scheduleWithFixedDelay(worker,
-            (i / numThreads) * MAX_THREAD_EXECUTE_PERIOD,
-            (long) (MAX_THREAD_EXECUTE_PERIOD - desiredExecutionTime),
-            TimeUnit.MILLISECONDS);
-      }
+      // schedule at staggered times
+      scheduleWithFixedDelay(worker, 0,
+          (long) (MAX_THREAD_EXECUTE_PERIOD - desiredExecutionTime),
+          TimeUnit.MILLISECONDS);
     }
 
     /**

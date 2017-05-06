@@ -12,6 +12,9 @@
   - Demo Presentation
 ##### NICETIES
 - Shortest path
+  - Try doing read only threadlocal conns
+  - Remove multithreaded capability for service?
+  - Add intelligent switcher if DB busy?
   - Add the shortest-path future to WikiGame
   - Make a two-sided Dijkstra?
 - Deployment

@@ -34,6 +34,26 @@ public class DbConn implements AutoCloseable {
    */
   public DbConn(String path)
       throws ClassNotFoundException, FileNotFoundException {
+    this(path, "");
+  }
+
+  /**
+   * Constructs a DbConn out of the provided Sqlite3 database, to be ready for
+   * querying.
+   *
+   * @param path
+   *          The path to the .sqlite3 database to load.
+   * @param setup
+   *          pre-commands (ex. PRAGMA commands) to execute on first connection
+   * @throws ClassNotFoundException
+   *           If the driver for Sqlite3 could not be loaded.
+   * @throws UnsupportedOperationException
+   *           If the database was not a .sqlite3 database.
+   * @throws FileNotFoundException
+   *           If database could not be found.
+   */
+  public DbConn(String path, String setup)
+      throws ClassNotFoundException, FileNotFoundException {
     Class.forName("org.sqlite.JDBC");
 
     // try to open the database (don't use ones that aren't there yet)
@@ -45,16 +65,11 @@ public class DbConn implements AutoCloseable {
       throw new FileNotFoundException("Database not found at " + path);
     }
 
-    conn = createConn("jdbc:sqlite:" + path);
-  }
-
-  private Connection createConn(String url) {
     try {
-      Connection c = DriverManager.getConnection(url);
-      try (Statement stat = c.createStatement()) {
-        stat.executeUpdate("PRAGMA foreign_keys = ON;");
+      conn = DriverManager.getConnection("jdbc:sqlite:" + path);
+      try (Statement stat = conn.createStatement()) {
+        stat.executeUpdate(setup);
       }
-      return c;
     } catch (SQLException e) {
       throw new UncheckedSqlException(e);
     }
