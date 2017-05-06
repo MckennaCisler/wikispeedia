@@ -20,6 +20,9 @@ public class WikiBodyFormatter implements ContentFormatter<WikiPage> {
     // remove geography tags
     root.select(".geography").remove();
 
+    // and coordinates tags
+    root.select(".coordinates").remove();
+
     return root;
   }
 }

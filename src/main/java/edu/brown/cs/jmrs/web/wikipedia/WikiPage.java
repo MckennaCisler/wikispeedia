@@ -7,6 +7,7 @@ import java.util.regex.Pattern;
 
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
+import org.jsoup.select.Elements;
 
 import com.google.common.cache.LoadingCache;
 import com.google.gson.JsonElement;
@@ -170,8 +171,14 @@ public class WikiPage extends Page {
    *           If the page could not be reached or loaded.
    */
   public String getBlurb() throws IOException {
-    return parsedContentOriginal().select("#mw-content-text > p").first().text()
-        .replaceAll("\\[\\d+\\]", "");
+    String para;
+    Elements paragraphs =
+        parsedContentOriginal().select("#mw-content-text > p");
+    int i = 0;
+    do {
+      para = paragraphs.get(i++).text().replaceAll("\\[\\d+\\]", "");
+    } while (para.equals("") && i < paragraphs.size());
+    return para;
   }
 
   /**
