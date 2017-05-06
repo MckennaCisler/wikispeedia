@@ -83,10 +83,10 @@ class ServerCommandHandler implements Runnable {
                 if (commandPayload.has("arguments")) {
                   lobby.init(commandPayload.get("arguments").getAsJsonObject());
                 }
-                server.lobbylessMap().remove(player.getId());
-                server.updateLobbylessPlayers();
                 lobby.addClient(player.getId());
                 player.setLobby(lobby);
+                server.lobbylessMap().remove(player.getId());
+                server.updateLobbylessPlayers();
                 jsonObject.addProperty("error_message", "");
                 toClient = gson.toJson(jsonObject);
                 server.sendToClient(conn, toClient);
@@ -98,10 +98,10 @@ class ServerCommandHandler implements Runnable {
                   throw new InputError(
                       "This client is not registered with any lobby");
                 }
-                server.lobbylessMap().put(player.getId(), player);
-                server.updateLobbylessPlayers();
                 player.getLobby().removeClient(player.getId());
                 player.setLobby(null);
+                server.lobbylessMap().put(player.getId(), player);
+                server.updateLobbylessPlayers();
                 jsonObject.addProperty("error_message", "");
                 toClient = gson.toJson(jsonObject);
                 server.sendToClient(conn, toClient);
@@ -121,10 +121,10 @@ class ServerCommandHandler implements Runnable {
                 if (playerLobby != null) {
                   playerLobby.removeClient(player.getId());
                 }
-                server.lobbylessMap().remove(player.getId());
-                server.updateLobbylessPlayers();
                 lobby2.addClient(player.getId());
                 player.setLobby(lobby2);
+                server.lobbylessMap().remove(player.getId());
+                server.updateLobbylessPlayers();
                 jsonObject.addProperty("error_message", "");
                 toClient = gson.toJson(jsonObject);
                 server.sendToClient(conn, toClient);
