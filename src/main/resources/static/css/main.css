@@ -119,8 +119,6 @@
 .top {
 	float: top;
 	height: auto;
-	border-bottom: thin solid black;
-	background: #77BEB7;
 }
 .card-header {
 	background: #D2CACF !important;
@@ -129,7 +127,7 @@
 	background: #D2CACF !important;
 }
 .title-a {
-	color: black;
+	color: white;
 	margin-left: 5px;
 	font-family: 'Rubik Mono One', sans-serif;
 }
