@@ -54,7 +54,7 @@ function displayServerConnErrorRedirectHome(error) {
 }
 
 function displayServerConnError(error) {
-    displayErrorRedirect(error.error_message, error.error_code);
+    displayError(error.error_message, error.error_code);
 }
 
 function minutesToStr(minutes) {
