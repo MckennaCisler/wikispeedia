@@ -1,6 +1,5 @@
 package edu.brown.cs.jmrs.server;
 
-import java.io.IOException;
 import java.util.function.BiFunction;
 
 import org.eclipse.jetty.websocket.api.Session;
@@ -14,6 +13,7 @@ import com.google.gson.Gson;
 import edu.brown.cs.jmrs.server.customizable.CommandInterpreter;
 import edu.brown.cs.jmrs.server.customizable.Lobby;
 import edu.brown.cs.jmrs.server.threading.GlobalThreadManager;
+import edu.brown.cs.jmrs.server.threading.MessageQueue;
 
 /**
  * User access point to server functionality, keeps functionality black-boxed.
@@ -27,6 +27,7 @@ public class Server {
   protected ServerWorker       server;
   protected CommandInterpreter interpreter;
   protected final Gson         gson;
+  protected MessageQueue       messageQueue;
 
   public Server(
       BiFunction<Server, String, ? extends Lobby> lobbyFactory,
@@ -35,14 +36,11 @@ public class Server {
     this.interpreter = interpreter;
     server = new ServerWorker(this, lobbyFactory, gson);
     this.gson = gson;
+    messageQueue = new MessageQueue();
   }
 
-  public void sendToClient(String playerId, String message) {
-    try {
-      server.getClient(playerId).getRemote().sendString(message);
-    } catch (IOException e) {
-      e.printStackTrace();
-    }
+  public void sendToClient(String clientId, String message) {
+    messageQueue.send(server.getClient(clientId), message);
   }
 
   public void closeLobby(String lobbyId) {
