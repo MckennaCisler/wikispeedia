@@ -4,6 +4,7 @@
 // Globals
 ///
 
+// TODO: Maybe some race conditions here
 const $history = $("#history");
 const $destination = $("#destination");
 const $timer = $("#timer");
@@ -21,10 +22,11 @@ let currHistoryName;
 let playerPaths = new Map();
 
 // Game info
-let startHref = "https://en.wikipedia.org/wiki/Cat"; // the start article
 let currHref; // the current article
-let destHref = "https://en.wikipedia.org/wiki/Dog"; // the end article
 let hasDrawnPlayerList;
+let docReady = false;
+let setDestinationWhenReady = false;
+let destPage;
 
 // Time
 let startTime = new Date().getTime();
@@ -32,11 +34,16 @@ let startTime = new Date().getTime();
 // TODO: Wait for server to be ready
 // TODO: Create a page run script that runs earlier
 $(document).ready(() => {
+	docReady = true;
 	resize();
 	$timer.text("0:00");
 	$title.html("<b>Loading...</b>");
 	$destination.html("<b>Loading...</b>");
 	setInterval(updateTimer, 200);
+
+	if (setDestinationWhenReady) {
+		$destination.html("<b>" + destPage + "</b>");
+	}
 });
 
 $(window).resize(resize);
@@ -62,15 +69,35 @@ serverConn.whenReadyToRecieve(() => {
 
 serverConn.whenReadyToSend(() => {
     hasDrawnPlayerList = false;
-    // $destination.html("<b>" + titleFromHref(end) + "</b>");
     currHistory = serverConn.clientId; // the player whose history is currently displayed
 
 		// wait until we have client id to register this one
-		serverConn.registerAllPlayers(drawHistoryCallback);
-
-    serverConn.getPlayers(drawHistoryCallback);
+		// serverConn.registerAllPlayers(drawHistoryCallback);
+    // serverConn.getPlayers(drawHistoryCallback);
     serverConn.goToInitialPage(drawPage, errorPage);
+		serverConn.getSettings("", GAME_STATE.STARTED, settingsCallback, settingsError);
 });
+
+///
+// Settings
+///
+function settingsCallback(settings) {
+	console.log("SETTINGS");
+	console.log(settings);
+	console.log("HEREHERHERE");
+
+	destPage = titleFromHref(settings.goalPage.name);
+	if (docReady) {
+		$destination.html("<b>" + destPage + "</b>");
+	} else {
+		setDestinationWhenReady = true;
+	}
+}
+
+function settingsError(error) {
+	console.log(error);
+	displayError("Couldn't get the game settings");
+}
 
 ///
 // Links
@@ -93,9 +120,10 @@ function drawPage(page) {
     $article.scrollTop(0);
     cleanHtml();
 
+		/*
     if (currHistory == serverConn.clientId) {
       drawHistory();
-    }
+    } */
 
     currHref = href;
   }
@@ -137,6 +165,7 @@ function cleanHtml() {
 // History
 ///
 
+/*
 function historyChange(newHistory, newHistoryName) {
   currHistory = newHistory;
   currHistoryName = newHistoryName;
@@ -173,6 +202,8 @@ function drawHistoryCallback(players) {
 
 function drawHistory() {
   playerHistory = playerPaths.get(currHistory);
+	console.log("PLAYER HISTORY");
+	console.log(playerHistory);
   html = "";
   if (playerHistory.path.length > 0) {
     startIndex = 0;
@@ -195,6 +226,14 @@ function drawHistory() {
   } else {
     $historyDropdown.html("<b>My progress</b>");
   }
+} */
+
+///
+// New history idea
+///
+
+function drawHistoryCallbackNew(players) {
+
 }
 
 ///

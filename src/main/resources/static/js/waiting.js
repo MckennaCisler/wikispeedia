@@ -130,13 +130,13 @@ $(document).ready(() => {
 	function drawFirstPage(article) {
 		"use strict";
 		$title1.html("<a href=\"" + article.href + "\" target=\"_blank\">" + article.title + "</a>");
-		// $blurb1.text(firstSentence(article.blurb));
+		$blurb1.text(article.blurb);
 	}
 
 	function drawSecondPage(article) {
 		"use strict";
 		$title2.html("<a href=\"" + article.href + "\" target=\"_blank\">" + article.title + "</a>");
-		// $blurb2.text(firstSentence(article.blurb));
+		$blurb2.text(article.blurb);
 	}
 
 	//let playersFake = [{name : "Rohan", id : "a"}, {name : "McKenna", id : "b"}, {name : "Jacob", id : "c"}, {name : "Sean", id : "d"}];
