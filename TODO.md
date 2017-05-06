@@ -3,6 +3,7 @@
 - <b>Fix bugs</b>
   - BLOCKING 1000 Bug
 - Visualizations for history and endgame ROHAN
+- Fix content formatter
 - Deal with what happens when a player can't be on a page (/waiting for ex.)
   - Add a "close error" callback
 - Going back (history) ROHAN

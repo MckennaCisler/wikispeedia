@@ -60,7 +60,7 @@ function resize() {
 }
 
 serverConn.whenReadyToRecieve(() => {
-    serverConn.registerError(displayServerConnError);
+    serverConn.registerError(displayServerConnErrorRedirectHome);
     serverConn.registerEndGame(() => {
 		setCookie('timePlayed', audio.currentTime);
         window.location.href = "end";

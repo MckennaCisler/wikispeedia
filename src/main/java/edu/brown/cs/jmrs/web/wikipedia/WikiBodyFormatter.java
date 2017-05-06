@@ -15,7 +15,6 @@ public class WikiBodyFormatter implements ContentFormatter<WikiPage> {
 
   @Override
   public Element format(Element input) {
-    // TODO: Efficient?
     Element root = input.select("#mw-content-text").first().clone();
 
     // remove geography tags

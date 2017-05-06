@@ -106,7 +106,7 @@ $(document).ready(() => {
 	// game logic handlers
 	serverConn.whenReadyToRecieve(() => {
 		"use strict";
-		serverConn.registerError(displayServerConnError);
+		serverConn.registerError(displayServerConnErrorRedirectHome);
 		serverConn.registerBeginGame(startGame);
 	});
 
