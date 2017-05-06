@@ -50,16 +50,21 @@ function resize() {
 	}
 }
 
-serverConn.ready(() => {
+serverConn.whenReadyToRecieve(() => {
     serverConn.registerError(displayServerConnError);
-
     serverConn.registerEndGame(() => {
+		setCookie('timePlayed', audio.currentTime);
         window.location.href = "end";
     });
+});
 
+serverConn.whenReadyToSend(() => {
     hasDrawnPlayerList = false;
     currHistory = serverConn.clientId; // the player whose history is currently displayed
-    serverConn.registerAllPlayers(drawHistoryCallback);
+
+		// wait until we have client id to register this one
+		serverConn.registerAllPlayers(drawHistoryCallback);
+
     serverConn.getPlayers(drawHistoryCallback);
     serverConn.goToInitialPage(drawPage, errorPage);
 		serverConn.getSettings("", settingsCallback, settingsError);
@@ -180,18 +185,18 @@ function drawHistory() {
   playerHistory = playerPaths.get(currHistory);
 	console.log(playerHistory);
   html = "";
-  if (playerHistory.length > 0) {
+  if (playerHistory.path.length > 0) {
     startIndex = 0;
-    if (playerHistory.length > 8) {
-      startIndex = playerHistory.length - 6;
+    if (playerHistory.path.length > 8) {
+      startIndex = playerHistory.path.length - 6;
       html = html + "<i>(" + startIndex + " articles before)</i><br>";
     }
 
-    for (i = startIndex; i < playerHistory.length - 1; i++) {
-      html = html + titleFromHref(playerHistory[i].url) + "<br>";
+    for (i = startIndex; i < playerHistory.path.length - 1; i++) {
+      html = html + titleFromHref(playerHistory.path[i].url) + "<br>";
     }
 
-    html = html + "<b>" + titleFromHref(playerHistory[playerHistory.length - 1].url) + "</b>";
+    html = html + "<b>" + titleFromHref(playerHistory[playerHistory.path.length - 1].url) + "</b>";
   }
 
   $history.html(html);

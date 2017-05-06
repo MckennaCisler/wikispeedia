@@ -1,6 +1,7 @@
 #### General todo
 ##### NECESSITIES
 - <b>Fix bugs</b>
+  - BLOCKING 1000 Bug
 - Visualizations for history and endgame ROHAN
 - Deal with what happens when a player can't be on a page (/waiting for ex.)
   - Add a "close error" callback
@@ -10,19 +11,16 @@
   - Stuff in docs folder
   - Demo Presentation
 ##### NICETIES
-- Mobile-friendly
 - Shortest path
   - Add the shortest-path future to WikiGame
   - Make a two-sided Dijkstra?
 - Deployment
 ##### STUFF THAT WOULD GIVE US THAT WARM FUZZY FEELING
 - Improve game generation
-- Hide user's IDs from obvious places (i.e. ALL_PLAYERS) using isCurrentPlayer, etc.
-- Chat everywhere
+- Chat everywhere? SEAN
 - Make an intermittent (or parallel... maybe do it while shortest-path finding?) DB-compare method that randomly double-checks a link list and changes it if needed
 - Music
-- Design work
-- Add small REPL parser to hang main thread.
+- Hide user's IDs from obvious places (i.e. ALL_PLAYERS) using isCurrentPlayer, etc.
 
 #### Deadlines:
 - <b>Adversary TA Meeting (Wednesday, 4/26)</b>

@@ -97,6 +97,7 @@ class ServerCommandHandler implements Runnable {
                   server.lobbylessMap().put(player.getId(), player);
                   server.updateLobbylessPlayers();
                   player.getLobby().removeClient(player.getId());
+                  player.setLobby(null);
                   jsonObject.addProperty("error_message", "");
                   toClient = gson.toJson(jsonObject);
                   conn.getRemote().sendString(toClient);

@@ -48,6 +48,7 @@ function decrement(pid) {
 	"use strict";
 	if ($("#counter").html() === "0") {
 		clearInterval(pid);
+		setCookie('timePlayed', audio.currentTime);
 		window.location.replace("play");
 	} else {
 		$("#counter").html($("#counter").html() - 1);
@@ -103,15 +104,18 @@ $(document).ready(() => {
 	});
 
 	// game logic handlers
-	serverConn.ready(() => {
+	serverConn.whenReadyToRecieve(() => {
 		"use strict";
-
 		serverConn.registerError(displayServerConnError);
+		serverConn.registerBeginGame(startGame);
+	});
+
+	serverConn.whenReadyToSend(() => {
+		// wait until we have client id to register this one
+		serverConn.registerAllPlayers(drawPlayers);
 
 		// Get player states
-		serverConn.registerAllPlayers(drawPlayers);
 		serverConn.getPlayers("", drawPlayers, displayServerConnError); // get the players in THIS lobby
-		serverConn.registerBeginGame(startGame); // TODO: Game will be 5s off in time!!!!
 
 		// Get current lobby settings
 		serverConn.getSettings("", GAME_STATE.WAITING, (settings) => {
@@ -121,7 +125,6 @@ $(document).ready(() => {
 				serverConn.getPage(settings.goalPage.name, drawSecondPage, displayServerConnError);
 			}, displayServerConnError);
 		}, displayServerConnError);
-
 	});
 
 	function drawFirstPage(article) {

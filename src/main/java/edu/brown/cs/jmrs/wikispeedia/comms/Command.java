@@ -230,7 +230,8 @@ public enum Command {
    *          The lobby to get players from.
    */
   public static void sendAllPlayers(WikiLobby lobby) {
-    Main.debugLog("All players: " + lobby.getPlayers());
+    Main.debugLog(String.format("All players in lobby '%s': %s", lobby,
+        lobby.getPlayers()));
     List<WikiPlayer> connectedPlayers =
         Functional.filter(lobby.getPlayers(), WikiPlayer::connected);
     Command.ALL_PLAYERS.sendToAll(lobby, connectedPlayers);

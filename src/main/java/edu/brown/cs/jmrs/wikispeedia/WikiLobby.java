@@ -16,6 +16,7 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonSerializationContext;
 import com.google.gson.JsonSerializer;
 
+import edu.brown.cs.jmrs.io.db.DbConn;
 import edu.brown.cs.jmrs.server.Server;
 import edu.brown.cs.jmrs.server.customizable.Lobby;
 import edu.brown.cs.jmrs.ui.Main;
@@ -37,14 +38,23 @@ import edu.brown.cs.jmrs.wikispeedia.comms.Command;
  *
  */
 public class WikiLobby implements Lobby {
-  static final LinkFinder<WikiPage> DEFAULT_LINK_FINDER =
-      new WikiPageLinkFinder(Filter.DISAMBIGUATION,
-          Filter.NON_ENGLISH_WIKIPEDIA);
-
   static final ContentFormatter<WikiPage> DEFAULT_CONTENT_FORMATTER =
       new ContentFormatterChain<WikiPage>(
           ImmutableList.of(new WikiBodyFormatter(), new WikiFooterRemover(),
               new WikiAnnotationRemover()));
+
+  static final LinkFinder<WikiPage> DEFAULT_LINK_FINDER;
+  static {
+    // try {
+    DEFAULT_LINK_FINDER =
+        new WikiPageLinkFinder(Filter.DISAMBIGUATION,
+            Filter.NON_ENGLISH_WIKIPEDIA);
+    // new CachingWikiLinkFinder(Main.getWikiDbConn(), Filter.DISAMBIGUATION,
+    // Filter.NON_ENGLISH_WIKIPEDIA);
+    // } catch (SQLException e) {
+    // throw new AssertionError("Could not initialize wikipedia database", e);
+    // }
+  }
 
   /**
    * Time to delay lobby creation by.
@@ -69,8 +79,10 @@ public class WikiLobby implements Lobby {
    *          The server it was called from.
    * @param id
    *          The id of this lobby.
+   * @param wikiDbConn
+   *          The database connection to the wikipedia database.
    */
-  public WikiLobby(Server server, String id) {
+  public WikiLobby(Server server, String id, DbConn wikiDbConn) {
     this.server = server;
     this.id = id;
     players = new HashMap<>();
@@ -274,6 +286,13 @@ public class WikiLobby implements Lobby {
   /****************************************/
   /* GETTERS */
   /****************************************/
+
+  /**
+   * @return The default LinkFinder for all lobbies, setup in this lobby.
+   */
+  public LinkFinder<WikiPage> getDefaultLinkFinder() {
+    return DEFAULT_LINK_FINDER;
+  }
 
   /**
    * @return The LinkFinder associated with this lobby's GameMode, used in
