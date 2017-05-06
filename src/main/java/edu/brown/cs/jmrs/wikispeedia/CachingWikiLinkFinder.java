@@ -186,8 +186,8 @@ public class CachingWikiLinkFinder extends WikiPageLinkFinder {
    *
    */
   class CacherWorker implements Runnable {
-    private static final int INITIAL_BATCH_SIZE = 250; // keep it low on startup
-    private static final double BATCH_SIZES_TO_AVG = 2;
+    private static final int INITIAL_BATCH_SIZE = 50; // keep it low on startup
+    private static final double BATCH_SIZES_TO_AVG = 5;
     private double desiredExecutionTime;
 
     private final BlockingQueue<Link> linksToCache;

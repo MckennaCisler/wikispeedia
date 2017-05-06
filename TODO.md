@@ -13,6 +13,8 @@
 ##### NICETIES
 - Shortest path
   - Add intelligent switcher if DB busy?
+  - Fix insane caching sizes (7000???)
+  - Make queue act like a set with .equals?
   - Add the shortest-path future to WikiGame
   - Make a two-sided Dijkstra?
 - Deployment
