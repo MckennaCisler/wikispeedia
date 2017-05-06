@@ -33,7 +33,7 @@ $(document).ready(() => {
 });
 
 serverConn.whenReadyToRecieve(() => {
-	serverConn.registerError(displayServerConnError);
+	serverConn.registerError(displayServerConnErrorRedirectHome);
 
 	// TODO: get everything interfacing with the server
 	// serverConn.registerAllPlayers("", playersCallback, displayServerConnError);

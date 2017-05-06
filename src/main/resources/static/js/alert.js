@@ -2,6 +2,10 @@
 let errNum = 0;
 function my_alert(alertText) {
 	"use strict";
+	my_alert_cb(alertText, () => {});
+}
+function my_alert_cb(alertText, callback) {
+	"use strict";
 	$("body").append(`<div class="modal fade" id="m${errNum}">
 	  <div class="modal-dialog" role="document">
 		<div class="modal-content">
@@ -17,6 +21,7 @@ function my_alert(alertText) {
 		</div>
 	  </div>
 	</div>`);
+	$(`#m${errNum} .close`).click(callback);
 	$(`#m${errNum}`).modal();
 	errNum++;
 }
