@@ -1,6 +1,5 @@
 package edu.brown.cs.jmrs.server;
 
-import java.io.IOException;
 import java.net.HttpCookie;
 import java.time.Instant;
 import java.util.Date;
@@ -220,13 +219,8 @@ class ServerWorker {
 
   private void sendLobbies(Client client) {
     if (client != null) {
-      try {
-        clients.getReversed(client).getRemote()
-            .sendString(gson.toJson(allLobbies()));
-        Main.debugLog("Open lobbies: " + getOpenLobbies());
-      } catch (IOException e) {
-        e.printStackTrace();
-      }
+      sendToClient(clients.getReversed(client), gson.toJson(allLobbies()));
+      Main.debugLog("Open lobbies: " + getOpenLobbies());
     }
   }
 
