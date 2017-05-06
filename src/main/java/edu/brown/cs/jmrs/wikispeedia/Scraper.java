@@ -19,9 +19,8 @@ import edu.brown.cs.jmrs.web.wikipedia.WikiPageLinkFinder.Filter;
  *
  */
 public class Scraper {
-
-  // underestimate
-  private static final int AVG_LINKS_PER_PAGE = 100;
+  private static final double EXECUTION_PERCENTAGE = 1;
+  private static final int AVG_LINKS_PER_PAGE = 100; // try to underestimate
 
   private final WikiPage startPage;
   private int depth;
@@ -41,7 +40,8 @@ public class Scraper {
       throws SQLException {
     this.startPage = startPage;
     depth = -1;
-    linkFinder = new CachingWikiLinkFinder(wikiDbConn, filters);
+    linkFinder =
+        new CachingWikiLinkFinder(wikiDbConn, EXECUTION_PERCENTAGE, filters);
   }
 
   /**

@@ -2,11 +2,17 @@ package edu.brown.cs.jmrs.wikispeedia;
 
 import java.io.IOException;
 import java.sql.SQLException;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.concurrent.Executor;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
+
+import org.eclipse.jetty.util.BlockingArrayQueue;
 
 import edu.brown.cs.jmrs.collect.Functional;
 import edu.brown.cs.jmrs.io.db.DbConn;
@@ -28,7 +34,8 @@ import edu.brown.cs.jmrs.web.wikipedia.WikiPageLinkFinder;
  *
  */
 public class CachingWikiLinkFinder extends WikiPageLinkFinder {
-  private static final int NUM_DB_CACHING_THREADS = 2;
+  private static final int NUM_DB_CACHING_THREADS = 1;
+
   private static final DbReader<Link> LINK_READER = new DbReader<>((rs) -> {
     // rs stores two urls; use Main cache for insides
     return new Link(new WikiPage(rs.getString(1), Main.WIKI_PAGE_DOC_CACHE),
@@ -44,7 +51,7 @@ public class CachingWikiLinkFinder extends WikiPageLinkFinder {
           + "PRIMARY KEY (start, end));"); // + "start-links INT," + "end-links
                                            // INT"
 
-  private final Executor cachingWorkers;
+  private final CacherWorker cacherWorker;
 
   private final Query<Link> lookup;
   private final Insert<Link> cacher;
@@ -52,12 +59,16 @@ public class CachingWikiLinkFinder extends WikiPageLinkFinder {
   /**
    * @param conn
    *          The conn to use to query/update the WikiPage and Link database.
+   * @param cacheWorkerExecutionPercentage
+   *          The desired percentage of CPU time the DB caching worker thread
+   *          uses.
    * @param filters
    *          A series of filters to ignore links by.
    * @throws SQLException
    *           If the required table could not be created.
    */
-  public CachingWikiLinkFinder(DbConn conn, Filter... filters)
+  public CachingWikiLinkFinder(DbConn conn,
+      double cacheWorkerExecutionPercentage, Filter... filters)
       throws SQLException {
     super(filters);
     lookup =
@@ -66,7 +77,9 @@ public class CachingWikiLinkFinder extends WikiPageLinkFinder {
         conn.makeInsert(
             "INSERT OR IGNORE INTO links (start, end) VALUES (?, ?)",
             LINK_WRITER);
-    cachingWorkers = Executors.newFixedThreadPool(NUM_DB_CACHING_THREADS);
+
+    // create worker that does batch sizes estimated to take up the desired time
+    cacherWorker = new CacherWorker(cacheWorkerExecutionPercentage);
   }
 
   @Override
@@ -78,8 +91,8 @@ public class CachingWikiLinkFinder extends WikiPageLinkFinder {
       Set<String> urls = super.links(page);
 
       // and cache them as Links (deferring to other thread)
-      cachingWorkers.execute(new CacherWorker(
-          Functional.map(urls, (url) -> new Link(page, new WikiPage(url)))));
+      cacherWorker.addLinks(
+          Functional.map(urls, (url) -> new Link(page, new WikiPage(url))));
 
       return urls;
     }
@@ -96,8 +109,8 @@ public class CachingWikiLinkFinder extends WikiPageLinkFinder {
       Set<WikiPage> pages = super.linkedPages(page);
 
       // and cache them as Links
-      cachingWorkers.execute(new CacherWorker(
-          Functional.map(pages, (dest) -> new Link(page, dest))));
+      cacherWorker
+          .addLinks(Functional.map(pages, (dest) -> new Link(page, dest)));
 
       return pages;
     }
@@ -113,7 +126,7 @@ public class CachingWikiLinkFinder extends WikiPageLinkFinder {
       Set<Link> edges = super.edges(node);
 
       // and cache them
-      cachingWorkers.execute(new CacherWorker(edges));
+      cacherWorker.addLinks(edges);
 
       return edges;
     }
@@ -127,22 +140,70 @@ public class CachingWikiLinkFinder extends WikiPageLinkFinder {
   }
 
   /**
-   * A simple runnable to enable deferring of database storage. Allows for quick
+   * A runnable to handle deferring of database storage. Allows for quick
    * responses to queries while also doing the heavy work of DB storage.
+   *
+   * Keeps a BlockingQueue of links to cache, and adds them to the database in
+   * SQL batches. The batch size is determine dynamically to meet a desired
+   * percentage of total execution time.
    *
    * @author mcisler
    *
    */
   private class CacherWorker implements Runnable {
-    private final Set<Link> linksToCache;
+    private static final int MAX_THREAD_EXECUTE_PERIOD = 2000; // ms
+    private static final int INITIAL_BATCH_SIZE = 1000;
+    private static final int BATCH_SIZES_TO_AVG = 5;
+    private double desiredExecutionTime;
 
-    CacherWorker(Set<Link> linksToCache) {
-      this.linksToCache = linksToCache;
+    private final BlockingQueue<Link> linksToCache;
+    private int curBatchSize;
+
+    /**
+     * Creates and starts a CacherWorker.
+     *
+     * @param desiredExecutionPercentage
+     *          The desired percentage of CPU time for this worker to use.
+     */
+    CacherWorker(double desiredExecutionPercentage) {
+      this.linksToCache = new BlockingArrayQueue<>(); // growable
+      this.curBatchSize = INITIAL_BATCH_SIZE;
+
+      desiredExecutionTime =
+          desiredExecutionPercentage * MAX_THREAD_EXECUTE_PERIOD;
+
+      if (desiredExecutionPercentage >= 1) {
+        ExecutorService workerExecutor = Executors.newSingleThreadExecutor();
+        workerExecutor.execute(this);
+      } else {
+        ScheduledExecutorService workerExecutor =
+            Executors.newSingleThreadScheduledExecutor();
+        workerExecutor.scheduleWithFixedDelay(this, 0L,
+            (long) (MAX_THREAD_EXECUTE_PERIOD - desiredExecutionTime),
+            TimeUnit.MILLISECONDS);
+      }
     }
 
     @Override
     public void run() {
-      cacher.insertAll(linksToCache);
+      long start = System.currentTimeMillis();
+      Set<Link> buffer = new HashSet<>(curBatchSize);
+      linksToCache.drainTo(buffer, curBatchSize);
+      cacher.insertAll(buffer);
+
+      long duration = System.currentTimeMillis() - start;
+
+      // adjust current value by deviation (ratio) off desired
+      // average last ten values (weight the new one ony a bit and the old
+      // (average) higher)
+      double newBatchSize = (duration / desiredExecutionTime) * curBatchSize;
+      curBatchSize =
+          (int) newBatchSize * 1 / BATCH_SIZES_TO_AVG
+              + curBatchSize * (BATCH_SIZES_TO_AVG - 1) / BATCH_SIZES_TO_AVG;
+    }
+
+    void addLinks(Collection<Link> links) {
+      linksToCache.addAll(links);
     }
   }
 }
