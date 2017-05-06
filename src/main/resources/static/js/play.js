@@ -21,9 +21,7 @@ let currHistoryName;
 let playerPaths = new Map();
 
 // Game info
-let startHref = "https://en.wikipedia.org/wiki/Cat"; // the start article
 let currHref; // the current article
-let destHref = "https://en.wikipedia.org/wiki/Dog"; // the end article
 let hasDrawnPlayerList;
 
 // Time
@@ -60,12 +58,24 @@ serverConn.ready(() => {
     });
 
     hasDrawnPlayerList = false;
-    // $destination.html("<b>" + titleFromHref(end) + "</b>");
     currHistory = serverConn.clientId; // the player whose history is currently displayed
     serverConn.registerAllPlayers(drawHistoryCallback);
     serverConn.getPlayers(drawHistoryCallback);
     serverConn.goToInitialPage(drawPage, errorPage);
+		serverConn.getSettings("", settingsCallback, settingsError);
 });
+
+///
+// Settings
+///
+function settingsCallback(settings) {
+	console.log("MADE IT HERE");
+	$destination.html(`<b>${titleFromHref("")}</b>`);
+}
+
+function settingsError(error) {
+	displayError("Couldn't get the game settings");
+}
 
 ///
 // Links
@@ -168,6 +178,7 @@ function drawHistoryCallback(players) {
 
 function drawHistory() {
   playerHistory = playerPaths.get(currHistory);
+	console.log(playerHistory);
   html = "";
   if (playerHistory.length > 0) {
     startIndex = 0;
