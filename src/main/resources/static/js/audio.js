@@ -31,7 +31,6 @@ $(document).ready(() => {
 	}
 	
 	let tillPlayed = getCookie('timePlayed');
-	console.log(tillPlayed);
 	if (tillPlayed) {
 		audio.currentTime = tillPlayed;
 	}
@@ -42,9 +41,7 @@ $(document).ready(() => {
 function update() {
 	"use strict";
 	let tillPlayed = getCookie('timePlayed');
-	console.log(tillPlayed);
 	let song = getCookie('songChoice');
-	console.log(song);
 	if (song == 0) {
 		audio.pause();
 	} else if (song == 1) {
