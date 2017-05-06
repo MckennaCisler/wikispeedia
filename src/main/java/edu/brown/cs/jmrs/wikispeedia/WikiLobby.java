@@ -160,6 +160,10 @@ public class WikiLobby implements Lobby {
   public void removeClient(String playerId) {
     this.players.remove(playerId);
     Command.sendAllPlayers(this);
+
+    if (players.size() == 0) {
+      server.closeLobby(id);
+    }
   }
 
   @Override

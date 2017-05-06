@@ -1,6 +1,5 @@
 package edu.brown.cs.jmrs.server;
 
-import java.io.IOException;
 import java.util.function.BiFunction;
 
 import org.eclipse.jetty.websocket.api.Session;
@@ -37,12 +36,8 @@ public class Server {
     this.gson = gson;
   }
 
-  public void sendToClient(String playerId, String message) {
-    try {
-      server.getClient(playerId).getRemote().sendString(message);
-    } catch (IOException e) {
-      e.printStackTrace();
-    }
+  public void sendToClient(String clientId, String message) {
+    server.sendToClient(server.getClient(clientId), message);
   }
 
   public void closeLobby(String lobbyId) {
