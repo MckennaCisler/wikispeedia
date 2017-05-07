@@ -12,8 +12,9 @@
   - Check that we use equalsAfterRedirect
   - check that going to pages works with apostrophes, etc. (ACROSS server-client actions)
   - End with different titles Newton, Isaac Newton
-  - Make shortest path work on end.js
-- Visualizations for history and endgame ROHAN
+  - Coordinates still show
+- Get settings on endpage -> hide content, show end differently (ROHAN)
+- Make end page work with shortest path (ROHAN)
 - Going back (history)  
 - Run ContentFormatter on blurb
 ##### NICETIES
@@ -38,7 +39,6 @@
 #### Rohan
 - & in links (i.e. R&B)
 - Geographic coordinates system
-- Make videos work?
 
 #### Sean
 

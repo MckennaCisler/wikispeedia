@@ -8,6 +8,7 @@ let leaderboard = true;
 let recentPlayers = [];
 
 let endPage = "";
+let shortestPath = false;
 
 $(document).ready(() => {
 	resize();
@@ -55,7 +56,18 @@ serverConn.whenReadyToRecieve(() => {
 
 serverConn.whenReadyToSend(() => {
 	serverConn.getPlayers("", playersCallback, displayServerConnError);
+	serverConn.getSettings("", GAME_STATE.ENDED, settingsCallback, settingsError);
 });
+
+function settingsCallback(settings) {
+	shortestPath = settings.gameMode == 1;
+	console.log(settings);
+	endPage = settings.goalPage.name;
+}
+
+function settingsError(error) {
+	// TODO
+}
 
 // Updates the player to time map and redraws the results
 function playersCallback(players) {
@@ -125,7 +137,7 @@ function drawResults(players) {
 
 	$("#stats").html("");
 	// TODO: Only if it's time trial
-	if (winners.length > 0) {
+	if (winners.length > 0 && !shortestPath) {
 		$("#stats").html(`<br><i>Winning time: ${millisecondsToStr(winners[0].playTime)}</i>`);
 	}
 }
@@ -150,7 +162,7 @@ function drawHistory(players) {
 	inContainer.attr("style:width", "80%");
 	inContainer.attr("style:height", "" + height + "px");
 
-	let margins = {"left" : 90, "top" : 10, "right" : 90, "bottom" : 30};
+	let margins = {"left" : 120, "top" : 10, "right" : 90, "bottom" : 30};
 	let buffer = 0;
 	width = document.getElementById("svg").getBoundingClientRect().width;
 
@@ -208,6 +220,8 @@ function drawHistory(players) {
 
 	let color = function(d) {
 	  let pageName = d.step.page.name;
+		console.log(pageName);
+		console.log(endPage);
 	  if (pageName == endPage) {
 	    return "#222";
 	  } else {
@@ -247,21 +261,25 @@ function drawHistory(players) {
 	    y = $(this).position().top;
 
 	    tooltip.transition()
-	       .duration(200)
-	       .style("opacity", .9);
+			       .duration(200)
+			       .style("opacity", .9);
+
 	    tooltip.html(titleFromHref(d.step.page.name))
 	      .style("left", "" + (x + 7) + "px")
 	      .style("top", "" + (y - 26) + "px");
 
 	    r = d3.select(this).attr("r");
+			console.log(r);
 	    d3.select(this).transition()
-	      .duration(200)
+				.duration(200)
 	      .attr("r", r * 1.2);
 	  })
 	  .on("mouseout", function(d) {
-	    tooltip.transition()
-	       .duration(200)
-	       .style("opacity", 0);
+	    tooltip.style("opacity", 0);
+
+		  tooltip.html("")
+		 			   .style("left", "0px")
+						 .style("right", "0px");
 
 	    d3.select(this).transition()
 	      .duration(200)

@@ -166,10 +166,16 @@
 	align-self: flex-end;
 }
 .me_li {
+	position: relative;
 	display: flex;
     flex-direction: row;
     justify-content: space-between;
     width: 100%;
+}
+#me {
+	position: absolute;
+	top: 50%;
+	transform: translateY(-50%);
 }
 .chat-bubble {
 	border-radius: 3px;
