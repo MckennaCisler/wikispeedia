@@ -13,6 +13,8 @@
   - Player must join a lobby bug
   - Check that we use equalsAfterRedirect
   - check that going to pages works with apostrophes, etc. (ACROSS server-client actions)
+  - End with different titles Newton, Isaac Newton
+  - Make shortest path work on end.js
 - Visualizations for history and endgame ROHAN
 - Going back (history)
 - Run ContentFormatter on blurb

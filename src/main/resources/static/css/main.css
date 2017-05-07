@@ -16,6 +16,13 @@
 	flex : 1;
 }
 
+.axis path,
+.axis line {
+  fill: none;
+  stroke: #000;
+  shape-rendering: crispEdges;
+}
+
 .f1 {
 	flex: 1 auto;
 }

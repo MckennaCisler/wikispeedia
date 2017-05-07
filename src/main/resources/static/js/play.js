@@ -182,7 +182,7 @@ function newUpdate(players) {
 			page = newPath[j];
 			if (j != 0) {
 	 			if (player.id == serverConn.clientId) {
-					$updates.prepend(`<i>You visited ${"\"" + titleFromHref(page.page.name) + "\""}<br></i>`);
+					$updates.prepend(`<b>You visited ${"\"" + titleFromHref(page.page.name) + "\""}<br></b>`);
 				} else {
 					$updates.prepend(player.name + ` visited ${"\"" + titleFromHref(page.page.name) + "\""}<br>`);
 				}
