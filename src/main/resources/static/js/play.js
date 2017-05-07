@@ -151,7 +151,7 @@ function cleanHtml() {
 
   $article.find("img").each(function(index, element) {
     let src = "" + $(element).attr("src");
-    console.log(src);
+    // console.log(src);
 
     if (!src.startsWith("https:")) {
       $(element).attr("src", "https:" + src);
