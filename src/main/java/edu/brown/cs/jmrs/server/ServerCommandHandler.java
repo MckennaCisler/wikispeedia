@@ -171,8 +171,10 @@ class ServerCommandHandler implements Runnable {
       // except when calling the value of an associated future:
       // http://stackoverflow.com/questions/2248131/
       // handling-exceptions-from-java-executorservice-tasks
-      e.printStackTrace();
-      throw e;
+      JsonObject jsonObject = new JsonObject();
+      jsonObject.addProperty("error_message", e.getMessage());
+      String toClient = gson.toJson(jsonObject);
+      server.sendToClient(conn, toClient);
     }
   }
 
