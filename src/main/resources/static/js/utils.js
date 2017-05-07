@@ -31,7 +31,7 @@ function firstSentence(paragraph) {
 
 // Helper to get callback
 function hrefHelper(f, href) {
-  return "javascript:" + f + "('" + href + "')";
+  return "javascript:" + f + "('" + encodeURI(href) + "')";
 }
 
 function displayError(msg, error_code) {
