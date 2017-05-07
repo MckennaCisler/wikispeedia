@@ -1,1 +1,1 @@
-web: java -cp target/dependency/*:target/classes edu.brown.cs.jmrs.ui.Main
+web: bash run --gui --spark-port 5000

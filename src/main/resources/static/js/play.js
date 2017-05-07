@@ -4,27 +4,23 @@
 // Globals
 ///
 
-const $history = $("#history");
+// TODO: Maybe some race conditions here
+const $updates = $("#updates");
 const $destination = $("#destination");
 const $timer = $("#timer");
-const $historyDropdown = $("#history-dropdown");
-const $historyDropdownList = $("#history-dropdown-list");
 
 const $title = $("#title");
 const $article = $("#article");
-
-let ding = new Audio('lib/assets/ding.mp3');
-let currHistory;
-let currHistoryName;
 
 // Player info
 let playerPaths = new Map();
 
 // Game info
-let startHref = "https://en.wikipedia.org/wiki/Cat"; // the start article
 let currHref; // the current article
-let destHref = "https://en.wikipedia.org/wiki/Dog"; // the end article
 let hasDrawnPlayerList;
+let docReady = false;
+let setDestinationWhenReady = false;
+let destPage;
 
 // Time
 let startTime = new Date().getTime();
@@ -32,11 +28,17 @@ let startTime = new Date().getTime();
 // TODO: Wait for server to be ready
 // TODO: Create a page run script that runs earlier
 $(document).ready(() => {
+	docReady = true;
 	resize();
 	$timer.text("0:00");
 	$title.html("<b>Loading...</b>");
 	$destination.html("<b>Loading...</b>");
+	$updates.append("<i>Game started</i>");
 	setInterval(updateTimer, 200);
+
+	if (setDestinationWhenReady) {
+		$destination.html("<b>" + destPage + "</b>");
+	}
 });
 
 $(window).resize(resize);
@@ -53,23 +55,52 @@ function resize() {
 }
 
 serverConn.whenReadyToRecieve(() => {
-    serverConn.registerError(displayServerConnError);
+    serverConn.registerError(displayServerConnErrorRedirectHome);
+		serverConn.registerAllPlayers(newUpdate);
     serverConn.registerEndGame(() => {
+		setCookie('timePlayed', audio.currentTime);
         window.location.href = "end";
     });
 });
 
 serverConn.whenReadyToSend(() => {
     hasDrawnPlayerList = false;
-    // $destination.html("<b>" + titleFromHref(end) + "</b>");
     currHistory = serverConn.clientId; // the player whose history is currently displayed
 
 		// wait until we have client id to register this one
-		serverConn.registerAllPlayers(drawHistoryCallback);
-
-    serverConn.getPlayers(drawHistoryCallback);
+    // serverConn.getPlayers(newUpdate);
     serverConn.goToInitialPage(drawPage, errorPage);
+		serverConn.getSettings("", GAME_STATE.STARTED, settingsCallback, settingsError);
+
+		window.onpopstate = (function(event) {
+			if (event.state.href !== undefined) {
+		  	serverConn.goBackPage(event.state.href, drawPage, errorPage);
+			} else {
+				console.log("Unknown state was popped");
+			}
+		}).bind(this);
 });
+
+///
+// Settings
+///
+function settingsCallback(settings) {
+	console.log("SETTINGS");
+	console.log(settings);
+	console.log("HEREHERHERE");
+
+	destPage = titleFromHref(settings.goalPage.name);
+	if (docReady) {
+		$destination.html("<b>" + destPage + "</b>");
+	} else {
+		setDestinationWhenReady = true;
+	}
+}
+
+function settingsError(error) {
+	console.log(error);
+	displayError("Couldn't get the game settings");
+}
 
 ///
 // Links
@@ -86,15 +117,14 @@ function drawPage(page) {
   href = page.href;
   title = titleFromHref(href);
 
+	// add to browser history
+	history.pushState({"href": href}, "", "");
+
   if (href != currHref) {
     $title.html("<b>" + title + "</b>");
     $article.html(html);
     $article.scrollTop(0);
     cleanHtml();
-
-    if (currHistory == serverConn.clientId) {
-      drawHistory();
-    }
 
     currHref = href;
   }
@@ -103,6 +133,7 @@ function drawPage(page) {
 // Error callback
 function errorPage(error) {
   displayError("Couldn't go to page: " + error.error_message);
+	drawPage(error.payload);
 }
 
 // Replaces the links with callbacks
@@ -136,63 +167,29 @@ function cleanHtml() {
 // History
 ///
 
-function historyChange(newHistory, newHistoryName) {
-  currHistory = newHistory;
-  currHistoryName = newHistoryName;
-  drawHistory();
-}
-
-function drawHistoryCallback(players) {
+function newUpdate(players) {
   for (let i = 0; i < players.length; i++) {
-    player = players[i];
+    let player = players[i];
+		let newPath = player.path;
+		let oldPath = playerPaths.get(player.id);
+		let oldPathLength = 0;
+
+		if (oldPath != undefined) {
+			oldPathLength = oldPath.length;
+		}
+
+		for (let j = oldPathLength; j < newPath.length; j++) {
+			page = newPath[j];
+			if (j != 0) {
+	 			if (player.id == serverConn.clientId) {
+					$updates.prepend(`<i>You visited ${"\"" + titleFromHref(page.page.name) + "\""}<br></i>`);
+				} else {
+					$updates.prepend(player.name + ` visited ${"\"" + titleFromHref(page.page.name) + "\""}<br>`);
+				}
+			}
+		}
+
     playerPaths.set(player.id, player.path);
-
-    if (!hasDrawnPlayerList) {
-      // Something like this: <li><a href="javascript:historyChange('Player 1')"><b>Me</b></a></li>
-      playerHtml = "";
-      if (player.id == serverConn.clientId) {
-        playerHtml = "<b>Me</b>";
-      } else {
-        playerHtml = player.name;
-      }
-
-      $historyDropdownList.append(
-        "<li><a href=\""
-        + hrefHelper("historyChange", player.id + "', '" + player.name)
-        + "\">" + playerHtml + "</a></li>");
-    }
-  }
-
-  if (!hasDrawnPlayerList) {
-    hasDrawnPlayerList = true;
-  }
-
-  drawHistory();
-}
-
-function drawHistory() {
-  playerHistory = playerPaths.get(currHistory);
-  html = "";
-  if (playerHistory.path.length > 0) {
-    startIndex = 0;
-    if (playerHistory.path.length > 8) {
-      startIndex = playerHistory.path.length - 6;
-      html = html + "<i>(" + startIndex + " articles before)</i><br>";
-    }
-
-    for (i = startIndex; i < playerHistory.path.length - 1; i++) {
-      html = html + titleFromHref(playerHistory.path[i].url) + "<br>";
-    }
-
-    html = html + "<b>" + titleFromHref(playerHistory[playerHistory.path.length - 1].url) + "</b>";
-  }
-
-  $history.html(html);
-
-  if (currHistory != serverConn.clientId) {
-    $historyDropdown.html(currHistoryName + "'s progress");
-  } else {
-    $historyDropdown.html("<b>My progress</b>");
   }
 }
 

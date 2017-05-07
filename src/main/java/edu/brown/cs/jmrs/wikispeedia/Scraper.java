@@ -61,7 +61,8 @@ public class Scraper {
     try {
       searchLinks = linkFinder.linkedPages(startPage);
     } catch (IOException e) {
-      throw new AssertionError("Start page not reachable: " + e.getMessage(),
+      throw new AssertionError(
+          "Start page not reachable: " + e.getMessage(),
           e);
     }
 
@@ -71,8 +72,11 @@ public class Scraper {
         try {
           Set<WikiPage> linksOfPage = linkFinder.linkedPages(page);
           nextSearchLinks.addAll(linksOfPage);
-          System.out.printf(String.format("Found %d links at page %s\n",
-              linksOfPage.size(), page.toString()));
+          System.out.printf(
+              String.format(
+                  "Found %d links at page %s\n",
+                  linksOfPage.size(),
+                  page.toString()));
         } catch (IOException e) {
           // skip ones that cannot be accessed
           continue;
@@ -84,9 +88,11 @@ public class Scraper {
       curDepth++;
 
       // for debugging
-      System.out.printf(String.format(
-          "**** Arrived at depth %d; iterating over %d links ****\n\n",
-          curDepth, searchLinks.size()));
+      System.out.printf(
+          String.format(
+              "**** Arrived at depth %d; iterating over %d links ****\n\n",
+              curDepth,
+              searchLinks.size()));
     }
 
   }
@@ -102,7 +108,8 @@ public class Scraper {
     try {
       links = linkFinder.linkedPages(startPage);
     } catch (IOException e) {
-      throw new AssertionError("Start page not reachable: " + e.getMessage(),
+      throw new AssertionError(
+          "Start page not reachable: " + e.getMessage(),
           e);
     }
 
@@ -123,8 +130,8 @@ public class Scraper {
       // then choose one for the next iteration (cycling until we get one)
       assert accessiblePages.size() > 0;
 
-      WikiPage randPage =
-          accessiblePages.get((int) (Math.random() * accessiblePages.size()));
+      WikiPage randPage = accessiblePages
+          .get((int) (Math.random() * accessiblePages.size()));
 
       try {
         links = linkFinder.linkedPages(randPage);

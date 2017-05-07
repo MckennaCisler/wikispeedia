@@ -1,15 +1,28 @@
+### Post demo
+ - Have a preset path
+ - Talk less about difficulties
+ - More confidence
+ - leader board choice on end
+ - set your own pages
+ - Practice
+
 #### General todo
+##### Documentation
+- Stuff in docs folder
+- Demo Presentation
+- Difficulties / challenges
+  - Mckennna - Race condition
+  - Sean - Cookies / websockets?
+  - Jacob - Attractive interface
+  - Rohan - Visualizaton?
 ##### NECESSITIES
 - <b>Fix bugs</b>
   - BLOCKING 1000 Bug
+  - Check that we use equalsAfterRedirect
+  - check that going to pages works with apostrophes, etc. (ACROSS server-client actions)
 - Visualizations for history and endgame ROHAN
-- Deal with what happens when a player can't be on a page (/waiting for ex.)
-  - Add a "close error" callback
 - Going back (history) ROHAN
 - Wikipedia RATE LIMIT
-- Documentation
-  - Stuff in docs folder
-  - Demo Presentation
 ##### NICETIES
 - Shortest path
   - Add intelligent switcher if DB busy?
@@ -17,13 +30,10 @@
   - Make queue act like a set with .equals?
   - Add the shortest-path future to WikiGame
   - Make a two-sided Dijkstra?
-- Deployment
 ##### STUFF THAT WOULD GIVE US THAT WARM FUZZY FEELING
-- Improve game generation
-- Chat everywhere? SEAN
 - Make an intermittent (or parallel... maybe do it while shortest-path finding?) DB-compare method that randomly double-checks a link list and changes it if needed
-- Music
 - Hide user's IDs from obvious places (i.e. ALL_PLAYERS) using isCurrentPlayer, etc.
+- Chat everywhere? SEAN
 
 #### Deadlines:
 - <b>Adversary TA Meeting (Wednesday, 4/26)</b>
@@ -41,14 +51,8 @@
 #### Sean
 
 #### Mckenna
-Core Functionality
-  Core
-      TIMING
-          When to start (5s countdown in beginning, etc.)
-
 Wiki Pages
     Be explicit with variable names (page name vs. href!)
-    Deal with redirects with URL!!! (hascode, equals, etc.!)
     Change link parsing to use input stream (as an OPTION?)
     DEAL WITH THE FACT THAT WIKIPEDIA HAS A RATE LIMIT
     Use Trie for link storage?

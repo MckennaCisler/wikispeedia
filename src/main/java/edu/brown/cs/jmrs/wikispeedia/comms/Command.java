@@ -28,6 +28,8 @@ public enum Command {
   GET_SETTINGS("get_settings", CommandType.INCOMING, "lobby_id", "state"), //
   FORCE_BEGIN_GAME("force_begin_game", CommandType.INCOMING), //
   GET_PAGE("get_page", CommandType.INCOMING, "page_name"), //
+  SEND_MESSAGE("send_message", CommandType.INCOMING, "message"), //
+  GET_MESSAGES("get_messages", CommandType.INCOMING/* , "date_since" */), //
   // Player-specific commands
   SET_USERNAME("set_username", CommandType.INCOMING, "username"), //
   SET_PLAYER_STATE("set_player_state", CommandType.INCOMING, "state"), //
@@ -45,6 +47,7 @@ public enum Command {
   RETURN_SET_USERNAME("return_set_username", CommandType.RESPONSE), //
   RETURN_GOTO_PAGE("return_goto_page", CommandType.RESPONSE), //
   RETURN_PATH("return_path", CommandType.RESPONSE), //
+  RETURN_MESSAGES("return_messages", CommandType.RESPONSE), //
 
   /**
    * OUTGOING Server Commands (see below for constructions).
@@ -73,9 +76,9 @@ public enum Command {
     WAITING, STARTED, ENDED
   }
 
-  private final String command;
+  private final String      command;
   private final CommandType type;
-  private String[] args;
+  private String[]          args;
 
   /**
    * Creates a particular defined command based on command.
@@ -170,7 +173,10 @@ public enum Command {
    * @param errorMessage
    *          An error message to send as well.
    */
-  public void send(Server server, String clientId, Object data,
+  public void send(
+      Server server,
+      String clientId,
+      Object data,
       String errorMessage) {
     server.sendToClient(clientId, build(data, errorMessage));
   }
@@ -185,7 +191,9 @@ public enum Command {
    * @param errorMessage
    *          The error message.
    */
-  public static void sendError(Server server, String clientId,
+  public static void sendError(
+      Server server,
+      String clientId,
       String errorMessage) {
     Main.debugLog("Command.ERROR sent: " + errorMessage);
     ERROR.send(server, clientId, ImmutableMap.of(), errorMessage);
@@ -230,10 +238,13 @@ public enum Command {
    *          The lobby to get players from.
    */
   public static void sendAllPlayers(WikiLobby lobby) {
-    Main.debugLog(String.format("All players in lobby '%s': %s", lobby,
-        lobby.getPlayers()));
-    List<WikiPlayer> connectedPlayers =
-        Functional.filter(lobby.getPlayers(), WikiPlayer::connected);
+    Main.debugLog(
+        String.format(
+            "All players in lobby '%s': %s",
+            lobby,
+            lobby.getPlayers()));
+    List<WikiPlayer> connectedPlayers = Functional
+        .filter(lobby.getPlayers(), WikiPlayer::connected);
     Command.ALL_PLAYERS.sendToAll(lobby, connectedPlayers);
   }
 

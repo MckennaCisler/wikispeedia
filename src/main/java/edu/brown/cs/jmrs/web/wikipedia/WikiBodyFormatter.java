@@ -15,11 +15,13 @@ public class WikiBodyFormatter implements ContentFormatter<WikiPage> {
 
   @Override
   public Element format(Element input) {
-    // TODO: Efficient?
     Element root = input.select("#mw-content-text").first().clone();
 
     // remove geography tags
     root.select(".geography").remove();
+
+    // and coordinates tags
+    root.select("#coordinates").remove();
 
     return root;
   }

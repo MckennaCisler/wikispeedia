@@ -39,19 +39,30 @@ function displayError(msg, error_code) {
     //alert(msg);
 }
 
+function displayErrorRedirect(msg, redirect, error_code) {
+    my_alert_cb(msg, () => {
+      window.location.href = redirect;
+    });
+}
+
 function clearError() {
     // TODO
+}
+
+function displayServerConnErrorRedirectHome(error) {
+    displayErrorRedirect(error.error_message, "/", error.error_code);
 }
 
 function displayServerConnError(error) {
     displayError(error.error_message, error.error_code);
 }
 
-function minutesToStr(minutes) {
-  let seconds = Math.floor(((minutes - Math.floor(minutes)) * 60));
+function millisecondsToStr(milliseconds) {
+  let minutes = Math.floor(milliseconds / 60000);
+  let seconds = Math.floor((milliseconds - minutes * 60000) / 1000);
   if (seconds < 10) {
     seconds = "0" + seconds;
   }
 
-  return "" + Math.floor(minutes) + ":" + seconds;
+  return "" + minutes + ":" + seconds;
 }

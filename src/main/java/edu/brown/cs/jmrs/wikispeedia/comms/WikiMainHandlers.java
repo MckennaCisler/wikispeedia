@@ -24,11 +24,7 @@ public class WikiMainHandlers implements SparkHandlers {
     Spark.get("/play", new StaticHandler("play.html"), freeMarker);
     Spark.get("/waiting", new StaticHandler("waiting.html"), freeMarker);
     Spark.get("/end", new StaticHandler("end.html"), freeMarker);
-    Spark.get("/404", new StaticHandler("404.html"), freeMarker);
-    Spark.notFound(((req, res) -> {
-      res.redirect("/404");
-      return "";
-    }));
+    Spark.get("/error", new StaticHandler("404.html"), freeMarker);
   }
 
   /**

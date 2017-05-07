@@ -1,9 +1,11 @@
 package edu.brown.cs.jmrs.wikispeedia;
 
+import java.io.IOException;
 import java.lang.reflect.Type;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.ArrayList;
+import java.util.Objects;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
@@ -55,6 +57,27 @@ public class WikiPath extends ArrayList<Visit> {
    */
   public WikiPage end() {
     return get(size() - 1).getPage();
+  }
+
+  /**
+   * @param page
+   *          The page to check for.
+   * @return Whether page is in this path.
+   */
+  public boolean contains(WikiPage page) {
+    for (Visit visit : this) {
+      try {
+        // try to do deep equality, but if it fails revert to shallow
+        if (visit.getPage().equalAfterRedirect(page)) {
+          return true;
+        }
+      } catch (IOException e) {
+        if (visit.getPage().equals(page)) {
+          return true;
+        }
+      }
+    }
+    return false;
   }
 
   /**
@@ -119,6 +142,31 @@ public class WikiPath extends ArrayList<Visit> {
      */
     public final WikiPage getPage() {
       return page;
+    }
+
+    @Override
+    public int hashCode() {
+      return Objects.hash(arrivalTime, page);
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+      if (this == obj) {
+        return true;
+      }
+      if (obj == null) {
+        return false;
+      }
+      if (!(obj instanceof Visit)) {
+        return false;
+      }
+      Visit other = (Visit) obj;
+      return other.arrivalTime == arrivalTime && other.page.equals(page);
+    }
+
+    @Override
+    public String toString() {
+      return String.format("%s at %s", page, arrivalTime);
     }
   }
 

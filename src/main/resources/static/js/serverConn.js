@@ -111,6 +111,19 @@ const Command = {
               return { "page_name" : page_name };
           }
     },
+    SEND_MESSAGE : {
+  		name: "send_message",
+  		type: COMMAND_TYPE.INCOMING,
+  		construct: (message) => {
+              return { "message" : message };
+          }
+    },
+    GET_MESSAGES : {
+  		name: "get_messages",
+      responseName: "return_messages",
+  		type: COMMAND_TYPE.INCOMING,
+  		construct: () => { return {}; }
+    },
     // Player-specific commands
     SET_USERNAME : {
   		name: "set_username",
@@ -143,15 +156,17 @@ const Command = {
   		name: "go_back_page",
       responseName: "return_goto_page",
   		type: COMMAND_TYPE.INCOMING,
-  		construct: () => { return {} }
+  		construct: (page_name) => {
+          return {"page_name" : page_name};
+      }
 	  },
     GET_PATH : {
   		name: "get_path",
       responseName: "return_path",
   		type: COMMAND_TYPE.INCOMING,
-          construct: (player_id) => {
-              return {"player_id" : player_id}
-          }
+      construct: (player_id) => {
+          return {"player_id" : player_id}
+      }
 	  },
     /**
      * RESPONSEs to INCOMING Commands. (MOST are stored as references in the GET_ objects)
@@ -278,10 +293,17 @@ class ServerConn {
         this._send(Command.GOTO_PAGE, callback, errCallback, ["", true]);
     }
 
-    goBackPage(callback, errCallback) {
-        this._send(Command.GO_BACK_PAGE, callback, errCallback);
+    goBackPage(page_name, callback, errCallback) {
+        this._send(Command.GO_BACK_PAGE, callback, errCallback, [page_name]);
     }
 
+		getMessages(callback, errCallback) {
+				this._send(Command.GET_MESSAGES, callback, errCallback, [])
+		}
+
+		sendMessage(message) {
+			this._send(Command.SEND_MESSAGE, () => {}, () => {}, [message]);
+		}
 
     getPage(page_name, callback, errCallback) {
         this._send(Command.GET_PAGE, callback, errCallback, [page_name]);
@@ -481,61 +503,3 @@ class ServerConn {
  * And also does not need the DOM
  */
 serverConn = new ServerConn(window.location.host + "/websocket");
-
-
-
-/**
- * TESTING
- */
-// serverConn.ready(() => {
-//     serverConn.startLobby("CRAZY LIT TESTING LOBBY", () => {
-//      serverConn.getPlayers("CRAZY LIT TESTING LOBBY",
-//          (players) => {
-//              console.log("SUCCESS: ");
-//              console.log(players);
-//          }, console.log);
-//
-//     }, console.log);
-
-    //
-    // getTime(callback, errCallback) {
-    //     this._send(Command.GET_TIME, callback, errCallback, []);
-    // }
-    //
-    // getSettings(lobby_id, callback, errCallback) {
-    //     this._send(Command.GET_SETTINGS, callback, errCallback, [lobby_id]);
-    // }
-    //
-    // gotoPage(page_name, callback, errCallback) {
-    //     this._send(Command.GOTO_PAGE, callback, errCallback, [page_name]);
-    // }
-    //
-    // getPage(page_name, callback, errCallback) {
-    //     this._send(Command.GET_PAGE, callback, errCallback, [page_name]);
-    // }
-    //
-    // getPath(player_id, callback, errCallback) {
-    //     this._send(Command.GET_PATH, callback, errCallback, [player_id]);
-    // }
-    //
-    // forceBeginGame(callback, errCallback) {
-    //     this._send(Command.FORCE_BEGIN_GAME, callback, errCallback, []);
-    // }
-    //
-    // // set lobby_id to null or undefined to generate a random one
-    // startLobby(lobby_id, callback, errCallback) {
-    //     this._send(Command.START_LOBBY, callback, errCallback, [lobby_id]);
-    // }
-    //
-    // leaveLobby(callback, errCallback) {
-    //     this._send(Command.LEAVE_LOBBY, callback, errCallback, []);
-    // }
-    //
-    // joinLobby(lobby_id, callback, errCallback) {
-    //     this._send(Command.JOIN_LOBBY, callback, errCallback, [lobby_id]);
-    // }
-    //
-    // getLobbies(callback, errCallback) {
-    //     this._send(Command.GET_LOBBIES, callback, errCallback, []);
-    // }
-// });

@@ -13,6 +13,8 @@
 	<script src="js/alert.js"></script>
 	<link rel="import" href="lib/chat.html">
 	<script src="js/chat.js"></script>
+	<script src="js/resize.js"></script>
+	<script src="js/audio.js"></script>
 	<script src="js/utils.js"></script>
 	<script src="js/end.js"></script>
 
@@ -40,16 +42,32 @@
 </head>
 <body>
 	<div class="top">
-		<h1 style="margin-left: 5px; margin-top: 10px; display: inline-block;" title="Go back to the main screen"><a class="title-a" href="/">Wikispeedia</a></h1>
+		<h1 style="margin-left: 10px; margin-top: 10px; display: inline-block;" title="Go back to the main screen"><a class="title-a" href="/">Wikispeedia</a></h1>
 		<button id="chat_button" style="float: right;" class="btn btn-secondary mr-2 mt-2">Chat</button>
 	</div>
 
 	<div class="container-fluid row main_content">
 		<div class="col">
 			<div class="card card-default">
-				<h3 class="card-header" id="winner"></h3>
+				<div class="card-header">
+					<h3 id="winner"></h3>
+					<div id="disp-buttons" class="btn-group" data-toggle="buttons">
+						<label class="btn btn-secondary active">
+							<input type="radio" name="display-type" id="time" checked>Leader board
+						</label>
+						<label class="btn btn-secondary">
+							<input type="radio" name="display-type" id="clicks">History
+						</label>
+					</div>
+				</div>
 				<div class="card-block">
 					<table class="table" id="leaderboard">
+						<thead>
+							<tr>
+								<th>Name</th>
+								<th># of clicks</th>
+							</tr>
+						</thead>
 					</table>
 				</div>
 				<div class="card-footer">

@@ -8,27 +8,25 @@
 	flex: 1;
 }
 
+#update-panel {
+	flex : 1;
+}
+
 .f1 {
 	flex: 1 auto;
 }
 
-#history {
-	text-align: left;
+#update-label {
+	text-align: center;
 	font-size: small;
 }
 
-#history-label {
-	text-align: left;
+#updates {
 	font-size: small;
 }
 
-#history-dropdown {
-	font-size: x-small;
-	border-color: #e52d27;
-}
-
-#history-panel {
-	
+#update-p {
+	overflow-y: scroll;
 }
 
 #destination {
@@ -121,8 +119,6 @@
 .top {
 	float: top;
 	height: auto;
-	border-bottom: thin solid black;
-	background: #77BEB7;
 }
 .card-header {
 	background: #D2CACF !important;
@@ -131,9 +127,12 @@
 	background: #D2CACF !important;
 }
 .title-a {
-	color: black;
+	color: white;
 	margin-left: 5px;
 	font-family: 'Rubik Mono One', sans-serif;
+}
+.title-a:hover {
+	color: lightsteelblue !important;
 }
 .main_content {
 	margin-top: 1em;
@@ -193,6 +192,14 @@
 	border-left: thin solid black;
 }
 
+#disp-buttons {
+	position: absolute;
+	right: 0%;
+	top: 0%;
+	padding-top: 10px;
+    padding-right: 10px;
+}
+
 .my_success {
 	color: white;
 	background-color: #83d1c9;
@@ -225,40 +232,40 @@ h3.card-header {
 .loader,
 .loader:before,
 .loader:after {
-  background: black;
-  -webkit-animation: load1 1s infinite ease-in-out;
-  animation: load1 1s infinite ease-in-out;
-  width: 1em;
-  height: 4em;
+  	background: black;
+  	-webkit-animation: load1 1s infinite ease-in-out;
+  	animation: load1 1s infinite ease-in-out;
+  	width: 1em;
+  	height: 4em;
 }
 .loader {
 	float: right;
-  color: black;
-  text-indent: -9999em;
-  margin: 1.5em 5em;
-  position: absolute;
-	top: 2%;
+  	color: black;
+  	text-indent: -9999em;
+  	margin: 1.5em 5em;
+  	position: absolute;
+	top: 1%;
 	right: 0%;
-  font-size: .5em;
-  -webkit-transform: translateZ(0);
-  -ms-transform: translateZ(0);
-  transform: translateZ(0);
-  -webkit-animation-delay: -0.16s;
-  animation-delay: -0.16s;
+  	font-size: .5em;
+  	-webkit-transform: translateZ(0);
+  	-ms-transform: translateZ(0);
+  	transform: translateZ(0);
+  	-webkit-animation-delay: -0.16s;
+  	animation-delay: -0.16s;
 }
 .loader:before,
 .loader:after {
-  position: absolute;
-  top: 0;
-  content: '';
+  	position: absolute;
+ 	top: 0;
+  	content: '';
 }
 .loader:before {
-  left: -1.5em;
-  -webkit-animation-delay: -0.32s;
-  animation-delay: -0.32s;
+  	left: -1.5em;
+  	-webkit-animation-delay: -0.32s;
+  	animation-delay: -0.32s;
 }
 .loader:after {
-  left: 1.5em;
+  	left: 1.5em;
 }
 @-webkit-keyframes load1 {
   0%,
@@ -285,20 +292,6 @@ h3.card-header {
   }
 }
 
-.loader2 {
-    border: 5px solid #f3f3f3; /* Light grey */
-    border-top: 5px solid black;
-	border-radius: 50%;
-    width: 1.5em;
-    height: 1.5em;
-    animation: spin 2s linear infinite;
-}
-@keyframes spin {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
-}
-
-
 @media(min-width: 900px) {
 	#row_div {
 		margin-left: 2em;
@@ -307,33 +300,33 @@ h3.card-header {
 }
 
 @media(max-width: 550px) {
-	#history-panel {
+	#update-panel {
 		display: none;
 	}
-	
+
 	#game-div {
 		display: flex;
 		flex-direction: column;
 	}
-	
+
 	#history-br {
 		display: none;
 	}
-	
+
 	#article-col {
 		flex: 1;
 	}
-	
+
 	.my_col {
 		display: flex;
 		flex-direction: row;
 		justify-content: space-around;
 	}
-	
+
 	#info > .card > .card-header {
 		display: none;
 	}
-	
+
 	#info > .card {
 		flex: 0.3;
 	}
@@ -344,7 +337,7 @@ h3.card-header {
 		display: flex;
 		flex-direction: row;
 	}
-	
+
 	.my_col {
 		display: flex;
 		flex-direction: column;

@@ -1,58 +1,29 @@
-let $winner;
-let $leaderboard;
-let fakeId = 1;
-
 let currSeconds = 0;
 let setWinner = false;
 
+let docReady = false;
+let serverReady = false;
+
 $(document).ready(() => {
+	if (serverReady) {
+		serverConn.registerAllPlayers(playersCallback);
+	}
+
+	docReady = true;
 });
 
 serverConn.whenReadyToRecieve(() => {
-	serverConn.registerError(displayServerConnError);
+	serverConn.registerError(displayServerConnErrorRedirectHome);
 
-	// TODO: get everything interfacing with the server
-	// serverConn.registerAllPlayers("", playersCallback, displayServerConnError);
-	$winner = $("#winner");
-	$leaderboard = $("#leaderboard");
-
-	$winner.html("Loading...");
-	playersCallback(fakePlayers);
+	if (docReady) {
+		serverConn.registerAllPlayers(playersCallback);
+	} else {
+		serverReady = true;
+	}
 });
 
 serverConn.whenReadyToSend(() => {
 	serverConn.getPlayers("", playersCallback, displayServerConnError);
-	serverConn.getSettings("", (lobby) => {
-		// @rjha
-		// @rjha
-		// @rjha
-		// @rjha
-		// @rjha
-		// @rjha
-		// @rjha
-		// @rjha
-		// @rjha
-		// @rjha
-		// @rjha
-		// @rjha
-		// @rjha
-		// Here you'll get stuff like this (where src is a lobby with those properties):
-		// (I don't know if you want anything)
-		// lobby.addProperty("id", src.id);
-    //   lobby.add("startPage", Main.GSON.toJsonTree(src.getStartPage()));
-    //   lobby.add("goalPage", Main.GSON.toJsonTree(src.getGoalPage()));
-    //   lobby.addProperty("started", src.started());
-    //   lobby.addProperty("ended", src.ended());
-    //   if (src.started()) {
-    //     lobby.addProperty("startTime", src.getStartTime().toEpochMilli());
-    //     lobby.addProperty("playTime", src.getPlayTime().toMillis());
-    //   }
-    //   if (src.ended()) {
-    //     lobby.addProperty("endTime", src.getEndTime().toEpochMilli());
-    //     TECHINCALLY THIS IS HERE BUT EACH PLAYER HAS AN isWinner ATTRIBUTE: lobby.add("winners", Main.GSON.toJsonTree(src.getWinners()));
-    //     // TODO: Shortest / known path
-    //   }
-	}, displayServerConnError);
 });
 
 // Updates the player to time map and redraws the results
@@ -60,79 +31,61 @@ function playersCallback(players) {
 	drawResults(players);
 }
 
-function updateTime() {
-	$td = $(this.find("td")[1]);
-	currentTime = $td.html();
-	currentTimeSplit = currentTime.split(":");
-	minutes = Number(currentTimeSplit[0]);
-	seconds = Number(currentTimeSplit[1]);
-
-	seconds = seconds + 1;
-	if (seconds >= 60) {
-		seconds = seconds - 60;
-		minutes = minutes + 1;
-	}
-
-	secondsStr = "" + seconds;
-	if (seconds < 10) {
-		secondsStr = "0" + secondsStr;
-	}
-
-	$td.html("" + minutes + ":" + secondsStr);
-}
-
 // Draws the results
 function drawResults(players) {
-	playersSorted = players.sort( function(a, b) {return a.playtime - b.playtime} );
-	if (!setWinner && playersSorted.length > 0) {
-		$winner.html(`<b> ${playersSorted[0].name} wins! </b>`);
-	}
+	playersSorted = players.sort( function(a, b) {return a.path.length - b.path.length} );
+	winners = [];
 
 	for (let i = 0; i < playersSorted.length; i++) {
 		let player = playersSorted[i];
+
 		nameHtml = player.name;
-		if (player.id == fakeId) {
+		if (player.id == serverConn.clientId) {
 			nameHtml = "<b>" + nameHtml + "</b>";
 		}
 
 		let style = "";
 		if (i == 0) {
-			$leaderboard.html("");
+			$("#leaderboard").html("<thead><tr><th>Name</th><th># of clicks</th></tr></thead>");
+		}
+
+		if (player.isWinner) {
 			style = "table-success";
+			winners.push(player);
 		} else if (!player.done) {
 			style = "table-danger";
 		}
 
-		$el = $(`<tr><td>${nameHtml}</td><td>${minutesToStr(player.playtime)}</td></tr>`)
-						.appendTo($leaderboard)
+		$el = $(`<tr><td>${nameHtml}</td><td>${player.path.length}</td></tr>`)
+						.appendTo($("#leaderboard"))
 						.attr("class", "" + style);
+	}
 
-		if (!player.done) {
-			window.setInterval(updateTime.bind($el), 1000);
+	winnerStr = "";
+	if (winners.length == 0) {
+		winnerStr = "<b>No winners</b>";
+	} else if (winners.length == 1) {
+		winnerStr = `<b>Winner: ${winners[0].name}</b>`;
+	} else if (winners.length == 2) {
+		winnerStr = `<b>Winners: ${winners[0].name} and ${winners[1].name}`;
+	} else {
+		winnerStr = "<b>Winners: ";
+		for (let i = 0; i < winners.length; i++) {
+
+			if (i < winners.length - 1) {
+				winnerStr = winnerStr + winners[i].name + ", ";
+			} else {
+				winnerStr = winnerStr + "and " + winners[i].name;
+			}
 		}
+
+		winnerStr = winnerStr + "</b>"
+	}
+
+	$("#winner").html(winnerStr);
+
+	// TODO: Only if it's time trial
+	if (winners.length > 0) {
+		$("#leaderboard").append(`<br><i>Winning time: ${millisecondsToStr(winners[0].playTime)}</i>`);
 	}
 }
-
-/// fake data
-let cat = {"url" : "https://www.wikipedia.org/wiki/Cat", "name" : "Cat"};
-let sanskrit = {"url" : "https://www.wikipedia.org/wiki/Sanskrit", "name" : "Sanskrit"};
-let hindi = {"url" : "https://www.wikipedia.org/wiki/Hindi", "name" : "Hindi"};
-let english = {"url" : "https://www.wikipedia.org/wiki/English", "name" : "English"};
-let spanish = {"url" : "https://www.wikipedia.org/wiki/Spanish", "name" : "Spanish"};
-let portuguese = {"url" : "https://www.wikipedia.org/wiki/Portuguese", "name" : "Portuguese"};
-let german = {"url" : "https://www.wikipedia.org/wiki/German", "name" : "German"};
-let italian = {"url" : "https://www.wikipedia.org/wiki/Italian", "name" : "Italian"};
-let latin = {"url" : "https://www.wikipedia.org/wiki/Latin", "name" : "Latin"};
-let hebrew = {"url" : "https://www.wikipedia.org/wiki/Hebrew", "name" : "Hebrew"};
-let yiddish = {"url" : "https://www.wikipedia.org/wiki/Yiddish", "name" : "Yiddish"};
-let bengali = {"url" : "https://www.wikipedia.org/wiki/Bengali", "name" : "Bengali"};
-let icelandic = {"url" : "https://www.wikipedia.org/wiki/Icelandic", "name" : "Icelandic"};
-let greek = {"url" : "https://www.wikipedia.org/wiki/Greek", "name" : "Greek"};
-let dog = {"url" : "https://www.wikipedia.org/wiki/Dog", "name" : "Dog"};
-
-let player1 = {"id" : 1, "name" : "rohan", "done" : true, "startPage" : cat, "endPage" : dog, "path" : [cat, dog], "playtime" : 0.4};
-let player2 = {"id" : 2, "name" : "mckenna", "done" : true, "startPage" : cat, "endPage" : dog, "path" : [cat, english, spanish, dog], "playtime" : 1};
-let player3 = {"id" : 3, "name" : "sean", "done" : true, "startPage" : cat, "endPage" : dog, "path" : [cat, english, spanish, dog], "playtime" : 1.4};
-let player4 = {"id" : 4, "name" : "jacob", "done" : true, "startPage" : cat, "endPage" : dog, "path" : [cat, english, spanish, greek, italian, portuguese, spanish, dog], "playtime" : 1.4};
-
-let fakePlayers = [player1, player2, player3, player4];
