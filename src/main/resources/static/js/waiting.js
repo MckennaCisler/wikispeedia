@@ -66,6 +66,7 @@ function decrement(pid) {
 function startGame() {
 	"use strict";
 	clearInterval(ddd);
+	$("#waiting-card-header").html("The game is starting");
 	document.title = "The game is starting";
 	let audio = new Audio('lib/assets/beep.wav');
 	audio.play();

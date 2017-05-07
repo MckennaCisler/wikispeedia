@@ -47,5 +47,16 @@ function getMessagesError(response) {
 }
 
 function displayMessages(messages) { //messages is a list of object of the form { timestamp: (milliseconds since epoch), message: (string content of the message), sender: (id of sender)}
-	console.log(messages);
+	//console.log(messages);
+	"use strict";
+	if (messages.length === 0) {
+		$("#chat_div").html("No one has said anything yet - start a conversation!");
+	} else {
+		$("#chat_div").html("");
+		for (let i = 0; i < messages.length; i++) {
+			let mess = messages[i];
+			let mStr = `<div class="chat-bubble ${mess.sender_id === serverConn.clientId ? "chat-sender" : "chat-receiver"}">${mess.message}</div>`;
+			$("#chat_div").html($("#chat_div").html() + mStr);
+		}
+	}
 }
