@@ -15,7 +15,6 @@ class Client implements Comparable<Client> {
   private String  id;
   private Lobby   lobby;
   private boolean connected;
-  private boolean disconnecting;
   private Date    cookieExpiration;
 
   /**
@@ -25,7 +24,7 @@ class Client implements Comparable<Client> {
    * @param id
    *          The id of the client
    */
-  public Client(String id) {
+  Client(String id) {
     this.id = id;
     connected = true;
   }
@@ -33,14 +32,6 @@ class Client implements Comparable<Client> {
   @Override
   public int compareTo(Client p) {
     return cookieExpiration.compareTo(p.getCookieExpiration());
-  }
-
-  public boolean disconnecting() {
-    return disconnecting;
-  }
-
-  public void disconnecting(boolean discVal) {
-    disconnecting = discVal;
   }
 
   @Override
@@ -60,7 +51,7 @@ class Client implements Comparable<Client> {
    *
    * @return the expiration date of the client's cookie
    */
-  public Date getCookieExpiration() {
+  public synchronized Date getCookieExpiration() {
     return cookieExpiration;
   }
 
@@ -78,7 +69,7 @@ class Client implements Comparable<Client> {
    *
    * @return the client's lobby
    */
-  public Lobby getLobby() {
+  public synchronized Lobby getLobby() {
     return lobby;
   }
 
@@ -92,7 +83,7 @@ class Client implements Comparable<Client> {
    *
    * @return whether the client is connected
    */
-  public boolean isConnected() {
+  public synchronized boolean isConnected() {
     return connected;
   }
 
@@ -103,7 +94,7 @@ class Client implements Comparable<Client> {
    * @param date
    *          The expiration date of the client's cookie
    */
-  public void setCookieExpiration(Date date) {
+  public synchronized void setCookieExpiration(Date date) {
     this.cookieExpiration = date;
   }
 
@@ -113,7 +104,7 @@ class Client implements Comparable<Client> {
    * @param lobby
    *          The lobby to direct client commands to
    */
-  public void setLobby(Lobby lobby) {
+  public synchronized void setLobby(Lobby lobby) {
     this.lobby = lobby;
   }
 
@@ -135,12 +126,7 @@ class Client implements Comparable<Client> {
 
   @Override
   public String toString() {
-    return "Player [id="
-        + id
-        + ", lobby="
-        + lobby
-        + ", connected="
-        + connected
+    return "Player [id=" + id + ", lobby=" + lobby + ", connected=" + connected
         + "]";
   }
 }

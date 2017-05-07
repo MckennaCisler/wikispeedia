@@ -50,10 +50,8 @@ class ServerWorker {
    * @param gson
    *          Gson instance for JSONification of lobbies
    */
-  public ServerWorker(
-      Server server,
-      BiFunction<Server, String, ? extends Lobby> lobbyFactory,
-      Gson gson) {
+  ServerWorker(Server server,
+      BiFunction<Server, String, ? extends Lobby> lobbyFactory, Gson gson) {
     this.server = server;
     lobbies = new LobbyManager(lobbyFactory);
     clients = new ConcurrentBiMap<>();
@@ -91,14 +89,16 @@ class ServerWorker {
     if (!disconnectedClients.isEmpty()) {
       Date now = new Date();
       Client p = disconnectedClients.poll();
-      while (p.getCookieExpiration().before(now)) {
-        clients.remove(clients.getReversed(p));
-        if (disconnectedClients.isEmpty()) {
-          return;
+      synchronized (p) {
+        while (p.getCookieExpiration().before(now)) {
+          clients.remove(clients.getReversed(p));
+          if (disconnectedClients.isEmpty()) {
+            return;
+          }
+          p = disconnectedClients.poll();
         }
-        p = disconnectedClients.poll();
+        disconnectedClients.add(p);
       }
-      disconnectedClients.add(p);
     }
   }
 
@@ -124,22 +124,27 @@ class ServerWorker {
     }
 
     Client client = clients.getBack(new Client(clientId));
-    if (client != null && client.disconnecting()) {
-      try {
-        client.wait();
-      } catch (InterruptedException e) {
-        e.printStackTrace();
+    if (client != null) {
+      // if we've seen this client, make sure we sync on them
+      synchronized (client) {
+        setupConnectedClient(conn, clientId);
       }
+    } else {
+      // if we haven't seen them, we can proceed
+      setupConnectedClient(conn, clientId);
     }
+    Main.debugLog("Known clients: " + clients.values());
+  }
 
+  private void setupConnectedClient(Session conn, String clientId) {
     // notify client of their id
-
     String toClient = "";
     String trueId = "";
 
     JsonObject jsonObject = new JsonObject();
     jsonObject.addProperty("command", "notify_id");
     try {
+      // NOTE that this adds the client to clients
       trueId = setClientId(conn, clientId);
 
       jsonObject.addProperty("client_id", trueId);
@@ -154,18 +159,21 @@ class ServerWorker {
       sendToClient(conn, toClient);
     }
 
-    client = clients.get(conn);
-    if (client != null) {
-      // if they are not in a lobby, give them a list of lobbies
-      if (client.getLobby() == null) {
-        notInLobbies.put(client.getId(), client);
-      } else {
-        // if they are already in a lobby and thus reconnecting, note that
-        // they're reconnecting
-        client.getLobby().playerReconnected(client.getId());
+    // a new client with potentially a new id (made from hashcode)
+    Client newClient = clients.get(conn);
+    if (newClient != null) {
+      synchronized (newClient) {
+        // if they are not in a lobby, give them a list of lobbies
+        if (newClient.getLobby() == null) {
+          notInLobbies.put(newClient.getId(), newClient);
+        } else {
+          // if they are already in a lobby and thus reconnecting, note that
+          // they're reconnecting
+          newClient.getLobby().playerReconnected(newClient.getId());
+        }
+        sendLobbies(newClient);
       }
     }
-    sendLobbies(client);
   }
 
   /**
@@ -176,48 +184,49 @@ class ServerWorker {
    *          The client who disconnected
    */
   public void clientDisconnected(Session conn) {
-    Client client = clients.get(conn);
-    if (client != null) {
-      client.disconnecting(true);
-    }
-
+    // get cookie experiation in case it may have expired (in which case we
+    // remove this conn)
     Date expiration = new Date();
     List<HttpCookie> cookies = conn.getUpgradeRequest().getCookies();
     for (HttpCookie cookie : cookies) {
       if (cookie.getName().equals("client_id")) {
         String cookieVal = cookie.getValue();
-        expiration = Date.from(
-            Instant.ofEpochMilli(
-                Long.parseLong(
-                    cookieVal.substring(cookieVal.indexOf(":") + 1))));
+        expiration =
+            Date.from(Instant.ofEpochMilli(Long
+                .parseLong(cookieVal.substring(cookieVal.indexOf(":") + 1))));
         break;
       }
     }
 
-    if (client != null && client.getLobby() == null) {
-      notInLobbies.remove(client.getId());
-    }
+    Client client = clients.get(conn);
+    if (client != null) {
+      synchronized (client) {
+        if (client.getLobby() == null) {
+          notInLobbies.remove(client.getId());
+        }
 
-    if (expiration.after(new Date())) {
-      if (client != null) {
-        assert client.isConnected();
-        client.toggleConnected();
+        // remove if expired
+        if (expiration.after(new Date())) {
+          assert client.isConnected();
+          client.toggleConnected();
 
-        client.setCookieExpiration(expiration);
-        disconnectedClients.add(client);
+          client.setCookieExpiration(expiration);
+          disconnectedClients.add(client);
 
-        if (client.getLobby() != null) {
-          client.getLobby().playerDisconnected(client.getId());
+          if (client.getLobby() != null) {
+            client.getLobby().playerDisconnected(client.getId());
+          }
+        } else {
+          clients.remove(conn);
         }
       }
     } else {
-      clients.remove(conn);
+      // remove if expired
+      if (!expiration.after(new Date())) {
+        clients.remove(conn);
+      }
     }
-
-    if (client != null) {
-      client.disconnecting(false);
-      client.notifyAll();
-    }
+    Main.debugLog("Known clients: " + clients.values());
   }
 
   /**
@@ -350,8 +359,10 @@ class ServerWorker {
         client = new Client(clientId);
       }
     } else if (!client.isConnected()) {
-      client.toggleConnected();
-      clients.put(conn, client);
+      synchronized (client) {
+        client.toggleConnected();
+        clients.put(conn, client);
+      }
     } else {
       throw new InputError("Don't steal identities");
     }

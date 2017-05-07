@@ -112,13 +112,17 @@ class ServerCommandHandler implements Runnable {
                 String lobbyId = commandPayload.get("lobby_id").getAsString();
                 Lobby lobby = server.createLobby(lobbyId);
 
-                if (commandPayload.has("arguments")) {
-                  lobby.init(commandPayload.get("arguments").getAsJsonObject());
+                // note lobby will not be null
+                synchronized (lobby) {
+                  if (commandPayload.has("arguments")) {
+                    lobby.init(
+                        commandPayload.get("arguments").getAsJsonObject());
+                  }
+                  lobby.addClient(player.getId());
+                  player.setLobby(lobby);
+                  server.lobbylessMap().remove(player.getId());
+                  server.updateLobbylessClients();
                 }
-                lobby.addClient(player.getId());
-                player.setLobby(lobby);
-                server.lobbylessMap().remove(player.getId());
-                server.updateLobbylessClients();
                 jsonObject.addProperty("error_message", "");
                 toClient = gson.toJson(jsonObject);
                 server.sendToClient(conn, toClient);
@@ -130,10 +134,12 @@ class ServerCommandHandler implements Runnable {
                   throw new InputError(
                       "This client is not registered with any lobby");
                 }
-                player.getLobby().removeClient(player.getId());
-                player.setLobby(null);
-                server.lobbylessMap().put(player.getId(), player);
-                server.updateLobbylessClients();
+                synchronized (player.getLobby()) {
+                  player.getLobby().removeClient(player.getId());
+                  player.setLobby(null);
+                  server.lobbylessMap().put(player.getId(), player);
+                  server.updateLobbylessClients();
+                }
                 jsonObject.addProperty("error_message", "");
                 toClient = gson.toJson(jsonObject);
                 server.sendToClient(conn, toClient);
@@ -149,21 +155,22 @@ class ServerCommandHandler implements Runnable {
                 if (lobby2 == null) {
                   throw new InputError("No lobby with specified ID exists");
                 }
-                Lobby playerLobby = player.getLobby();
-                if (playerLobby != null) {
-                  playerLobby.removeClient(player.getId());
+                synchronized (lobby2) {
+                  Lobby playerLobby = player.getLobby();
+                  if (playerLobby != null) {
+                    playerLobby.removeClient(player.getId());
+                  }
+                  lobby2.addClient(player.getId());
+                  player.setLobby(lobby2);
+                  server.lobbylessMap().remove(player.getId());
+                  server.updateLobbylessClients();
                 }
-                lobby2.addClient(player.getId());
-                player.setLobby(lobby2);
-                server.lobbylessMap().remove(player.getId());
-                server.updateLobbylessClients();
                 jsonObject.addProperty("error_message", "");
                 toClient = gson.toJson(jsonObject);
                 server.sendToClient(conn, toClient);
                 return;
               default: // equivalent to NULL, i.e. that the command type was
-                       // not
-                       // in the Commands enum
+                       // not in the Commands enum
 
                 if (player.getLobby() != null) {
                   // if not a server command pass it to the lobby

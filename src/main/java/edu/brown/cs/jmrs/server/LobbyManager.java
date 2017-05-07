@@ -19,9 +19,9 @@ import edu.brown.cs.jmrs.server.customizable.Lobby;
  */
 public class LobbyManager {
 
-  private final ReentrantReadWriteLock                rwl = new ReentrantReadWriteLock();
-  private final Lock                                  r   = rwl.readLock();
-  private final Lock                                  w   = rwl.writeLock();
+  private final ReentrantReadWriteLock rwl = new ReentrantReadWriteLock();
+  private final Lock                   r   = rwl.readLock();
+  private final Lock                   w   = rwl.writeLock();
 
   private ConcurrentHashMap<String, Lobby>            lobbies;
   private BiFunction<Server, String, ? extends Lobby> lobbyFactory;
@@ -124,8 +124,11 @@ public class LobbyManager {
    *          The id of the lobby to remove
    */
   public void remove(String lobbyId) {
-    w.lock();
-    lobbies.remove(lobbyId);
-    w.unlock();
+    try {
+      w.lock();
+      lobbies.remove(lobbyId);
+    } finally {
+      w.unlock();
+    }
   }
 }
