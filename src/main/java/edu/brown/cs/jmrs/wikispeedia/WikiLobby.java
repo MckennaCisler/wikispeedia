@@ -1,6 +1,7 @@
 package edu.brown.cs.jmrs.wikispeedia;
 
 import java.lang.reflect.Type;
+import java.sql.SQLException;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.ArrayList;
@@ -30,7 +31,6 @@ import edu.brown.cs.jmrs.web.wikipedia.WikiAnnotationRemover;
 import edu.brown.cs.jmrs.web.wikipedia.WikiBodyFormatter;
 import edu.brown.cs.jmrs.web.wikipedia.WikiFooterRemover;
 import edu.brown.cs.jmrs.web.wikipedia.WikiPage;
-import edu.brown.cs.jmrs.web.wikipedia.WikiPageLinkFinder;
 import edu.brown.cs.jmrs.web.wikipedia.WikiPageLinkFinder.Filter;
 import edu.brown.cs.jmrs.wikispeedia.comms.Command;
 

@@ -16,10 +16,11 @@ import java.util.concurrent.ConcurrentMap;
  */
 public class DbReaderPreHash<T, H> extends DbReader<T> {
   // Avoid running out of memory due to cache size
-  private static final int MAX_SAVED_PREHASH = 1000000;
+  private static final int DEFAULT_CACHE_SIZE = 100000;
 
   private ThrowingFunction<ResultSet, H> prehash;
   private ConcurrentMap<H, T> madeObjects;
+  private final int cacheSize;
 
   /**
    * @param callback
@@ -32,9 +33,26 @@ public class DbReaderPreHash<T, H> extends DbReader<T> {
    */
   public DbReaderPreHash(ThrowingFunction<ResultSet, T> callback,
       ThrowingFunction<ResultSet, H> prehash) {
+    this(callback, prehash, DEFAULT_CACHE_SIZE);
+  }
+
+  /**
+   * @param callback
+   *          The function to be used to create an object for this DbReader from
+   *          a result set.
+   * @param prehash
+   *          A function that returns a hashcode uniquely representing the
+   *          object that would be (or is already) constructed from the given
+   *          result set.
+   * @param cacheSize
+   *          The number of objects to store in the cache.
+   */
+  public DbReaderPreHash(ThrowingFunction<ResultSet, T> callback,
+      ThrowingFunction<ResultSet, H> prehash, int cacheSize) {
     super(callback);
     this.prehash = prehash;
     this.madeObjects = new ConcurrentHashMap<>();
+    this.cacheSize = cacheSize;
   }
 
   @Override
@@ -45,7 +63,7 @@ public class DbReaderPreHash<T, H> extends DbReader<T> {
     } else {
       T t = super.construct(rs);
       // avoid out of memory error
-      if (madeObjects.size() < MAX_SAVED_PREHASH) {
+      if (madeObjects.size() < cacheSize) {
         madeObjects.put(ph, t);
       } else {
         madeObjects.clear();
