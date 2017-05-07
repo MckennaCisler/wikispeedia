@@ -42,6 +42,66 @@ import edu.brown.cs.jmrs.wikispeedia.comms.Command;
  *
  */
 public class WikiLobby implements Lobby {
+  private class Message {
+
+    private Instant timestamp;
+    private String  content;
+    private String  senderId;
+
+    public Message(String content, String senderId) {
+      this.content = content;
+      this.senderId = senderId;
+      timestamp = Instant.now();
+    }
+
+    public String getContent() {
+      return content;
+    }
+
+    public String getSender() {
+      return senderId;
+    }
+
+    public Instant getTime() {
+      return timestamp;
+    }
+  }
+
+  /**
+   * Custom serializer for use with GSON.
+   *
+   * @author mcisler
+   *
+   */
+  public static class Serializer implements JsonSerializer<WikiLobby> {
+
+    @Override
+    public JsonElement serialize(
+        WikiLobby src,
+        Type typeOfSrc,
+        JsonSerializationContext context) {
+      JsonObject lobby = new JsonObject();
+
+      lobby.addProperty("id", src.id);
+      lobby.add("startPage", Main.GSON.toJsonTree(src.getStartPage()));
+      lobby.addProperty("gameMode", src.gameMode.getGameMode().ordinal());
+      lobby.add("goalPage", Main.GSON.toJsonTree(src.getGoalPage()));
+      lobby.addProperty("started", src.started());
+      lobby.addProperty("ended", src.ended());
+      if (src.started()) {
+        lobby.addProperty("startTime", src.getStartTime().toEpochMilli());
+        lobby.addProperty("playTime", src.getPlayTime().toMillis());
+      }
+      if (src.ended()) {
+        lobby.addProperty("endTime", src.getEndTime().toEpochMilli());
+        lobby.add("winners", Main.GSON.toJsonTree(src.getWinners()));
+        // TODO: Shortest / known path
+      }
+
+      return lobby;
+    }
+  }
+
   static final ContentFormatter<WikiPage> DEFAULT_CONTENT_FORMATTER = new ContentFormatterChain<WikiPage>(
       ImmutableList.of(
           new WikiBodyFormatter(),
@@ -49,6 +109,7 @@ public class WikiLobby implements Lobby {
           new WikiAnnotationRemover()));
 
   static final LinkFinder<WikiPage>       DEFAULT_LINK_FINDER;
+
   static {
     // try {
     DEFAULT_LINK_FINDER = new WikiPageLinkFinder(
@@ -60,35 +121,26 @@ public class WikiLobby implements Lobby {
     // throw new AssertionError("Could not initialize wikipedia database", e);
     // }
   }
-
   /**
    * Time to delay lobby creation by.
    */
-  private static final long                 START_DELAY = 5;
+  private static final long START_DELAY = 5;
+  private transient Server  server;
+  private final String      id;
 
-<<<<<<< 3990a2668954d16f9ed1f3878be6ce13102e40b2
-  private transient Server server;
-  private final String     id;
   // map from id to player
   private transient Map<String, WikiPlayer> players;
-  private transient WikiGameMode            gameMode = null;
-
-  private Instant         startTime = null;
-  private WikiGame        game;
-  private Set<WikiPlayer> winners;
-  private List<Message>   messages;
-=======
-  private transient Server                  server;
-  private final String                      id;
-  // map from id to player
-  private transient Map<String, WikiPlayer> players;
-  private transient WikiGameMode            gameMode    = null;
-
-  private Instant                           startTime   = null;
+  private transient WikiGameMode            gameMode  = null;
+  private Instant                           startTime = null;
   private WikiGame                          game;
+
   private Set<WikiPlayer>                   winners;
-  private List<Message>                     messages;
->>>>>>> documentation
+
+  /****************************************/
+  /* LOBBY OVERRIDES */
+  /****************************************/
+
+  private List<Message> messages;
 
   /**
    * Constructs a new WikiLobby (likely through a Factory in
@@ -108,9 +160,197 @@ public class WikiLobby implements Lobby {
     messages = Collections.synchronizedList(new ArrayList<>());
   }
 
+  @Override
+  public void addClient(String playerId) {
+    if (started()) {
+      Command.sendError(
+          server,
+          playerId,
+          "Game has already started, cannot add player");
+      return;
+    }
+    // first is leader
+    boolean isLeader = this.players.size() == 0;
+
+    this.players.put(playerId, new WikiPlayer(playerId, this, isLeader));
+
+    Command.sendAllPlayers(this);
+  }
+
+  /**
+   * Sends a message to all players with the states of all other players. Also
+   * initiates game start.
+   *
+   * @return Whether all were ready and the game is starting.
+   */
+  public boolean checkAllReady() {
+    boolean allReady = true;
+    for (Entry<String, WikiPlayer> entry : players.entrySet()) {
+      boolean ready = entry.getValue().ready();
+      if (!ready) {
+        allReady = false;
+        break;
+      }
+    }
+
+    // notify with new states (state)
+    Command.sendAllPlayers(this);
+
+    if (allReady) {
+      start(false);
+      Command.sendBeginGame(this);
+    }
+
+    return allReady;
+  }
+
+  /**
+   * Checks for a winning player based on each's position in a lobby. Should be
+   * called periodically, or at least at every player move. Note that winners
+   * are not determined here, so the race condition occurs elsewhere if two are
+   * close.
+   *
+   * @return Whether there was a winner.
+   */
+  public boolean checkForWinner() {
+    Set<WikiPlayer> possibleWinners = gameMode.checkForWinners(this);
+    if (possibleWinners.size() > 0) {
+      winners = possibleWinners;
+      stop();
+      Command.sendEndGame(this);
+      return true;
+    }
+    return false;
+  }
+
+  /**
+   * @return Whether the lobby has ended, based on its internal game mode.
+   */
+  public boolean ended() {
+    return gameMode.ended(this);
+  }
+
+  /**
+   * @return The ContentFormatter associated with this lobby's GameMode, used to
+   *         reformat the parsedContent() of player's Wikipages.
+   */
+  public ContentFormatter<WikiPage> getContentFormatter() {
+    return gameMode.getContentFormatter();
+  }
+
   /****************************************/
-  /* LOBBY OVERRIDES */
+  /* STATE HANDLERS / SETTERS */
   /****************************************/
+
+  /**
+   * @return The default LinkFinder for all lobbies, setup in this lobby.
+   */
+  public LinkFinder<WikiPage> getDefaultLinkFinder() {
+    return DEFAULT_LINK_FINDER;
+  }
+
+  /**
+   * @return When this lobby ended.
+   * @throws IllegalStateException
+   *           If the lobby has not ended or was not started.
+   */
+  public Instant getEndTime() {
+    return gameMode.getEndTime(this);
+  }
+
+  /**
+   * @return The game of this lobby
+   */
+  public WikiGame getGame() {
+    return game;
+  }
+
+  /**
+   * @return The goal wiki page of this lobby.
+   */
+  public WikiPage getGoalPage() {
+    return game.getGoal();
+  }
+
+  /**
+   * @return The LinkFinder associated with this lobby's GameMode, used in
+   *         finding links from WikiPages.
+   */
+  public LinkFinder<WikiPage> getLinkFinder() {
+    return gameMode.getLinkFinder();
+  }
+
+  /**
+   * @param playerId
+   *          The id of the player to get.
+   * @return The player with that ID, or null if none found.
+   */
+  public WikiPlayer getPlayer(String playerId) {
+    return players.get(playerId);
+  }
+
+  /**
+   * @return The players in this map.
+   */
+  public List<WikiPlayer> getPlayers() {
+    return ImmutableList.copyOf(players.values());
+  }
+
+  /****************************************/
+  /* GETTERS */
+  /****************************************/
+
+  /**
+   * @return The current time the lobby has been started, i.e. the duration
+   *         since startTime, or the total time the lobby lasted for if it has
+   *         finished.
+   * @throws IllegalStateException
+   *           If the lobby has not been started.
+   */
+  public Duration getPlayTime() {
+    if (!started()) {
+      throw new IllegalStateException("Lobby has not started");
+    }
+    return Duration.between(startTime, ended() ? getEndTime() : Instant.now());
+  }
+
+  /**
+   * @return The server associated with this lobby.
+   */
+  public Server getServer() {
+    return server;
+  }
+
+  /**
+   * @return The start wiki page of this lobby.
+   */
+  public WikiPage getStartPage() {
+    return game.getStart();
+  }
+
+  /**
+   * @return When this lobby was started.
+   * @throws IllegalStateException
+   *           If the lobby has not been started.
+   */
+  public Instant getStartTime() {
+    if (!started()) {
+      throw new IllegalStateException("Lobby has not started");
+    }
+    return startTime;
+  }
+
+  /**
+   * @return The player who won the game.
+   * @throws IllegalStateException
+   *           If the game has not ended.
+   */
+  public Set<WikiPlayer> getWinners() {
+    if (!ended()) {
+      throw new IllegalStateException("Lobby has not ended");
+    }
+    return winners;
+  }
 
   /**
    * Called on lobby creation; structures this lobby to follow a certain game
@@ -187,29 +427,10 @@ public class WikiLobby implements Lobby {
   }
 
   @Override
-  public void addClient(String playerId) {
-    if (started()) {
-      Command.sendError(
-          server,
-          playerId,
-          "Game has already started, cannot add player");
-      return;
-    }
-    // first is leader
-    boolean isLeader = this.players.size() == 0;
-
-    this.players.put(playerId, new WikiPlayer(playerId, this, isLeader));
-
-    Command.sendAllPlayers(this);
-  }
-
-  @Override
-  public void removeClient(String playerId) {
-    this.players.remove(playerId);
-    Command.sendAllPlayers(this);
-
-    if (players.size() == 0) {
-      server.closeLobby(id);
+  public void playerDisconnected(String clientId) {
+    if (players.containsKey(clientId)) {
+      players.get(clientId).setConnected(false);
+      Command.sendAllPlayers(this);
     }
   }
 
@@ -221,37 +442,18 @@ public class WikiLobby implements Lobby {
     }
   }
 
-  @Override
-  public void playerDisconnected(String clientId) {
-    if (players.containsKey(clientId)) {
-      players.get(clientId).setConnected(false);
-      Command.sendAllPlayers(this);
-    }
-  }
-
-  @Override
-  public JsonElement toJson(Gson gson) {
-    return gson.toJsonTree(this);
-  }
-
-  /****************************************/
-  /* STATE HANDLERS / SETTERS */
-  /****************************************/
-
-  /**
-   * Sets the player's name, possibly considering other player's names.
-   *
-   * @param clientId
-   *          The player id of the player to set.
-   * @param uname
-   *          The username to set.
-   */
-  public void setPlayerName(String clientId, String uname) {
-    players.get(clientId).setName(uname);
-  }
-
   public void registerMessage(String content, String clientId) {
     messages.add(new Message(content, clientId));
+  }
+
+  @Override
+  public void removeClient(String playerId) {
+    this.players.remove(playerId);
+    Command.sendAllPlayers(this);
+
+    if (players.size() == 0) {
+      server.closeLobby(id);
+    }
   }
 
   public void sendMessagesToPlayer(String clientId) {
@@ -273,6 +475,18 @@ public class WikiLobby implements Lobby {
     responseObject.addProperty("error_message", "");
 
     server.sendToClient(clientId, new Gson().toJson(responseObject));
+  }
+
+  /**
+   * Sets the player's name, possibly considering other player's names.
+   *
+   * @param clientId
+   *          The player id of the player to set.
+   * @param uname
+   *          The username to set.
+   */
+  public void setPlayerName(String clientId, String uname) {
+    players.get(clientId).setName(uname);
   }
 
   /**
@@ -304,6 +518,13 @@ public class WikiLobby implements Lobby {
   }
 
   /**
+   * @return Whether the lobby has started the game.
+   */
+  public boolean started() {
+    return startTime != null;
+  }
+
+  /**
    * Stops the game by setting an end time and configuring all players.
    */
   public void stop() {
@@ -323,242 +544,9 @@ public class WikiLobby implements Lobby {
             getEndTime()));
   }
 
-  /**
-   * Sends a message to all players with the states of all other players. Also
-   * initiates game start.
-   *
-   * @return Whether all were ready and the game is starting.
-   */
-  public boolean checkAllReady() {
-    boolean allReady = true;
-    for (Entry<String, WikiPlayer> entry : players.entrySet()) {
-      boolean ready = entry.getValue().ready();
-      if (!ready) {
-        allReady = false;
-        break;
-      }
-    }
-
-    // notify with new states (state)
-    Command.sendAllPlayers(this);
-
-    if (allReady) {
-      start(false);
-      Command.sendBeginGame(this);
-    }
-
-    return allReady;
-  }
-
-  /**
-   * Checks for a winning player based on each's position in a lobby. Should be
-   * called periodically, or at least at every player move. Note that winners
-   * are not determined here, so the race condition occurs elsewhere if two are
-   * close.
-   *
-   * @return Whether there was a winner.
-   */
-  public boolean checkForWinner() {
-    Set<WikiPlayer> possibleWinners = gameMode.checkForWinners(this);
-    if (possibleWinners.size() > 0) {
-      winners = possibleWinners;
-      stop();
-      Command.sendEndGame(this);
-      return true;
-    }
-    return false;
-  }
-
-  /****************************************/
-  /* GETTERS */
-  /****************************************/
-
-  /**
-   * @return The default LinkFinder for all lobbies, setup in this lobby.
-   */
-  public LinkFinder<WikiPage> getDefaultLinkFinder() {
-    return DEFAULT_LINK_FINDER;
-  }
-
-  /**
-   * @return The LinkFinder associated with this lobby's GameMode, used in
-   *         finding links from WikiPages.
-   */
-  public LinkFinder<WikiPage> getLinkFinder() {
-    return gameMode.getLinkFinder();
-  }
-
-  /**
-   * @return The ContentFormatter associated with this lobby's GameMode, used to
-   *         reformat the parsedContent() of player's Wikipages.
-   */
-  public ContentFormatter<WikiPage> getContentFormatter() {
-    return gameMode.getContentFormatter();
-  }
-
-  /**
-   * @return The game of this lobby
-   */
-  public WikiGame getGame() {
-    return game;
-  }
-
-  /**
-   * @return The start wiki page of this lobby.
-   */
-  public WikiPage getStartPage() {
-    return game.getStart();
-  }
-
-  /**
-   * @return The goal wiki page of this lobby.
-   */
-  public WikiPage getGoalPage() {
-    return game.getGoal();
-  }
-
-  /**
-   * @return The server associated with this lobby.
-   */
-  public Server getServer() {
-    return server;
-  }
-
-  /**
-   * @return The players in this map.
-   */
-  public List<WikiPlayer> getPlayers() {
-    return ImmutableList.copyOf(players.values());
-  }
-
-  /**
-   * @param playerId
-   *          The id of the player to get.
-   * @return The player with that ID, or null if none found.
-   */
-  public WikiPlayer getPlayer(String playerId) {
-    return players.get(playerId);
-  }
-
-  /**
-   * @return The player who won the game.
-   * @throws IllegalStateException
-   *           If the game has not ended.
-   */
-  public Set<WikiPlayer> getWinners() {
-    if (!ended()) {
-      throw new IllegalStateException("Lobby has not ended");
-    }
-    return winners;
-  }
-
-  /**
-   * @return Whether the lobby has started the game.
-   */
-  public boolean started() {
-    return startTime != null;
-  }
-
-  /**
-   * @return Whether the lobby has ended, based on its internal game mode.
-   */
-  public boolean ended() {
-    return gameMode.ended(this);
-  }
-
-  /**
-   * @return The current time the lobby has been started, i.e. the duration
-   *         since startTime, or the total time the lobby lasted for if it has
-   *         finished.
-   * @throws IllegalStateException
-   *           If the lobby has not been started.
-   */
-  public Duration getPlayTime() {
-    if (!started()) {
-      throw new IllegalStateException("Lobby has not started");
-    }
-    return Duration.between(startTime, ended() ? getEndTime() : Instant.now());
-  }
-
-  /**
-   * @return When this lobby was started.
-   * @throws IllegalStateException
-   *           If the lobby has not been started.
-   */
-  public Instant getStartTime() {
-    if (!started()) {
-      throw new IllegalStateException("Lobby has not started");
-    }
-    return startTime;
-  }
-
-  /**
-   * @return When this lobby ended.
-   * @throws IllegalStateException
-   *           If the lobby has not ended or was not started.
-   */
-  public Instant getEndTime() {
-    return gameMode.getEndTime(this);
-  }
-
-  private class Message {
-
-    private Instant timestamp;
-    private String  content;
-    private String  senderId;
-
-    public Message(String content, String senderId) {
-      this.content = content;
-      this.senderId = senderId;
-      timestamp = Instant.now();
-    }
-
-    public Instant getTime() {
-      return timestamp;
-    }
-
-    public String getSender() {
-      return senderId;
-    }
-
-    public String getContent() {
-      return content;
-    }
-  }
-
-  /**
-   * Custom serializer for use with GSON.
-   *
-   * @author mcisler
-   *
-   */
-  public static class Serializer implements JsonSerializer<WikiLobby> {
-
-    @Override
-    public JsonElement serialize(
-        WikiLobby src,
-        Type typeOfSrc,
-        JsonSerializationContext context) {
-      JsonObject lobby = new JsonObject();
-
-      lobby.addProperty("id", src.id);
-      lobby.add("startPage", Main.GSON.toJsonTree(src.getStartPage()));
-      lobby.addProperty("gameMode", src.gameMode.getGameMode().ordinal());
-      lobby.add("goalPage", Main.GSON.toJsonTree(src.getGoalPage()));
-      lobby.addProperty("started", src.started());
-      lobby.addProperty("ended", src.ended());
-      if (src.started()) {
-        lobby.addProperty("startTime", src.getStartTime().toEpochMilli());
-        lobby.addProperty("playTime", src.getPlayTime().toMillis());
-      }
-      if (src.ended()) {
-        lobby.addProperty("endTime", src.getEndTime().toEpochMilli());
-        lobby.add("winners", Main.GSON.toJsonTree(src.getWinners()));
-        // TODO: Shortest / known path
-      }
-
-      return lobby;
-    }
+  @Override
+  public JsonElement toJson(Gson gson) {
+    return gson.toJsonTree(this);
   }
 
   @Override
