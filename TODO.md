@@ -9,12 +9,8 @@
 - Stuff in docs folder
 ##### NECESSITIES
 - <b>Fix bugs</b>
-  - Check that we use equalsAfterRedirect
-  - End with different titles Newton, Isaac Newton SOLVED?
   - Weird player must join lobby bug!!!! Race condition? More likely a concurrency issue with the client lists?
-- Get settings on endpage -> hide content, show end differently (ROHAN)
-- Make end page work with shortest path (ROHAN)
-- Make shortest path work on end.js
+- Bug where lobby can't be started while another game is running
 ##### NICETIES
 - Shortest path
   - Add intelligent switcher if DB busy?

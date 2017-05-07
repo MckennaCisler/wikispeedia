@@ -4,4 +4,5 @@ Cat -> Mammal -> Hunter-gatherer -> Tracking_(hunting) -> Hunting -> Domesticati
 Cat -> Pet -> Dog
 Cat -> Furry -> Hairless_dog -> Dog
 
-###
+### Kin-Ball
+Known to be impossible?

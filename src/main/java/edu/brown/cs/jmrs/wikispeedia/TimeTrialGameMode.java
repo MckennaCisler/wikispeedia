@@ -2,10 +2,11 @@ package edu.brown.cs.jmrs.wikispeedia;
 
 import java.time.Instant;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.PriorityQueue;
 import java.util.Queue;
 import java.util.Set;
+
+import com.google.common.collect.ImmutableSet;
 
 import edu.brown.cs.jmrs.web.ContentFormatter;
 import edu.brown.cs.jmrs.web.LinkFinder;
@@ -46,23 +47,19 @@ public class TimeTrialGameMode implements WikiGameMode {
       }
     }
 
-    if (done.size() > 0) {
-      if (done.size() > 1) {
-        // remove all those that are not equal (in case this was called
-        // after others are done)
-        WikiPlayer first = done.poll();
-        Set<WikiPlayer> winners = new HashSet<>();
-        winners.add(first);
-
-        while (first.getEndTime().equals(done.peek())) {
-          winners.add(first);
-          first = done.poll();
-        }
-
-        return winners;
+    // only set if unset
+    if (lobby.getWinners().size() == 0) {
+      if (done.size() == 0) {
+        return ImmutableSet.of();
+      } else if (done.size() == 1) {
+        return ImmutableSet.of(done.peek());
+      } else {
+        throw new IllegalStateException(
+            "More than two people were done when checking for winners");
       }
+    } else {
+      return lobby.getWinners();
     }
-    return new HashSet<>(done);
   }
 
   @Override
@@ -87,5 +84,4 @@ public class TimeTrialGameMode implements WikiGameMode {
     }
     return new ArrayList<>(wikiLobby.getWinners()).get(0).getEndTime();
   }
-
 }

@@ -6,6 +6,8 @@ import java.util.PriorityQueue;
 import java.util.Queue;
 import java.util.Set;
 
+import com.google.common.collect.ImmutableSet;
+
 import edu.brown.cs.jmrs.web.ContentFormatter;
 import edu.brown.cs.jmrs.web.LinkFinder;
 import edu.brown.cs.jmrs.web.wikipedia.WikiPage;
@@ -36,33 +38,38 @@ public class LeastClicksGameMode implements WikiGameMode {
 
   @Override
   public Set<WikiPlayer> checkForWinners(WikiLobby lobby) {
-    // sort by path length
-    Queue<WikiPlayer> done =
-        new PriorityQueue<>((p1, p2) -> Integer.compare(p1.getPathLength(),
-            p2.getPathLength()));
-    for (WikiPlayer player : lobby.getPlayers()) {
-      if (player.done()) {
-        done.add(player);
-      }
-    }
-
-    if (done.size() > 0) {
-      if (done.size() > 1) {
-        // remove all those that are not equal (in case this was called
-        // after others are done)
-        WikiPlayer first = done.poll();
-        Set<WikiPlayer> winners = new HashSet<>();
-        winners.add(first);
-
-        while (first.getEndTime().equals(done.peek())) {
-          winners.add(first);
-          first = done.poll();
+    if (ended(lobby)) {
+      // sort by path length
+      Queue<WikiPlayer> done =
+          new PriorityQueue<>((p1, p2) -> Integer.compare(p1.getPathLength(),
+              p2.getPathLength()));
+      for (WikiPlayer player : lobby.getPlayers()) {
+        if (player.done()) {
+          done.add(player);
         }
-
-        return winners;
       }
+
+      if (done.size() > 0) {
+        if (done.size() > 1) {
+          // remove all those that are not equal (in case this was called
+          // after others are done)
+          WikiPlayer first = done.poll();
+          Set<WikiPlayer> winners = new HashSet<>();
+
+          WikiPlayer next = first;
+          while (next != null
+              && next.getPathLength() == first.getPathLength()) {
+            winners.add(next);
+            // reiterate
+            next = done.poll();
+          }
+          return winners;
+        }
+      }
+      return new HashSet<>(done);
     }
-    return new HashSet<>(done);
+    return ImmutableSet.of();
+
   }
 
   @Override
@@ -82,15 +89,18 @@ public class LeastClicksGameMode implements WikiGameMode {
       throw new IllegalStateException("Lobby has not ended.");
     }
 
-    // get last player's end time
-    Instant laggardTime = wikiLobby.getPlayers().get(0).getEndTime();
-    for (WikiPlayer player : wikiLobby.getPlayers()) {
-      // note that lobby being ended implies all players are done.
-      if (player.getEndTime().isAfter(laggardTime)) {
-        laggardTime = player.getEndTime();
+    // if there are no players (a completely expired lobby), just send null
+    if (wikiLobby.getPlayers().size() > 0) {
+      // get last player's end time
+      Instant laggardTime = wikiLobby.getPlayers().get(0).getEndTime();
+      for (WikiPlayer player : wikiLobby.getPlayers()) {
+        // note that lobby being ended implies all players are done.
+        if (player.getEndTime().isAfter(laggardTime)) {
+          laggardTime = player.getEndTime();
+        }
       }
+      return laggardTime;
     }
-    return laggardTime;
+    return null;
   }
-
 }

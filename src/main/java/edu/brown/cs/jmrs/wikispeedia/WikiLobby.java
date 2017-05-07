@@ -13,6 +13,7 @@ import java.util.Map.Entry;
 import java.util.Set;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
@@ -100,7 +101,8 @@ public class WikiLobby implements Lobby {
         lobby.addProperty("playTime", src.getPlayTime().toMillis());
       }
       if (src.ended()) {
-        lobby.addProperty("endTime", src.getEndTime().toEpochMilli());
+        lobby.addProperty("endTime",
+            src.getEndTime() != null ? src.getEndTime().toEpochMilli() : null);
         lobby.add("winners", Main.GSON.toJsonTree(src.getWinners()));
         // TODO: Shortest / known path
       }
@@ -164,6 +166,7 @@ public class WikiLobby implements Lobby {
     this.id = id;
     players = new HashMap<>();
     messages = Collections.synchronizedList(new ArrayList<>());
+    winners = ImmutableSet.of();
   }
 
   @Override
@@ -222,6 +225,7 @@ public class WikiLobby implements Lobby {
       winners = possibleWinners;
       stop();
       Command.sendEndGame(this);
+      Command.sendAllPlayers(this);
       return true;
     }
     return false;
@@ -231,6 +235,7 @@ public class WikiLobby implements Lobby {
    * @return Whether the lobby has ended, based on its internal game mode.
    */
   public boolean ended() {
+    // winners = gameMode.checkForWinners(this);
     return gameMode.ended(this);
   }
 
@@ -345,14 +350,9 @@ public class WikiLobby implements Lobby {
   }
 
   /**
-   * @return The player who won the game.
-   * @throws IllegalStateException
-   *           If the game has not ended.
+   * @return The players who won the game, or none if not ended.
    */
   public Set<WikiPlayer> getWinners() {
-    if (!ended()) {
-      throw new IllegalStateException("Lobby has not ended");
-    }
     return winners;
   }
 
