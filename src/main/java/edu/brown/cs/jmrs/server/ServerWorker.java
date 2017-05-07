@@ -200,7 +200,7 @@ class ServerWorker {
   }
 
   /**
-   * closes the lobby associated with the given id if it exists
+   * closes the lobby associated with the given id if it exists.
    *
    * @param lobbyId
    *          The id to close the lobby associated with

@@ -223,6 +223,7 @@ public class WikiLobby implements Lobby {
       winners = possibleWinners;
       stop();
       Command.sendEndGame(this);
+      Command.sendAllPlayers(this);
       return true;
     }
     return false;
