@@ -50,8 +50,10 @@ class ServerWorker {
    * @param gson
    *          Gson instance for JSONification of lobbies
    */
-  public ServerWorker(Server server,
-      BiFunction<Server, String, ? extends Lobby> lobbyFactory, Gson gson) {
+  public ServerWorker(
+      Server server,
+      BiFunction<Server, String, ? extends Lobby> lobbyFactory,
+      Gson gson) {
     this.server = server;
     lobbies = new LobbyManager(lobbyFactory);
     clients = new ConcurrentBiMap<>();
@@ -121,6 +123,15 @@ class ServerWorker {
       }
     }
 
+    Client client = clients.getBack(new Client(clientId));
+    if (client != null && client.disconnecting()) {
+      try {
+        client.wait();
+      } catch (InterruptedException e) {
+        e.printStackTrace();
+      }
+    }
+
     // notify client of their id
 
     String toClient = "";
@@ -143,7 +154,7 @@ class ServerWorker {
       sendToClient(conn, toClient);
     }
 
-    Client client = clients.get(conn);
+    client = clients.get(conn);
     if (client != null) {
       // if they are not in a lobby, give them a list of lobbies
       if (client.getLobby() == null) {
@@ -165,19 +176,24 @@ class ServerWorker {
    *          The client who disconnected
    */
   public void clientDisconnected(Session conn) {
+    Client client = clients.get(conn);
+    if (client != null) {
+      client.disconnecting(true);
+    }
+
     Date expiration = new Date();
     List<HttpCookie> cookies = conn.getUpgradeRequest().getCookies();
     for (HttpCookie cookie : cookies) {
       if (cookie.getName().equals("client_id")) {
         String cookieVal = cookie.getValue();
-        expiration =
-            Date.from(Instant.ofEpochMilli(Long
-                .parseLong(cookieVal.substring(cookieVal.indexOf(":") + 1))));
+        expiration = Date.from(
+            Instant.ofEpochMilli(
+                Long.parseLong(
+                    cookieVal.substring(cookieVal.indexOf(":") + 1))));
         break;
       }
     }
 
-    Client client = clients.get(conn);
     if (client != null && client.getLobby() == null) {
       notInLobbies.remove(client.getId());
     }
@@ -196,6 +212,11 @@ class ServerWorker {
       }
     } else {
       clients.remove(conn);
+    }
+
+    if (client != null) {
+      client.disconnecting(false);
+      client.notifyAll();
     }
   }
 
@@ -319,6 +340,7 @@ class ServerWorker {
    */
   public String setClientId(Session conn, String clientId) throws InputError {
     Client client = clients.getBack(new Client(clientId));
+
     if (client == null) {
       clientId = conn.hashCode() + "";
       // starts out connected

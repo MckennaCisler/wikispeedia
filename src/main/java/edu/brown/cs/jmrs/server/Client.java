@@ -15,6 +15,7 @@ class Client implements Comparable<Client> {
   private String  id;
   private Lobby   lobby;
   private boolean connected;
+  private boolean disconnecting;
   private Date    cookieExpiration;
 
   /**
@@ -32,6 +33,14 @@ class Client implements Comparable<Client> {
   @Override
   public int compareTo(Client p) {
     return cookieExpiration.compareTo(p.getCookieExpiration());
+  }
+
+  public boolean disconnecting() {
+    return disconnecting;
+  }
+
+  public void disconnecting(boolean discVal) {
+    disconnecting = discVal;
   }
 
   @Override

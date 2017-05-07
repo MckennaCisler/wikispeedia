@@ -6,11 +6,11 @@ import java.time.Duration;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
@@ -79,16 +79,20 @@ public class WikiLobby implements Lobby {
   public static class Serializer implements JsonSerializer<WikiLobby> {
 
     @Override
-    public JsonElement serialize(WikiLobby src, Type typeOfSrc,
+    public JsonElement serialize(
+        WikiLobby src,
+        Type typeOfSrc,
         JsonSerializationContext context) {
       JsonObject lobby = new JsonObject();
 
       lobby.addProperty("id", src.id);
       lobby.addProperty("gameMode", src.gameMode.getGameMode().ordinal());
       try {
-        lobby.add("startPage",
+        lobby.add(
+            "startPage",
             WikiInterpreter.getPlayerPageInfo(src.getStartPage(), src));
-        lobby.add("goalPage",
+        lobby.add(
+            "goalPage",
             WikiInterpreter.getPlayerPageInfo(src.getGoalPage(), src));
       } catch (IOException e) {
         lobby.add("startPage", Main.GSON.toJsonTree(src.getStartPage()));
@@ -101,7 +105,8 @@ public class WikiLobby implements Lobby {
         lobby.addProperty("playTime", src.getPlayTime().toMillis());
       }
       if (src.ended()) {
-        lobby.addProperty("endTime",
+        lobby.addProperty(
+            "endTime",
             src.getEndTime() != null ? src.getEndTime().toEpochMilli() : null);
         lobby.add("winners", Main.GSON.toJsonTree(src.getWinners()));
         // TODO: Shortest / known path
@@ -111,18 +116,19 @@ public class WikiLobby implements Lobby {
     }
   }
 
-  static final ContentFormatter<WikiPage> DEFAULT_CONTENT_FORMATTER =
-      new ContentFormatterChain<WikiPage>(
-          ImmutableList.of(new WikiBodyFormatter(), new WikiFooterRemover(),
-              new WikiAnnotationRemover()));
+  static final ContentFormatter<WikiPage> DEFAULT_CONTENT_FORMATTER = new ContentFormatterChain<WikiPage>(
+      ImmutableList.of(
+          new WikiBodyFormatter(),
+          new WikiFooterRemover(),
+          new WikiAnnotationRemover()));
 
-  static final LinkFinder<WikiPage> DEFAULT_LINK_FINDER;
+  static final LinkFinder<WikiPage>       DEFAULT_LINK_FINDER;
 
   static {
     // try {
-    DEFAULT_LINK_FINDER =
-        new WikiPageLinkFinder(Filter.DISAMBIGUATION,
-            Filter.NON_ENGLISH_WIKIPEDIA);
+    DEFAULT_LINK_FINDER = new WikiPageLinkFinder(
+        Filter.DISAMBIGUATION,
+        Filter.NON_ENGLISH_WIKIPEDIA);
     // new CachingWikiLinkFinder(Main.getWikiDbConn(), Filter.DISAMBIGUATION,
     // Filter.NON_ENGLISH_WIKIPEDIA);
     // } catch (SQLException e) {
@@ -142,7 +148,7 @@ public class WikiLobby implements Lobby {
   private Instant                           startTime = null;
   private WikiGame                          game;
 
-  private Set<WikiPlayer> winners;
+  private Set<WikiPlayer>                   winners;
 
   /****************************************/
   /* LOBBY OVERRIDES */
@@ -164,7 +170,7 @@ public class WikiLobby implements Lobby {
   public WikiLobby(Server server, String id, DbConn wikiDbConn) {
     this.server = server;
     this.id = id;
-    players = new HashMap<>();
+    players = new ConcurrentHashMap<>();
     messages = Collections.synchronizedList(new ArrayList<>());
     winners = ImmutableSet.of();
   }
@@ -172,7 +178,9 @@ public class WikiLobby implements Lobby {
   @Override
   public void addClient(String playerId) {
     if (started()) {
-      Command.sendError(server, playerId,
+      Command.sendError(
+          server,
+          playerId,
           "Game has already started, cannot add player");
       return;
     }
@@ -385,13 +393,15 @@ public class WikiLobby implements Lobby {
     // add custom shortcut to set start and end page specifically.
     if (arguments.has("startPage")
         && !arguments.get("startPage").getAsString().equals("")) {
-      startPage =
-          WikiPage.fromAny(arguments.get("startPage").getAsString(),
-              Main.WIKI_PAGE_DOC_CACHE);
+      startPage = WikiPage.fromAny(
+          arguments.get("startPage").getAsString(),
+          Main.WIKI_PAGE_DOC_CACHE);
 
       if (!startPage.accessible()) {
-        throw new InputError(String.format(
-            "Page %s is not a valid Wikipedia page!", startPage.getName()));
+        throw new InputError(
+            String.format(
+                "Page %s is not a valid Wikipedia page!",
+                startPage.getName()));
       }
     } else {
       startPage = GameGenerator.pageWithObscurity(difficulty);
@@ -400,13 +410,15 @@ public class WikiLobby implements Lobby {
 
     if (arguments.has("goalPage")
         && !arguments.get("goalPage").getAsString().equals("")) {
-      endPage =
-          WikiPage.fromAny(arguments.get("goalPage").getAsString(),
-              Main.WIKI_PAGE_DOC_CACHE);
+      endPage = WikiPage.fromAny(
+          arguments.get("goalPage").getAsString(),
+          Main.WIKI_PAGE_DOC_CACHE);
 
       if (!endPage.accessible()) {
-        throw new InputError(String.format(
-            "Page %s is not a valid Wikipedia page!", endPage.getName()));
+        throw new InputError(
+            String.format(
+                "Page %s is not a valid Wikipedia page!",
+                endPage.getName()));
       }
     } else {
       endPage = GameGenerator.pageWithObscurity(difficulty);
@@ -414,10 +426,13 @@ public class WikiLobby implements Lobby {
 
     game = new WikiGame(startPage, endPage);
 
-    Main.debugLog(String.format("Generated %s game: %s -> %s",
-        mode == WikiGameMode.Mode.TIME_TRIAL.ordinal() ? "time trial"
-            : "least clicks",
-        game.getStart(), game.getGoal()));
+    Main.debugLog(
+        String.format(
+            "Generated %s game: %s -> %s",
+            mode == WikiGameMode.Mode.TIME_TRIAL.ordinal() ? "time trial"
+                : "least clicks",
+            game.getStart(),
+            game.getGoal()));
   }
 
   @Override
@@ -431,9 +446,11 @@ public class WikiLobby implements Lobby {
       players.get(clientId).setConnected(false);
       Command.sendAllPlayers(this);
     } else {
-      throw new AssertionError(String.format(
-          "Unknown player with client id %s disconnected; known are %s",
-          clientId, players));
+      throw new AssertionError(
+          String.format(
+              "Unknown player with client id %s disconnected; known are %s",
+              clientId,
+              players));
     }
   }
 
@@ -443,9 +460,11 @@ public class WikiLobby implements Lobby {
       players.get(clientId).setConnected(true);
       Command.sendAllPlayers(this);
     } else {
-      throw new AssertionError(String.format(
-          "Unknown player with client id %s reconnected; known are %s",
-          clientId, players));
+      throw new AssertionError(
+          String.format(
+              "Unknown player with client id %s reconnected; known are %s",
+              clientId,
+              players));
     }
   }
 
@@ -464,7 +483,16 @@ public class WikiLobby implements Lobby {
     this.players.remove(playerId);
     Command.sendAllPlayers(this);
 
-    if (players.size() == 0) {
+    boolean closeLobby = true;
+
+    for (WikiPlayer player : players.values().toArray(new WikiPlayer[] {})) {
+      if (player.connected()) {
+        closeLobby = false;
+        break;
+      }
+    }
+
+    if (players.size() == 0 || closeLobby) {
       server.closeLobby(id);
     }
   }
@@ -518,8 +546,10 @@ public class WikiLobby implements Lobby {
     if (!force) {
       for (Entry<String, WikiPlayer> entry : players.entrySet()) {
         if (!entry.getValue().ready()) {
-          throw new IllegalStateException(String
-              .format("Player %s is not ready", entry.getValue().getName()));
+          throw new IllegalStateException(
+              String.format(
+                  "Player %s is not ready",
+                  entry.getValue().getName()));
         }
       }
     }
@@ -550,9 +580,13 @@ public class WikiLobby implements Lobby {
       }
     }
 
-    Main.debugLog(String.format(
-        "Lobby %s finished; \n\twinners: %s \n\tplayTime: %s\n\tendTime: %s",
-        id, getWinners(), getPlayTime(), getEndTime()));
+    Main.debugLog(
+        String.format(
+            "Lobby %s finished; \n\twinners: %s \n\tplayTime: %s\n\tendTime: %s",
+            id,
+            getWinners(),
+            getPlayTime(),
+            getEndTime()));
   }
 
   @Override
@@ -562,7 +596,9 @@ public class WikiLobby implements Lobby {
 
   @Override
   public String toString() {
-    return String.format("%s (%s)", id,
+    return String.format(
+        "%s (%s)",
+        id,
         started() ? (ended() ? "ended" : "started") : "not started");
   }
 
