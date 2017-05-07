@@ -38,15 +38,14 @@ $(document).ready(function () {
 	});
 
 	$("#back_main").on('click', () => {
-		serverConn.leaveLobby(() => {
-			$("#start_game").prop('disabled', false);
-			$("#start_game").html(`Start your game!`);
-			clearInterval(dotPid);
-			$("#uname_picker").hide();
-			$("#main").show();
-			$("#rules").show();
-			$(`#${lobbyName}`).remove();
-		}, displayServerConnError);
+		serverConn.leaveLobby();
+		$("#start_game").prop('disabled', false);
+		$("#start_game").html(`Start your game!`);
+		clearInterval(dotPid);
+		$("#uname_picker").hide();
+		$("#main").show();
+		$("#rules").show();
+		$(`#${lobbyName}`).remove();
 	});
 
 	$("#music-select").change(() => {
@@ -202,19 +201,29 @@ serverConn.whenReadyToSend(() => {
 function drawLobbies(lobbies) {
 	"use strict";
 	if (lobbies.length === 0) {
-		$(document).ready(() => {
-			$("#open_games").html("No games were found, you'll have to make your own!");
-			$("#open_games").addClass("none-found");
-		});
+		clearLobbies();
 	} else {
 		$(document).ready(() => {
 			$("#open_games").removeClass("none-found");
 			let textStr = "";
 			for (let i = 0; i < lobbies.length; i++) {
-				textStr += '<li class="alobby list-group-item list-group-item-action" id="' +
-					lobbies[i].id + '">' + lobbies[i].id + '</li>';
+				if (!lobbies[i].started) {
+					textStr += '<li class="alobby list-group-item list-group-item-action" id="' +
+						lobbies[i].id + '">' + lobbies[i].id + '</li>';
+				}
 			}
-			$("#open_games").html(textStr);
+			if (textStr !== "") {
+				$("#open_games").html(textStr);
+			} else {
+				clearLobbies();
+			}
 		});
 	}
+}
+
+function clearLobbies() {
+	$(document).ready(() => {
+		$("#open_games").html("No games were found, you'll have to make your own!");
+		$("#open_games").addClass("none-found");
+	});
 }

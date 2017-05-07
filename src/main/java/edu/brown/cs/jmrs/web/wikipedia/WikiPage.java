@@ -33,7 +33,7 @@ public class WikiPage extends Page {
       "https://en.wikipedia.org/wiki/";
 
   // Common regexes
-  public static final Pattern WIKIPEDIA_DOMAIN_REGEX =
+  public static final Pattern WIKIPEDIA_DOMAIN_REGEX  =
       Pattern.compile(HTTP_REGEX + ".*?\\.wikipedia\\.org");
   public static final Pattern WIKIPEDIA_ARTICLE_REGEX =
       Pattern.compile(WIKIPEDIA_DOMAIN_REGEX.pattern() + "\\/wiki\\/.*");
@@ -242,6 +242,18 @@ public class WikiPage extends Page {
   @Override
   public String toString() {
     return url();
+  }
+
+  @Override
+  public boolean equalsAfterRedirect(Page page) throws IOException {
+    if (this == page) {
+      return true;
+    }
+    if (page == null) {
+      return false;
+    }
+    assert page instanceof WikiPage;
+    return getTitle().equals(((WikiPage) page).getTitle());
   }
 
   /**
