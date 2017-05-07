@@ -111,6 +111,7 @@ $(document).ready(() => {
 		"use strict";
 		serverConn.registerError(displayServerConnErrorRedirectHome);
 		serverConn.registerBeginGame(startGame);
+		serverConn.registerClose(displayConnCloseMsg);
 	});
 
 	serverConn.whenReadyToSend(() => {

@@ -16,12 +16,14 @@ import edu.brown.cs.jmrs.server.customizable.Lobby;
  */
 class ServerCommandHandler implements Runnable {
 
+  /**
+   * All server commands.
+   *
+   * @author shastin1
+   *
+   */
   private enum Commands {
-    SET_CLIENT_ID,
-    START_LOBBY,
-    LEAVE_LOBBY,
-    JOIN_LOBBY,
-    GET_LOBBIES,
+    SET_CLIENT_ID, START_LOBBY, LEAVE_LOBBY, JOIN_LOBBY, GET_LOBBIES,
     // Value to signify not in enum (when using switch statement)
     NULL;
 
@@ -43,7 +45,7 @@ class ServerCommandHandler implements Runnable {
   private final String             unformattedCommand;
   private final CommandInterpreter interpreter;
 
-  private final Gson               gson;
+  private final Gson gson;
 
   /**
    * Constructor, stores all necessary objects for analyzing and acting on
@@ -61,12 +63,8 @@ class ServerCommandHandler implements Runnable {
    * @param gson
    *          The Gson instance used for JSONification of lobbies
    */
-  public ServerCommandHandler(
-      ServerWorker server,
-      Session conn,
-      String command,
-      CommandInterpreter interpreter,
-      Gson gson) {
+  ServerCommandHandler(ServerWorker server, Session conn, String command,
+      CommandInterpreter interpreter, Gson gson) {
     this.server = server;
     this.conn = conn;
     this.unformattedCommand = command;
@@ -169,11 +167,10 @@ class ServerCommandHandler implements Runnable {
 
                 if (player.getLobby() != null) {
                   // if not a server command pass it to the lobby
-                  interpreter
-                      .interpret(player.getLobby(), player.getId(), commandMap);
+                  interpreter.interpret(player.getLobby(), player.getId(),
+                      commandMap);
                 } else {
-                  jsonObject.addProperty(
-                      "error_message",
+                  jsonObject.addProperty("error_message",
                       "Player must join a lobby first");
                   toClient = gson.toJson(jsonObject);
                   server.sendToClient(conn, toClient);
@@ -186,16 +183,14 @@ class ServerCommandHandler implements Runnable {
             server.sendToClient(conn, toClient);
           }
         } else {
-          jsonObject.addProperty(
-              "error_message",
+          jsonObject.addProperty("error_message",
               "Cannot continue without unique ID");
           toClient = gson.toJson(jsonObject);
           server.sendToClient(conn, toClient);
         }
       } else {
         jsonObject.addProperty("command", "command_error");
-        jsonObject.addProperty(
-            "error_message",
+        jsonObject.addProperty("error_message",
             "Client-to-Server commands must be JSON with 'command' field");
         toClient = gson.toJson(jsonObject);
         server.sendToClient(conn, toClient);

@@ -250,6 +250,12 @@ class ServerConn {
          * Messages queued in case a callback is added expecting to get them.
          */
         this.recievedMessages = [];
+
+
+        /**
+         * Called on close.
+         */
+        this.closeCallback;
     }
 
     _setId(id) {
@@ -354,6 +360,10 @@ class ServerConn {
 
     registerError(callback) {
         this._registerOutgoing(Command.ERROR, callback);
+    }
+
+    registerClose(callback) {
+      this.closeCallback = callback;
     }
 
     _registerOutgoing(command, callback) {
@@ -467,6 +477,7 @@ class ServerConn {
 
     ws_onclose() {
       console.log("INFO: Connection was closed");
+      this.closeCallback();
     }
 
     _send(command, callback, errCallback, args) {
