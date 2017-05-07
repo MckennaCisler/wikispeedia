@@ -122,7 +122,7 @@ $(document).ready(() => {
 
 		// Get current lobby settings
 		serverConn.getSettings("", GAME_STATE.WAITING, (settings) => {
-	 		// Get articles
+	 		// Get articles (nested because serverConn can't handled concurrent messages :P)
 			serverConn.getPage(settings.startPage.name, (article) => {
 				drawFirstPage(article);
 				serverConn.getPage(settings.goalPage.name, drawSecondPage, displayServerConnError);

@@ -50,10 +50,8 @@ class ServerWorker {
    * @param gson
    *          Gson instance for JSONification of lobbies
    */
-  public ServerWorker(
-      Server server,
-      BiFunction<Server, String, ? extends Lobby> lobbyFactory,
-      Gson gson) {
+  public ServerWorker(Server server,
+      BiFunction<Server, String, ? extends Lobby> lobbyFactory, Gson gson) {
     this.server = server;
     lobbies = new LobbyManager(lobbyFactory);
     clients = new ConcurrentBiMap<>();
@@ -172,10 +170,9 @@ class ServerWorker {
     for (HttpCookie cookie : cookies) {
       if (cookie.getName().equals("client_id")) {
         String cookieVal = cookie.getValue();
-        expiration = Date.from(
-            Instant.ofEpochMilli(
-                Long.parseLong(
-                    cookieVal.substring(cookieVal.indexOf(":") + 1))));
+        expiration =
+            Date.from(Instant.ofEpochMilli(Long
+                .parseLong(cookieVal.substring(cookieVal.indexOf(":") + 1))));
         break;
       }
     }
@@ -305,7 +302,6 @@ class ServerWorker {
    *          The message so send
    */
   public void sendToClient(Session client, String message) {
-    System.out.println("connected");
     messageQueue.send(client, message);
   }
 

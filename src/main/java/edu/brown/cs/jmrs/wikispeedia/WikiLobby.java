@@ -76,9 +76,7 @@ public class WikiLobby implements Lobby {
   public static class Serializer implements JsonSerializer<WikiLobby> {
 
     @Override
-    public JsonElement serialize(
-        WikiLobby src,
-        Type typeOfSrc,
+    public JsonElement serialize(WikiLobby src, Type typeOfSrc,
         JsonSerializationContext context) {
       JsonObject lobby = new JsonObject();
 
@@ -102,19 +100,18 @@ public class WikiLobby implements Lobby {
     }
   }
 
-  static final ContentFormatter<WikiPage> DEFAULT_CONTENT_FORMATTER = new ContentFormatterChain<WikiPage>(
-      ImmutableList.of(
-          new WikiBodyFormatter(),
-          new WikiFooterRemover(),
-          new WikiAnnotationRemover()));
+  static final ContentFormatter<WikiPage> DEFAULT_CONTENT_FORMATTER =
+      new ContentFormatterChain<WikiPage>(
+          ImmutableList.of(new WikiBodyFormatter(), new WikiFooterRemover(),
+              new WikiAnnotationRemover()));
 
-  static final LinkFinder<WikiPage>       DEFAULT_LINK_FINDER;
+  static final LinkFinder<WikiPage> DEFAULT_LINK_FINDER;
 
   static {
     // try {
-    DEFAULT_LINK_FINDER = new WikiPageLinkFinder(
-        Filter.DISAMBIGUATION,
-        Filter.NON_ENGLISH_WIKIPEDIA);
+    DEFAULT_LINK_FINDER =
+        new WikiPageLinkFinder(Filter.DISAMBIGUATION,
+            Filter.NON_ENGLISH_WIKIPEDIA);
     // new CachingWikiLinkFinder(Main.getWikiDbConn(), Filter.DISAMBIGUATION,
     // Filter.NON_ENGLISH_WIKIPEDIA);
     // } catch (SQLException e) {
@@ -134,7 +131,7 @@ public class WikiLobby implements Lobby {
   private Instant                           startTime = null;
   private WikiGame                          game;
 
-  private Set<WikiPlayer>                   winners;
+  private Set<WikiPlayer> winners;
 
   /****************************************/
   /* LOBBY OVERRIDES */
@@ -163,9 +160,7 @@ public class WikiLobby implements Lobby {
   @Override
   public void addClient(String playerId) {
     if (started()) {
-      Command.sendError(
-          server,
-          playerId,
+      Command.sendError(server, playerId,
           "Game has already started, cannot add player");
       return;
     }
@@ -379,32 +374,30 @@ public class WikiLobby implements Lobby {
     WikiPage startPage, endPage;
 
     // add custom shortcut to set start and end page specifically.
-    if (arguments.has("startPage")) {
-      startPage = WikiPage.fromAny(
-          arguments.get("startPage").getAsString(),
-          Main.WIKI_PAGE_DOC_CACHE);
+    if (arguments.has("startPage")
+        && !arguments.get("startPage").getAsString().equals("")) {
+      startPage =
+          WikiPage.fromAny(arguments.get("startPage").getAsString(),
+              Main.WIKI_PAGE_DOC_CACHE);
 
       if (!startPage.accessible()) {
-        throw new InputError(
-            String.format(
-                "Page %s is not a valid Wikipedia page!",
-                startPage.getName()));
+        throw new InputError(String.format(
+            "Page %s is not a valid Wikipedia page!", startPage.getName()));
       }
     } else {
       startPage = GameGenerator.pageWithObscurity(difficulty);
 
     }
 
-    if (arguments.has("goalPage")) {
-      endPage = WikiPage.fromAny(
-          arguments.get("goalPage").getAsString(),
-          Main.WIKI_PAGE_DOC_CACHE);
+    if (arguments.has("goalPage")
+        && !arguments.get("goalPage").getAsString().equals("")) {
+      endPage =
+          WikiPage.fromAny(arguments.get("goalPage").getAsString(),
+              Main.WIKI_PAGE_DOC_CACHE);
 
       if (!endPage.accessible()) {
-        throw new InputError(
-            String.format(
-                "Page %s is not a valid Wikipedia page!",
-                endPage.getName()));
+        throw new InputError(String.format(
+            "Page %s is not a valid Wikipedia page!", endPage.getName()));
       }
     } else {
       endPage = GameGenerator.pageWithObscurity(difficulty);
@@ -412,13 +405,10 @@ public class WikiLobby implements Lobby {
 
     game = new WikiGame(startPage, endPage);
 
-    Main.debugLog(
-        String.format(
-            "Generated %s game: %s -> %s",
-            mode == WikiGameMode.Mode.TIME_TRIAL.ordinal() ? "time trial"
-                : "least clicks",
-            game.getStart(),
-            game.getGoal()));
+    Main.debugLog(String.format("Generated %s game: %s -> %s",
+        mode == WikiGameMode.Mode.TIME_TRIAL.ordinal() ? "time trial"
+            : "least clicks",
+        game.getStart(), game.getGoal()));
   }
 
   @Override
@@ -431,6 +421,10 @@ public class WikiLobby implements Lobby {
     if (players.containsKey(clientId)) {
       players.get(clientId).setConnected(false);
       Command.sendAllPlayers(this);
+    } else {
+      throw new AssertionError(String.format(
+          "Unknown player with client id %s disconnected; known are %s",
+          clientId, players));
     }
   }
 
@@ -439,9 +433,19 @@ public class WikiLobby implements Lobby {
     if (players.containsKey(clientId)) {
       players.get(clientId).setConnected(true);
       Command.sendAllPlayers(this);
+    } else {
+      throw new AssertionError(String.format(
+          "Unknown player with client id %s reconnected; known are %s",
+          clientId, players));
     }
   }
 
+  /**
+   * @param content
+   *          Message content
+   * @param clientId
+   *          Client id who sent message
+   */
   public void registerMessage(String content, String clientId) {
     messages.add(new Message(content, clientId));
   }
@@ -456,6 +460,10 @@ public class WikiLobby implements Lobby {
     }
   }
 
+  /**
+   * @param clientId
+   *          Player id to send to
+   */
   public void sendMessagesToPlayer(String clientId) {
     Message[] messageArray = messages.toArray(new Message[] {});
     JsonArray jsonArray = new JsonArray();
@@ -501,10 +509,8 @@ public class WikiLobby implements Lobby {
     if (!force) {
       for (Entry<String, WikiPlayer> entry : players.entrySet()) {
         if (!entry.getValue().ready()) {
-          throw new IllegalStateException(
-              String.format(
-                  "Player %s is not ready",
-                  entry.getValue().getName()));
+          throw new IllegalStateException(String
+              .format("Player %s is not ready", entry.getValue().getName()));
         }
       }
     }
@@ -535,13 +541,9 @@ public class WikiLobby implements Lobby {
       }
     }
 
-    Main.debugLog(
-        String.format(
-            "Lobby %s finished; \n\twinners: %s \n\tplayTime: %s\n\tendTime: %s",
-            id,
-            getWinners(),
-            getPlayTime(),
-            getEndTime()));
+    Main.debugLog(String.format(
+        "Lobby %s finished; \n\twinners: %s \n\tplayTime: %s\n\tendTime: %s",
+        id, getWinners(), getPlayTime(), getEndTime()));
   }
 
   @Override
@@ -551,9 +553,7 @@ public class WikiLobby implements Lobby {
 
   @Override
   public String toString() {
-    return String.format(
-        "%s (%s)",
-        id,
+    return String.format("%s (%s)", id,
         started() ? (ended() ? "ended" : "started") : "not started");
   }
 
