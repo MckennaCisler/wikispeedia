@@ -53,14 +53,14 @@
 					<h3 id="winner"></h3>
 					<div id="disp-buttons" class="btn-group" data-toggle="buttons">
 						<label class="btn btn-secondary active">
-							<input type="radio" name="display-type" id="time" checked>Leader board
+							<input type="radio" name="display-type" id="lead" checked>Leaderboard
 						</label>
 						<label class="btn btn-secondary">
-							<input type="radio" name="display-type" id="clicks">History
+							<input type="radio" name="display-type" id="hist">History
 						</label>
 					</div>
 				</div>
-				<div class="card-block">
+				<div class="card-block" id="results">
 					<table class="table" id="leaderboard">
 						<thead>
 							<tr>
@@ -69,6 +69,8 @@
 							</tr>
 						</thead>
 					</table>
+					<div id="stats">
+					</div>
 				</div>
 				<div class="card-footer">
 					<a href="/"><button class="btn btn-danger">Play again!</button></a>

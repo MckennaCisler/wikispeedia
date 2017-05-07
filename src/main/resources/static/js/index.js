@@ -53,7 +53,7 @@ $(document).ready(function () {
 		let mval = document.getElementById("music-select").options.selectedIndex;
 		setCookie('songChoice', mval);
 	});
-	
+
 	$("#se-chooser").change(() => {
 		if (document.getElementById("se-chooser").checked) {
 			$("#se-boxes").show();
@@ -95,10 +95,10 @@ $(document).ready(function () {
 					$("#start_game").html(`Generating${dotStr}`);
 				}
 			}, 1000);
-			
+
 			let params;
 			if (document.getElementById("se-chooser").checked && ($("#se-start").val() !== "" || $("#se-end").val() !== "")) {
-				params = 
+				params =
 					{
 					"gameMode": mode,
 					"difficulty": $("#difficulty_slider").val() / 100,
@@ -106,7 +106,7 @@ $(document).ready(function () {
 					"goalPage": $("#se-end").val()
 				};
 			} else {
-				params = 
+				params =
 					{
 					"gameMode": mode,
 					"difficulty": $("#difficulty_slider").val() / 100
@@ -186,17 +186,6 @@ function resize() {
 		$('#row_div').addClass("row");
 	}
 }
-
-/*function startLobby(callback, errCallback) {
-	serverConn.startLobby(lobbyName.trim(),
-		() => {
-			callback();
-		},
-		(error) => {
-			errCallback(error.error_message);
-			displayServerConnError(error);
-		});
-}*/
 
 // game logic handlers
 serverConn.whenReadyToRecieve(() => {
