@@ -305,6 +305,7 @@ class ServerWorker {
    *          The message so send
    */
   public void sendToClient(Session client, String message) {
+    System.out.println("connected");
     messageQueue.send(client, message);
   }
 

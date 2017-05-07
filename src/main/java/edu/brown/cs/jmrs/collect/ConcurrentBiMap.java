@@ -10,7 +10,7 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 /**
  * A thread-safe bi-map. Allows effectively constant time lookups in both
  * directions on entries while also forcing both keys and values to be unique.
- * 
+ *
  * @author shastin1
  *
  * @param <E>
@@ -34,27 +34,14 @@ public class ConcurrentBiMap<E, T> implements Map<E, T> {
   }
 
   @Override
-  public int size() {
-    int size = 0;
+  public void clear() {
     try {
-      r.lock();
-      size = fore.size();
+      w.lock();
+      fore.clear();
+      back.clear();
     } finally {
-      r.unlock();
+      w.unlock();
     }
-    return size;
-  }
-
-  @Override
-  public boolean isEmpty() {
-    boolean empty = false;
-    try {
-      r.lock();
-      empty = fore.isEmpty();
-    } finally {
-      r.unlock();
-    }
-    return empty;
   }
 
   @Override
@@ -82,6 +69,18 @@ public class ConcurrentBiMap<E, T> implements Map<E, T> {
   }
 
   @Override
+  public Set<Entry<E, T>> entrySet() {
+    Set<Entry<E, T>> entries = null;
+    try {
+      r.lock();
+      entries = fore.entrySet();
+    } finally {
+      r.unlock();
+    }
+    return entries;
+  }
+
+  @Override
   public T get(Object key) {
     T value = null;
     try {
@@ -94,8 +93,26 @@ public class ConcurrentBiMap<E, T> implements Map<E, T> {
   }
 
   /**
+   * Given a value, if there is an equivalent value held that value is returned.
+   *
+   * @param key
+   *          The value to find an equivalent value to
+   * @return The stored equivalent value, or null if none exists
+   */
+  public T getBack(T key) {
+    T retVal = null;
+    try {
+      r.lock();
+      retVal = get(getReversed(key));
+    } finally {
+      r.unlock();
+    }
+    return retVal;
+  }
+
+  /**
    * Effectively constant time lookup of key from value.
-   * 
+   *
    * @param key
    *          The "value" to find the "key" for
    * @return The "key" associated with the given "value"
@@ -111,22 +128,28 @@ public class ConcurrentBiMap<E, T> implements Map<E, T> {
     return value;
   }
 
-  /**
-   * Given a value, if there is an equivalent value held that value is returned.
-   * 
-   * @param key
-   *          The value to find an equivalent value to
-   * @return The stored equivalent value, or null if none exists
-   */
-  public T getBack(T key) {
-    T retVal = null;
+  @Override
+  public boolean isEmpty() {
+    boolean empty = false;
     try {
       r.lock();
-      retVal = get(getReversed(key));
+      empty = fore.isEmpty();
     } finally {
       r.unlock();
     }
-    return retVal;
+    return empty;
+  }
+
+  @Override
+  public Set<E> keySet() {
+    Set<E> keys = null;
+    try {
+      r.lock();
+      keys = fore.keySet();
+    } finally {
+      r.unlock();
+    }
+    return keys;
   }
 
   @Override
@@ -143,10 +166,26 @@ public class ConcurrentBiMap<E, T> implements Map<E, T> {
     return old;
   }
 
+  @Override
+  public void putAll(Map<? extends E, ? extends T> m) {
+    try {
+      w.lock();
+      for (Entry<? extends E, ? extends T> entry : m.entrySet()) {
+        E key = entry.getKey();
+        T value = entry.getValue();
+        T old = fore.put(key, value);
+        back.remove(old);
+        back.put(value, key);
+      }
+    } finally {
+      w.unlock();
+    }
+  }
+
   /**
    * Puts key-value pair into map, but only if the given value is not already
    * associated with any key.
-   * 
+   *
    * @param key
    *          The key to enter
    * @param value
@@ -157,7 +196,7 @@ public class ConcurrentBiMap<E, T> implements Map<E, T> {
     boolean placed = false;
     try {
       w.lock();
-      if (getReversed(value) != null) {
+      if (getReversed(value) == null) {
         placed = true;
         put(key, value);
       }
@@ -181,66 +220,15 @@ public class ConcurrentBiMap<E, T> implements Map<E, T> {
   }
 
   @Override
-  public void putAll(Map<? extends E, ? extends T> m) {
-    try {
-      w.lock();
-      for (Entry<? extends E, ? extends T> entry : m.entrySet()) {
-        E key = entry.getKey();
-        T value = entry.getValue();
-        T old = fore.put(key, value);
-        back.remove(old);
-        back.put(value, key);
-      }
-    } finally {
-      w.unlock();
-    }
-  }
-
-  @Override
-  public void clear() {
-    try {
-      w.lock();
-      fore.clear();
-      back.clear();
-    } finally {
-      w.unlock();
-    }
-  }
-
-  @Override
-  public Set<E> keySet() {
-    Set<E> keys = null;
+  public int size() {
+    int size = 0;
     try {
       r.lock();
-      keys = fore.keySet();
+      size = fore.size();
     } finally {
       r.unlock();
     }
-    return keys;
-  }
-
-  @Override
-  public Collection<T> values() {
-    Set<T> keys = null;
-    try {
-      r.lock();
-      keys = back.keySet();
-    } finally {
-      r.unlock();
-    }
-    return keys;
-  }
-
-  @Override
-  public Set<Entry<E, T>> entrySet() {
-    Set<Entry<E, T>> entries = null;
-    try {
-      r.lock();
-      entries = fore.entrySet();
-    } finally {
-      r.unlock();
-    }
-    return entries;
+    return size;
   }
 
   @Override
@@ -253,5 +241,17 @@ public class ConcurrentBiMap<E, T> implements Map<E, T> {
       r.unlock();
     }
     return retVal;
+  }
+
+  @Override
+  public Collection<T> values() {
+    Set<T> keys = null;
+    try {
+      r.lock();
+      keys = back.keySet();
+    } finally {
+      r.unlock();
+    }
+    return keys;
   }
 }
