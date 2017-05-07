@@ -11,17 +11,17 @@ $(document).ready(() => {
     // Grab DOM from chat.html's document.
     let el = content.querySelector('#chat_card');
     document.body.appendChild(el.cloneNode(true));
-	
+
 	$("#chat_card").hide();
-	
+
 	$("#chat_button").on('click', () => {
 		$("#chat_card").toggle();
 	});
-	
+
 	$("#xout").on('click', () => {
 		$("#chat_card").hide();
 	});
-	
+
 	$("#send_chat").on('click', () => {
 		//TODO
 		let text = $("#chat_text").val();
@@ -29,6 +29,9 @@ $(document).ready(() => {
 		$("#chat_text").val("");
 	});
 });
+
+serverConn.whenReadyToSend(() => {
+	serverConn.getMessages(displayMessages, getMessagesError); });
 
 $(document).keypress((e) => {
 	"use strict";
@@ -38,3 +41,11 @@ $(document).keypress((e) => {
 		}
 	}
 });
+
+function getMessagesError(response) {
+	console.log(response.error_message);
+}
+
+function displayMessages(messages) { //messages is a list of object of the form { timestamp: (milliseconds since epoch), message: (string content of the message)}
+	console.log(messages);
+}

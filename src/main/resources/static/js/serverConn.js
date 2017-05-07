@@ -111,6 +111,19 @@ const Command = {
               return { "page_name" : page_name };
           }
     },
+    SEND_MESSAGE : {
+  		name: "send_message",
+  		type: COMMAND_TYPE.INCOMING,
+  		construct: (message) => {
+              return { "message" : message };
+          }
+    },
+    GET_MESSAGES : {
+  		name: "get_messages",
+      responseName: "return_messages",
+  		type: COMMAND_TYPE.INCOMING,
+  		construct: () => { return {}; }
+    },
     // Player-specific commands
     SET_USERNAME : {
   		name: "set_username",
@@ -284,6 +297,13 @@ class ServerConn {
         this._send(Command.GO_BACK_PAGE, callback, errCallback, [page_name]);
     }
 
+		getMessages(callback, errCallback) {
+				this._send(Command.GET_MESSAGES, callback, errCallback, [])
+		}
+
+		sendMessage(message) {
+			this._send(Command.SEND_MESSAGE, () => {}, () => {}, [message]);
+		}
 
     getPage(page_name, callback, errCallback) {
         this._send(Command.GET_PAGE, callback, errCallback, [page_name]);
