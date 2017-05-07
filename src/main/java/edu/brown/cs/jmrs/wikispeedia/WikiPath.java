@@ -1,6 +1,5 @@
 package edu.brown.cs.jmrs.wikispeedia;
 
-import java.io.IOException;
 import java.lang.reflect.Type;
 import java.time.Duration;
 import java.time.Instant;
@@ -66,15 +65,9 @@ public class WikiPath extends ArrayList<Visit> {
    */
   public boolean contains(WikiPage page) {
     for (Visit visit : this) {
-      try {
-        // try to do deep equality, but if it fails revert to shallow
-        if (visit.getPage().equalAfterRedirect(page)) {
-          return true;
-        }
-      } catch (IOException e) {
-        if (visit.getPage().equals(page)) {
-          return true;
-        }
+      // try to do deep equality, but if it fails revert to shallow
+      if (visit.getPage().equalAfterRedirectSafe(page)) {
+        return true;
       }
     }
     return false;

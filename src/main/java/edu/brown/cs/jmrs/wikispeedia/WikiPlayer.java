@@ -301,7 +301,7 @@ public class WikiPlayer {
     WikiPage prevPage;
     do {
       prevPage = path.remove(path.size() - 1).getPage();
-    } while (path.size() > 0 && !prevPage.equals(page));
+    } while (path.size() > 0 && !prevPage.equalAfterRedirectSafe(page));
 
     // it should be in there
     assert path.size() > 0;

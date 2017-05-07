@@ -322,4 +322,18 @@ public class Page implements Node<Page, Link> {
     }
     return finalUrl().equals(page.finalUrl());
   }
+
+  /**
+   * @param page
+   *          The page to compare to this one.
+   * @return Whether this page equals page, trying to check after redirect but
+   *         reverting to old otherwise.
+   */
+  public boolean equalAfterRedirectSafe(Page page) {
+    try {
+      return equalAfterRedirect(page);
+    } catch (IOException e) {
+      return equals(page);
+    }
+  }
 }

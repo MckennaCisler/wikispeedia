@@ -10,19 +10,13 @@
 #### General todo
 ##### Documentation
 - Stuff in docs folder
-- Demo Presentation
-- Difficulties / challenges
-  - Mckennna - Race condition
-  - Sean - Cookies / websockets?
-  - Jacob - Attractive interface
-  - Rohan - Visualizaton?
 ##### NECESSITIES
 - <b>Fix bugs</b>
-  - BLOCKING 1000 Bug
+  - BLOCKING 1000 Bug?????
   - Check that we use equalsAfterRedirect
   - check that going to pages works with apostrophes, etc. (ACROSS server-client actions)
 - Visualizations for history and endgame ROHAN
-- Going back (history) ROHAN
+- Going back (history)
 - Wikipedia RATE LIMIT
 ##### NICETIES
 - Shortest path

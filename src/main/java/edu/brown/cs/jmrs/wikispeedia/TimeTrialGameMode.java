@@ -1,6 +1,7 @@
 package edu.brown.cs.jmrs.wikispeedia;
 
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.PriorityQueue;
 import java.util.Queue;
@@ -78,11 +79,9 @@ public class TimeTrialGameMode implements WikiGameMode {
       throw new IllegalStateException("Lobby has not ended.");
     }
     // get winner's end time
-    for (WikiPlayer player : wikiLobby.getPlayers()) {
-      if (wikiLobby.getWinners().contains(player)) {
-        return player.getEndTime();
-      }
+    if (wikiLobby.getWinners().size() == 0) {
+      throw new AssertionError("Lobby was ended but no winner was defined.");
     }
-    throw new AssertionError("Lobby was ended but no winner was defined.");
+    return new ArrayList<>(wikiLobby.getWinners()).get(0).getEndTime();
   }
 }

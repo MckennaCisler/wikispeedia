@@ -1,6 +1,6 @@
 package edu.brown.cs.jmrs.server;
 
-class InputError extends Exception {
+public class InputError extends Exception {
 
   private String message;
 
