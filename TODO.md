@@ -2,27 +2,19 @@
  - Have a preset path
  - Talk less about difficulties
  - More confidence
- - leader board choice on end
- - set your own pages
  - Practice
 
 #### General todo
 ##### Documentation
 - Stuff in docs folder
-- Demo Presentation
-- Difficulties / challenges
-  - Mckennna - Race condition
-  - Sean - Cookies / websockets?
-  - Jacob - Attractive interface
-  - Rohan - Visualizaton?
 ##### NECESSITIES
 - <b>Fix bugs</b>
-  - BLOCKING 1000 Bug
   - Check that we use equalsAfterRedirect
-  - check that going to pages works with apostrophes, etc. (ACROSS server-client actions)
-- Visualizations for history and endgame ROHAN
-- Going back (history) ROHAN
-- Wikipedia RATE LIMIT
+  - End with different titles Newton, Isaac Newton SOLVED?
+  - Weird player must join lobby bug!!!! Race condition? More likely a concurrency issue with the client lists?
+- Get settings on endpage -> hide content, show end differently (ROHAN)
+- Make end page work with shortest path (ROHAN)
+- Make shortest path work on end.js
 ##### NICETIES
 - Shortest path
   - Add intelligent switcher if DB busy?
@@ -33,7 +25,6 @@
 ##### STUFF THAT WOULD GIVE US THAT WARM FUZZY FEELING
 - Make an intermittent (or parallel... maybe do it while shortest-path finding?) DB-compare method that randomly double-checks a link list and changes it if needed
 - Hide user's IDs from obvious places (i.e. ALL_PLAYERS) using isCurrentPlayer, etc.
-- Chat everywhere? SEAN
 
 #### Deadlines:
 - <b>Adversary TA Meeting (Wednesday, 4/26)</b>
@@ -46,7 +37,6 @@
 #### Rohan
 - & in links (i.e. R&B)
 - Geographic coordinates system
-- Make videos work?
 
 #### Sean
 

@@ -2,11 +2,25 @@ package edu.brown.cs.jmrs.server;
 
 import org.eclipse.jetty.websocket.api.Session;
 
+/**
+ * Handles when a websocket disconnects.
+ *
+ * @author shastin1
+ *
+ */
 class ClientDisconnectedHandler implements Runnable {
 
   private final ServerWorker server;
-  private final Session conn;
+  private final Session      conn;
 
+  /**
+   * Constructor setting values to operate on when a thread is available.
+   *
+   * @param server
+   *          The server connected to
+   * @param conn
+   *          The connection to the client
+   */
   public ClientDisconnectedHandler(ServerWorker server, Session conn) {
     this.server = server;
     this.conn = conn;
@@ -15,7 +29,7 @@ class ClientDisconnectedHandler implements Runnable {
   @Override
   public void run() {
     try {
-      server.playerDisconnected(conn);
+      server.clientDisconnected(conn);
     } catch (Throwable e) {
       // solely for debugging purposes, as threads do not display exceptions
       // except when calling the value of an associated future:

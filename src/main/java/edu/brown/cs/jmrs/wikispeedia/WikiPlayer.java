@@ -226,8 +226,10 @@ public class WikiPlayer {
       throw new IllegalStateException(
           String.format("Player %s has already reached the goal", name));
     }
+    assert getCurPage() != null;
+    assert goalPage != null;
 
-    if (getCurPage().equalAfterRedirect(goalPage)) {
+    if (getCurPage().equalsAfterRedirect(goalPage)) {
       this.endTime = endTimeIfSo;
       return true;
     }
@@ -274,7 +276,7 @@ public class WikiPlayer {
 
     // we assume that the curPage page has been cached already (speed issue)
     if (lobby.getLinkFinder().linkedPages(getCurPage()).contains(page)) {
-      if (!page.equals(getCurPage())) {
+      if (!page.equalsAfterRedirect(getCurPage())) {
         path.add(page);
       }
       checkIfDone(Instant.now());
@@ -294,6 +296,10 @@ public class WikiPlayer {
     checkLobbyState();
 
     if (!path.contains(page)) {
+      // they may be moving forward, so try to go to the page from this one
+      if (goToPage(page)) {
+        return;
+      }
       throw new NoSuchElementException(String
           .format("Page %s not in player %s's history", page.getName(), name));
     }
@@ -301,10 +307,10 @@ public class WikiPlayer {
     WikiPage prevPage;
     do {
       prevPage = path.remove(path.size() - 1).getPage();
-    } while (path.size() > 0 && !prevPage.equals(page));
+    } while (path.size() > 0 && !prevPage.equalsAfterRedirectSafe(page));
 
-    // it should be in there
-    assert path.size() > 0;
+    // add it back because we removed it
+    path.add(prevPage);
   }
 
   private void checkLobbyState() {

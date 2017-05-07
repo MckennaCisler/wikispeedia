@@ -6,6 +6,7 @@
 	<link href="css/main.css" rel="stylesheet" type="text/css">
 	<link href="lib/css/bootstrap-alt.min.css" rel="stylesheet" type="text/css">
 	<script src="lib/js/jquery.min.js"></script>
+	<script src="http://d3js.org/d3.v3.min.js"></script>
 	<script src="js/serverConn.js"></script>
 	<script src="lib/js/tether.min.js"></script>
 	<script src="lib/js/bootstrap.min.js"></script>
@@ -53,14 +54,14 @@
 					<h3 id="winner"></h3>
 					<div id="disp-buttons" class="btn-group" data-toggle="buttons">
 						<label class="btn btn-secondary active">
-							<input type="radio" name="display-type" id="time" checked>Leader board
+							<input type="radio" name="display-type" id="lead" checked>Leaderboard
 						</label>
 						<label class="btn btn-secondary">
-							<input type="radio" name="display-type" id="clicks">History
+							<input type="radio" name="display-type" id="hist">History
 						</label>
 					</div>
 				</div>
-				<div class="card-block">
+				<div class="card-block" id="results">
 					<table class="table" id="leaderboard">
 						<thead>
 							<tr>
@@ -69,6 +70,12 @@
 							</tr>
 						</thead>
 					</table>
+					<svg id="svg">
+					</svg>
+					<div id="legend">
+					</div>
+					<div id="stats">
+					</div>
 				</div>
 				<div class="card-footer">
 					<a href="/"><button class="btn btn-danger">Play again!</button></a>

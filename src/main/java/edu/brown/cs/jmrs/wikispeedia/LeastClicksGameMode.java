@@ -18,7 +18,11 @@ import edu.brown.cs.jmrs.web.wikipedia.WikiPage;
  *
  */
 public class LeastClicksGameMode implements WikiGameMode {
-  public static final WikiGameMode.Mode MODE = WikiGameMode.Mode.LEAST_CLICKS;
+
+  @Override
+  public WikiGameMode.Mode getGameMode() {
+    return WikiGameMode.Mode.LEAST_CLICKS;
+  }
 
   @Override
   public LinkFinder<WikiPage> getLinkFinder() {
@@ -88,4 +92,5 @@ public class LeastClicksGameMode implements WikiGameMode {
     }
     return laggardTime;
   }
+
 }

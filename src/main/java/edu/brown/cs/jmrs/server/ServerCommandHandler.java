@@ -8,20 +8,22 @@ import com.google.gson.JsonObject;
 import edu.brown.cs.jmrs.server.customizable.CommandInterpreter;
 import edu.brown.cs.jmrs.server.customizable.Lobby;
 
+/**
+ * Command handler for the built-in commands the server architecture requires.
+ *
+ * @author shastin1
+ *
+ */
 class ServerCommandHandler implements Runnable {
 
-  private final ServerWorker       server;
-  private final Session            conn;
-  private final String             unformattedCommand;
-  private final CommandInterpreter interpreter;
-  private final Gson               gson;
-
+  /**
+   * All server commands.
+   *
+   * @author shastin1
+   *
+   */
   private enum Commands {
-    SET_CLIENT_ID,
-    START_LOBBY,
-    LEAVE_LOBBY,
-    JOIN_LOBBY,
-    GET_LOBBIES,
+    SET_CLIENT_ID, START_LOBBY, LEAVE_LOBBY, JOIN_LOBBY, GET_LOBBIES,
     // Value to signify not in enum (when using switch statement)
     NULL;
 
@@ -38,17 +40,47 @@ class ServerCommandHandler implements Runnable {
     }
   }
 
-  public ServerCommandHandler(
-      ServerWorker server,
-      Session conn,
-      String command,
-      CommandInterpreter interpreter,
-      Gson gson) {
+  private final ServerWorker       server;
+  private final Session            conn;
+  private final String             unformattedCommand;
+  private final CommandInterpreter interpreter;
+
+  private final Gson gson;
+
+  /**
+   * Constructor, stores all necessary objects for analyzing and acting on
+   * commands when a thread is available.
+   *
+   * @param server
+   *          The server instance to act on
+   * @param conn
+   *          The connection to the client that sent the command
+   * @param command
+   *          The command (as stringified JSON) sent by the client
+   * @param interpreter
+   *          The command interpreter to forward the command to if it is not a
+   *          built-in command
+   * @param gson
+   *          The Gson instance used for JSONification of lobbies
+   */
+  ServerCommandHandler(ServerWorker server, Session conn, String command,
+      CommandInterpreter interpreter, Gson gson) {
     this.server = server;
     this.conn = conn;
     this.unformattedCommand = command;
     this.interpreter = interpreter;
     this.gson = gson;
+  }
+
+  /**
+   * Checks that a returned JSON commandMap follows the correct protocol.
+   *
+   * @param commandMap
+   *          The command to check the structure of
+   * @return whether the command abides by the set structure
+   */
+  private boolean commandMapStructure(JsonObject commandMap) {
+    return commandMap.has("command") && commandMap.has("payload");
   }
 
   @Override
@@ -86,7 +118,7 @@ class ServerCommandHandler implements Runnable {
                 lobby.addClient(player.getId());
                 player.setLobby(lobby);
                 server.lobbylessMap().remove(player.getId());
-                server.updateLobbylessPlayers();
+                server.updateLobbylessClients();
                 jsonObject.addProperty("error_message", "");
                 toClient = gson.toJson(jsonObject);
                 server.sendToClient(conn, toClient);
@@ -101,7 +133,7 @@ class ServerCommandHandler implements Runnable {
                 player.getLobby().removeClient(player.getId());
                 player.setLobby(null);
                 server.lobbylessMap().put(player.getId(), player);
-                server.updateLobbylessPlayers();
+                server.updateLobbylessClients();
                 jsonObject.addProperty("error_message", "");
                 toClient = gson.toJson(jsonObject);
                 server.sendToClient(conn, toClient);
@@ -124,7 +156,7 @@ class ServerCommandHandler implements Runnable {
                 lobby2.addClient(player.getId());
                 player.setLobby(lobby2);
                 server.lobbylessMap().remove(player.getId());
-                server.updateLobbylessPlayers();
+                server.updateLobbylessClients();
                 jsonObject.addProperty("error_message", "");
                 toClient = gson.toJson(jsonObject);
                 server.sendToClient(conn, toClient);
@@ -135,11 +167,10 @@ class ServerCommandHandler implements Runnable {
 
                 if (player.getLobby() != null) {
                   // if not a server command pass it to the lobby
-                  interpreter
-                      .interpret(player.getLobby(), player.getId(), commandMap);
+                  interpreter.interpret(player.getLobby(), player.getId(),
+                      commandMap);
                 } else {
-                  jsonObject.addProperty(
-                      "error_message",
+                  jsonObject.addProperty("error_message",
                       "Player must join a lobby first");
                   toClient = gson.toJson(jsonObject);
                   server.sendToClient(conn, toClient);
@@ -152,16 +183,14 @@ class ServerCommandHandler implements Runnable {
             server.sendToClient(conn, toClient);
           }
         } else {
-          jsonObject.addProperty(
-              "error_message",
+          jsonObject.addProperty("error_message",
               "Cannot continue without unique ID");
           toClient = gson.toJson(jsonObject);
           server.sendToClient(conn, toClient);
         }
       } else {
         jsonObject.addProperty("command", "command_error");
-        jsonObject.addProperty(
-            "error_message",
+        jsonObject.addProperty("error_message",
             "Client-to-Server commands must be JSON with 'command' field");
         toClient = gson.toJson(jsonObject);
         server.sendToClient(conn, toClient);
@@ -176,12 +205,5 @@ class ServerCommandHandler implements Runnable {
       String toClient = gson.toJson(jsonObject);
       server.sendToClient(conn, toClient);
     }
-  }
-
-  /**
-   * Checks that a returned JSON commandMap follows the correct protocol.
-   */
-  private boolean commandMapStructure(JsonObject commandMap) {
-    return commandMap.has("command") && commandMap.has("payload");
   }
 }

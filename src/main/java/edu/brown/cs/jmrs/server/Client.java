@@ -4,6 +4,12 @@ import java.util.Date;
 
 import edu.brown.cs.jmrs.server.customizable.Lobby;
 
+/**
+ * Representation of a client with information on their lobby and connection
+ * status to help direct commands.
+ *
+ * @author shastin1
+ */
 class Client implements Comparable<Client> {
 
   private String  id;
@@ -11,21 +17,21 @@ class Client implements Comparable<Client> {
   private boolean connected;
   private Date    cookieExpiration;
 
+  /**
+   * Constructor with id parameter, defaults connected to true, lobby to null,
+   * and cookieExpration to null.
+   *
+   * @param id
+   *          The id of the client
+   */
   public Client(String id) {
     this.id = id;
     connected = true;
   }
 
-  public void setLobby(Lobby lobby) {
-    this.lobby = lobby;
-  }
-
-  public String getId() {
-    return id;
-  }
-
-  public Lobby getLobby() {
-    return lobby;
+  @Override
+  public int compareTo(Client p) {
+    return cookieExpiration.compareTo(p.getCookieExpiration());
   }
 
   @Override
@@ -40,12 +46,75 @@ class Client implements Comparable<Client> {
     return false;
   }
 
+  /**
+   * returns the expiration date of the client's cookie.
+   *
+   * @return the expiration date of the client's cookie
+   */
+  public Date getCookieExpiration() {
+    return cookieExpiration;
+  }
+
+  /**
+   * Returns the client's unique id.
+   *
+   * @return the client's unique id
+   */
+  public String getId() {
+    return id;
+  }
+
+  /**
+   * returns the client's lobby.
+   *
+   * @return the client's lobby
+   */
+  public Lobby getLobby() {
+    return lobby;
+  }
+
   @Override
   public int hashCode() {
     return id.hashCode();
   }
 
-  public boolean toggleConnected() {
+  /**
+   * Returns whether the client is connected.
+   *
+   * @return whether the client is connected
+   */
+  public boolean isConnected() {
+    return connected;
+  }
+
+  /**
+   * Sets the expiration date of the cookie, so the client's information will be
+   * erased from the server if they disconnect.
+   *
+   * @param date
+   *          The expiration date of the client's cookie
+   */
+  public void setCookieExpiration(Date date) {
+    this.cookieExpiration = date;
+  }
+
+  /**
+   * Sets the lobby the client is in.
+   *
+   * @param lobby
+   *          The lobby to direct client commands to
+   */
+  public void setLobby(Lobby lobby) {
+    this.lobby = lobby;
+  }
+
+  /**
+   * Toggles the status of connected (true -> false or vice versa) and returns
+   * the old value.
+   *
+   * @return the old value of connected
+   */
+  public synchronized boolean toggleConnected() {
     if (connected) {
       connected = false;
       return true;
@@ -53,23 +122,6 @@ class Client implements Comparable<Client> {
       connected = true;
       return false;
     }
-  }
-
-  public boolean isConnected() {
-    return connected;
-  }
-
-  public void setCookieExpiration(Date date) {
-    this.cookieExpiration = date;
-  }
-
-  public Date getCookieExpiration() {
-    return cookieExpiration;
-  }
-
-  @Override
-  public int compareTo(Client p) {
-    return cookieExpiration.compareTo(p.getCookieExpiration());
   }
 
   @Override

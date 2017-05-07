@@ -34,10 +34,11 @@ public class Page implements Node<Page, Link> {
   private String url;
 
   // only one of the following will be used
-  private Document parsed;
+  private Document                       parsed;
   private LoadingCache<String, Document> docCache;
-  private boolean cached; // note this is not universal; it may have been
-                          // evicted separately.
+  private boolean                        cached;  // note this is not universal;
+                                                  // it may have been
+                                                  // evicted separately.
 
   /**
    * Creates a page based on the given URL. Content is downloaded upon request
@@ -313,13 +314,28 @@ public class Page implements Node<Page, Link> {
    * @throws IOException
    *           If either page could not be accessed.
    */
-  public boolean equalAfterRedirect(Page page) throws IOException {
+  public boolean equalsAfterRedirect(Page page) throws IOException {
     if (this == page) {
       return true;
     }
     if (page == null) {
       return false;
     }
-    return finalUrl().equals(page.finalUrl());
+    throw new UnsupportedOperationException();
+    // return finalUrl().equals(page.finalUrl());
+  }
+
+  /**
+   * @param page
+   *          The page to compare to this one.
+   * @return Whether this page equals page, trying to check after redirect but
+   *         reverting to old otherwise.
+   */
+  public boolean equalsAfterRedirectSafe(Page page) {
+    try {
+      return equalsAfterRedirect(page);
+    } catch (IOException e) {
+      return equals(page);
+    }
   }
 }

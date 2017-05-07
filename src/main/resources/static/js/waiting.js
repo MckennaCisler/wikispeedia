@@ -66,6 +66,7 @@ function decrement(pid) {
 function startGame() {
 	"use strict";
 	clearInterval(ddd);
+	$("#waiting-card-header").html("The game is starting");
 	document.title = "The game is starting";
 	let audio = new Audio('lib/assets/beep.wav');
 	audio.play();
@@ -94,7 +95,9 @@ $(document).ready(() => {
 	$title2.html("Loading...");
 
 	$("#force").on('click', () => {
-		startGame();
+		serverConn.forceBeginGame(() => {
+			startGame();
+		}, displayServerConnError);
 	});
 
 	$("#leave").on('click', () => {
@@ -108,6 +111,7 @@ $(document).ready(() => {
 		"use strict";
 		serverConn.registerError(displayServerConnErrorRedirectHome);
 		serverConn.registerBeginGame(startGame);
+		serverConn.registerClose(displayConnCloseMsg);
 	});
 
 	serverConn.whenReadyToSend(() => {
@@ -119,7 +123,7 @@ $(document).ready(() => {
 
 		// Get current lobby settings
 		serverConn.getSettings("", GAME_STATE.WAITING, (settings) => {
-	 		// Get articles
+	 		// Get articles (nested because serverConn can't handled concurrent messages :P)
 			serverConn.getPage(settings.startPage.name, (article) => {
 				drawFirstPage(article);
 				serverConn.getPage(settings.goalPage.name, drawSecondPage, displayServerConnError);
@@ -150,17 +154,17 @@ $(document).ready(() => {
 					$("#force").hide();
 				}
 				if (!players[i].ready) {
-					$("<li class=\"list-group-item\"><div class=\"me_li\"><div style=\"align-self: flex-start;\"><b>Me</b></div><button class=\"btn btn-outline-success\" id=\"my_but\" style=\"align-self: flex-end;\">Click when ready</button></li>")
+					$("<li class=\"list-group-item\"><div class=\"me_li\"><div style=\"align-self: flex-start;\"><p id=\"me\"><b>Me</b></p></div><button class=\"btn btn-outline-success\" id=\"my_but\" style=\"align-self: flex-end;\">Click when ready</button></li>")
 					.appendTo($players);
 					$("#my_but").on('click', function() {
 						serverConn.setPlayerState(true);
 					});
 				} else {
-					$("<li class=\"list-group-item\"><div class=\"me_li\"><div style=\"align-self: flex-start;\"><b>Me</b></div><button class=\"btn btn-success\" id=\"my_but\" style=\"align-self: flex-end;\" disabled>Click when ready</button></li>")
+					$("<li class=\"list-group-item\"><div class=\"me_li\"><div style=\"align-self: flex-start;\"><p id=\"me\"><b>Me</b></p></div><button class=\"btn btn-success\" id=\"my_but\" style=\"align-self: flex-end;\" disabled>Click when ready</button></li>")
 					.appendTo($players);
 				}
 			} else {
-				$("<li class=\"list-group-item\"><input type=\"checkbox\" disabled" + (players[i].ready ? " checked" : "") + ">&nbsp" + players[i].name + "</li>")
+				$("<li class=\"list-group-item\">" + players[i].name + "&nbsp" + "<input type=\"checkbox\" disabled" + (players[i].ready ? " checked>" : ">") + "</li>")
 					.appendTo($players);
 			}
 		}

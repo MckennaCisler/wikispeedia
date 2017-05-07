@@ -56,6 +56,7 @@ function resize() {
 
 serverConn.whenReadyToRecieve(() => {
     serverConn.registerError(displayServerConnErrorRedirectHome);
+		serverConn.registerClose(displayConnCloseMsg);
 		serverConn.registerAllPlayers(newUpdate);
     serverConn.registerEndGame(() => {
 		setCookie('timePlayed', audio.currentTime);
@@ -117,8 +118,10 @@ function drawPage(page) {
   href = page.href;
   title = titleFromHref(href);
 
-	// add to browser history
-	history.pushState({"href": href}, "", "");
+	// add to browser history if not already there
+	if (history.state == null || history.state.href !== href) {
+		history.pushState({"href": href}, "", "");
+	}
 
   if (href != currHref) {
     $title.html("<b>" + title + "</b>");
@@ -149,7 +152,7 @@ function cleanHtml() {
 
   $article.find("img").each(function(index, element) {
     let src = "" + $(element).attr("src");
-    console.log(src);
+    // console.log(src);
 
     if (!src.startsWith("https:")) {
       $(element).attr("src", "https:" + src);
@@ -182,7 +185,7 @@ function newUpdate(players) {
 			page = newPath[j];
 			if (j != 0) {
 	 			if (player.id == serverConn.clientId) {
-					$updates.prepend(`<i>You visited ${"\"" + titleFromHref(page.page.name) + "\""}<br></i>`);
+					$updates.prepend(`<b>You visited ${"\"" + titleFromHref(page.page.name) + "\""}<br></b>`);
 				} else {
 					$updates.prepend(player.name + ` visited ${"\"" + titleFromHref(page.page.name) + "\""}<br>`);
 				}

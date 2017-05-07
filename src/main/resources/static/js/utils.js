@@ -31,7 +31,7 @@ function firstSentence(paragraph) {
 
 // Helper to get callback
 function hrefHelper(f, href) {
-  return "javascript:" + f + "('" + href + "')";
+  return "javascript:" + f + "('" + encodeURI(href) + "')";
 }
 
 function displayError(msg, error_code) {
@@ -47,6 +47,10 @@ function displayErrorRedirect(msg, redirect, error_code) {
 
 function clearError() {
     // TODO
+}
+
+function displayConnCloseMsg() {
+  displayErrorRedirect("Connection to server lost. Please refresh.", "/");
 }
 
 function displayServerConnErrorRedirectHome(error) {

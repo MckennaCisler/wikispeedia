@@ -202,7 +202,7 @@ class ServerConn {
     constructor(source) {
         // constants
         this.COMMAND_TIMEOUT = 10000; // some can take a while
-        this.CLIENT_ID_COOKIE_EXPIRATION = 60;
+        this.CLIENT_ID_COOKIE_EXPIRATION = 1440; // 24 hours
         this.STOP_LOGGING_RECIEVED_MESSAGES_TIMEOUT = 5000;
 
         this.clientId = "";
@@ -250,6 +250,12 @@ class ServerConn {
          * Messages queued in case a callback is added expecting to get them.
          */
         this.recievedMessages = [];
+
+
+        /**
+         * Called on close.
+         */
+        this.closeCallback;
     }
 
     _setId(id) {
@@ -356,11 +362,15 @@ class ServerConn {
         this._registerOutgoing(Command.ERROR, callback);
     }
 
+    registerClose(callback) {
+      this.closeCallback = callback;
+    }
+
     _registerOutgoing(command, callback) {
         this.pendingResponses[command.name] = {
             "command": command,
             "callback": callback,
-            "errCallback" : () => {}, // no reason
+            "errCallback" : undefined, // no reason
             "timeout" : null          // no reason
         }
     }
@@ -442,24 +452,32 @@ class ServerConn {
                 }
               }
           } else {
-              // (but give any command type access to the top-level error_message)
               const actions = this.pendingResponses[parsedMsg.command];
               window.clearTimeout(actions.timeout);
-              if (actions.errCallback !== undefined) { actions.errCallback(parsedMsg); }
+              if (actions.errCallback !== undefined) {
+                actions.errCallback(parsedMsg);
+              } else if (parsedMsg.command === Command.ERROR.name) {
+                this._handle_error_command(parsedMsg);
+              }
 
               console.log(`\nGOT_ERROR: : ${parsedMsg.command}`);
               console.log(parsedMsg);
           }
       } else if (parsedMsg.error_message !== undefined && parsedMsg.error_message !== "") {
-        const errCallback = this.pendingResponses[Command.ERROR.name].callback;
-        if (errCallback !== undefined) { errCallback(parsedMsg); }
+        this._handle_error_command(parsedMsg);
       } else {
           console.log("\n(The above was an unknown (or unregistered) command: '" + parsedMsg.command + "')");
       }
     }
 
+    _handle_error_command(parsedMsg) {
+      const errCallback = this.pendingResponses[Command.ERROR.name].callback;
+      if (errCallback !== undefined) { errCallback(parsedMsg); }
+    }
+
     ws_onclose() {
       console.log("INFO: Connection was closed");
+      this.closeCallback();
     }
 
     _send(command, callback, errCallback, args) {
