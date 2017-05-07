@@ -173,6 +173,10 @@
 	color: black;
 }
 
+#chat_div {
+	overflow-y: scroll;
+}
+
 #counter {
 	position: absolute;
 	top: 0%;

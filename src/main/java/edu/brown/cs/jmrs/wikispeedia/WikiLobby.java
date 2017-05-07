@@ -228,7 +228,7 @@ public class WikiLobby implements Lobby {
   }
 
   public void registerMessage(String content, String clientId) {
-    messages.add(new Message(content, players.get(clientId).getName()));
+    messages.add(new Message(content, clientId));
   }
 
   public void sendMessagesToPlayer(String clientId) {
@@ -238,7 +238,8 @@ public class WikiLobby implements Lobby {
     for (Message message : messageArray) {
       JsonObject jsonMessage = new JsonObject();
       jsonMessage.addProperty("timestamp", message.getTime().toEpochMilli());
-      jsonMessage.addProperty("sender", message.getSender());
+      jsonMessage.addProperty("sender", players.get(clientId).getName());
+      jsonMessage.addProperty("sender_id", message.getSender());
       jsonMessage.addProperty("message", message.getContent());
       jsonArray.add(jsonMessage);
     }
