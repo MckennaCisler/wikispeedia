@@ -7,6 +7,15 @@ import java.util.Set;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
+/**
+ * A thread-safe bi-map. Allows effectively constant time lookups in both
+ * directions on entries while also forcing both keys and values to be unique.
+ * 
+ * @author shastin1
+ *
+ * @param <E>
+ * @param <T>
+ */
 public class ConcurrentBiMap<E, T> implements Map<E, T> {
 
   private final ReentrantReadWriteLock rwl = new ReentrantReadWriteLock();
@@ -16,6 +25,9 @@ public class ConcurrentBiMap<E, T> implements Map<E, T> {
   private Map<E, T>                    fore;
   private Map<T, E>                    back;
 
+  /**
+   * Default constructor, initializes forward and backward hash maps.
+   */
   public ConcurrentBiMap() {
     fore = new HashMap<>();
     back = new HashMap<>();
@@ -81,6 +93,13 @@ public class ConcurrentBiMap<E, T> implements Map<E, T> {
     return value;
   }
 
+  /**
+   * Effectively constant time lookup of key from value.
+   * 
+   * @param key
+   *          The "value" to find the "key" for
+   * @return The "key" associated with the given "value"
+   */
   public E getReversed(Object key) {
     E value = null;
     try {
@@ -92,6 +111,13 @@ public class ConcurrentBiMap<E, T> implements Map<E, T> {
     return value;
   }
 
+  /**
+   * Given a value, if there is an equivalent value held that value is returned.
+   * 
+   * @param key
+   *          The value to find an equivalent value to
+   * @return The stored equivalent value, or null if none exists
+   */
   public T getBack(T key) {
     T retVal = null;
     try {
@@ -117,11 +143,21 @@ public class ConcurrentBiMap<E, T> implements Map<E, T> {
     return old;
   }
 
+  /**
+   * Puts key-value pair into map, but only if the given value is not already
+   * associated with any key.
+   * 
+   * @param key
+   *          The key to enter
+   * @param value
+   *          The value to enter
+   * @return True iff the key-value pair was successfully put into the map
+   */
   public boolean putNoOverwrite(E key, T value) {
     boolean placed = false;
     try {
       w.lock();
-      if (!back.containsKey(value)) {
+      if (getReversed(value) != null) {
         placed = true;
         put(key, value);
       }
