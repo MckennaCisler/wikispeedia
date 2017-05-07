@@ -103,7 +103,17 @@ public class ConcurrentBiMap<E, T> implements Map<E, T> {
     T retVal = null;
     try {
       r.lock();
-      retVal = get(getReversed(key));
+      E tempVal = getReversed(key);
+      if (tempVal != null) {
+        retVal = get(tempVal);
+      } else if (back.keySet().contains(key)) {
+        for (T entry : back.keySet()) {
+          if (key.equals(entry)) {
+            retVal = entry;
+            break;
+          }
+        }
+      }
     } finally {
       r.unlock();
     }
