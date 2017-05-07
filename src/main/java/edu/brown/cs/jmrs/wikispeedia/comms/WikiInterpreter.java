@@ -251,17 +251,16 @@ public class WikiInterpreter implements CommandInterpreter {
    */
   public static JsonObject getPlayerPageInfo(WikiPage page, WikiLobby lobby)
       throws IOException {
-    // return Main.GSON.toJsonTree(ImmutableMap.of("href", page.url(), "title",
-    // page.getTitle(), "blurb", page.getBlurb(), "text",
-    // lobby.getContentFormatter()
-    // .stringFormat(page.linksMatching(lobby.getLinkFinder())),
-    // "links", lobby.getLinkFinder().linkedPages(page))).getAsJsonObject();
-    return Main.GSON.toJsonTree(
-        ImmutableMap.of("href", page.url(), "title", page.getTitle(), "blurb",
-            page.getFormattedBlurb(lobby.getContentFormatter()), "text",
-            lobby.getContentFormatter()
-                .stringFormat(page.linksMatching(lobby.getLinkFinder())),
-            "links", lobby.getLinkFinder().linkedPages(page)))
-        .getAsJsonObject();
+    JsonObject info = new JsonObject();
+    info.addProperty("href", page.url());
+    info.addProperty("name", page.getName());
+    info.addProperty("title", page.getTitle());
+    info.addProperty("blurb",
+        page.getFormattedBlurb(lobby.getContentFormatter()));
+    info.addProperty("text", lobby.getContentFormatter()
+        .stringFormat(page.linksMatching(lobby.getLinkFinder())));
+    info.add("links",
+        Main.GSON.toJsonTree(lobby.getLinkFinder().linkedPages(page)));
+    return info;
   }
 }

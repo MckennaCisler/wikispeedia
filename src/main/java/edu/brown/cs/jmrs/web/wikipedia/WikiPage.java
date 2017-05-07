@@ -168,7 +168,7 @@ public class WikiPage extends Page {
   }
 
   /**
-   * @return The title of this Wikipedia page.
+   * @return The blurb of this Wikipedia page.
    * @throws IOException
    *           If the page could not be reached or loaded.
    */
@@ -184,7 +184,7 @@ public class WikiPage extends Page {
   }
 
   /**
-   * @return The title of this Wikipedia page.
+   * @return The blurb of this Wikipedia page formatted with formatter.
    * @param formatter
    *          The ContentFormatter to use in formatting this page.
    * @throws IOException
