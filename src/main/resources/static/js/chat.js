@@ -25,7 +25,7 @@ $(document).ready(() => {
 	$("#send_chat").on('click', () => {
 		//TODO
 		let text = $("#chat_text").val();
-		alert(`gonna send ${text} eventually`);
+		serverConn.sendMessage(text);
 		$("#chat_text").val("");
 	});
 });
@@ -46,6 +46,6 @@ function getMessagesError(response) {
 	console.log(response.error_message);
 }
 
-function displayMessages(messages) { //messages is a list of object of the form { timestamp: (milliseconds since epoch), message: (string content of the message)}
+function displayMessages(messages) { //messages is a list of object of the form { timestamp: (milliseconds since epoch), message: (string content of the message), sender: (id of sender)}
 	console.log(messages);
 }

@@ -19,11 +19,14 @@ public class WikiGame {
    *          The starting page of this game.
    * @param goal
    *          The goal page of this game.
-   * @param knownPath
-   *          A known path from start to goal.
-   * @param shortestPath
-   *          A value which may eventually represent the shortest path between
-   *          start and goal.
+   *
+   */
+
+  /*
+   * @param knownPath A known path from start to goal.
+   *
+   * @param shortestPath A value which may eventually represent the shortest
+   * path between start and goal.
    */
   public WikiGame(WikiPage start, WikiPage goal) {
     // List<WikiPage> knownPath, Future<List<WikiPage>> shortestPath

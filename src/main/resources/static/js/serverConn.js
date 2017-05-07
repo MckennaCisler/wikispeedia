@@ -422,7 +422,7 @@ class ServerConn {
     }
 
     process_message(parsedMsg) {
-      console.log("PROCESSING: ");
+      console.log(`PROCESSING: ${parsedMsg.command}`);
       console.log(parsedMsg);
 
       if (this.pendingResponses.hasOwnProperty(parsedMsg.command)) {
@@ -447,7 +447,7 @@ class ServerConn {
               window.clearTimeout(actions.timeout);
               if (actions.errCallback !== undefined) { actions.errCallback(parsedMsg); }
 
-              console.log("\nGOT_ERROR: ");
+              console.log(`\nGOT_ERROR: : ${parsedMsg.command}`);
               console.log(parsedMsg);
           }
       } else if (parsedMsg.error_message !== undefined && parsedMsg.error_message !== "") {
@@ -475,7 +475,7 @@ class ServerConn {
             "payload": command.construct.apply(null, args)
         };
 
-        console.log("SENDING: ");
+        console.log(`SENDING: ${command}`);
         console.log(msg);
 
         // add an entry for the RESPONSE command to this one

@@ -75,7 +75,6 @@ public class Query<T> extends DbStatement<T> {
     } else {
       return queryDb(hashableInputs);
     }
-
   }
 
   private List<T> queryDb(ObjArray inputs) {
@@ -106,7 +105,7 @@ public class Query<T> extends DbStatement<T> {
         try {
           rs.close();
         } catch (SQLException e) {
-          System.out.println("ERROR: closing result set");
+          System.out.println("ERROR: closing result set failed");
         }
       }
     }

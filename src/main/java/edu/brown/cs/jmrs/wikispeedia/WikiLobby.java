@@ -71,10 +71,10 @@ public class WikiLobby implements Lobby {
   private transient Map<String, WikiPlayer> players;
   private transient WikiGameMode gameMode = null;
 
-  private Instant                           startTime   = null;
-  private WikiGame                          game;
-  private Set<WikiPlayer>                   winners;
-  private List<Message>                     messages;
+  private Instant startTime = null;
+  private WikiGame game;
+  private Set<WikiPlayer> winners;
+  private List<Message> messages;
 
   /**
    * Constructs a new WikiLobby (likely through a Factory in
@@ -136,6 +136,7 @@ public class WikiLobby implements Lobby {
       }
     } else {
       startPage = GameGenerator.pageWithObscurity(difficulty);
+
     }
 
     if (arguments.has("goalPage")) {
@@ -226,8 +227,8 @@ public class WikiLobby implements Lobby {
     players.get(clientId).setName(uname);
   }
 
-  public void registerMessage(String content) {
-    messages.add(new Message(content));
+  public void registerMessage(String content, String clientId) {
+    messages.add(new Message(content, players.get(clientId).getName()));
   }
 
   public void sendMessagesToPlayer(String clientId) {
@@ -237,6 +238,7 @@ public class WikiLobby implements Lobby {
     for (Message message : messageArray) {
       JsonObject jsonMessage = new JsonObject();
       jsonMessage.addProperty("timestamp", message.getTime().toEpochMilli());
+      jsonMessage.addProperty("sender", message.getSender());
       jsonMessage.addProperty("message", message.getContent());
       jsonArray.add(jsonMessage);
     }
@@ -472,15 +474,21 @@ public class WikiLobby implements Lobby {
   private class Message {
 
     private Instant timestamp;
-    private String  content;
+    private String content;
+    private String senderId;
 
-    public Message(String content) {
+    public Message(String content, String senderId) {
       this.content = content;
+      this.senderId = senderId;
       timestamp = Instant.now();
     }
 
     public Instant getTime() {
       return timestamp;
+    }
+
+    public String getSender() {
+      return senderId;
     }
 
     public String getContent() {
