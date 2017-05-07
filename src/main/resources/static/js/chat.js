@@ -25,7 +25,7 @@ $(document).ready(() => {
 	$("#send_chat").on('click', () => {
 		//TODO
 		let text = $("#chat_text").val();
-		alert(`gonna send ${text} eventually`);
+		serverConn.sendMessage(text);
 		$("#chat_text").val("");
 	});
 });
