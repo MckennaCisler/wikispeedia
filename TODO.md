@@ -9,8 +9,8 @@
 - Stuff in docs folder
 ##### NECESSITIES
 - <b>Fix bugs</b>
-  - Check that we use equalsAfterRedirect
-  - End with different titles Newton, Isaac Newton
+  - Weird player must join lobby bug!!!! Race condition? More likely a concurrency issue with the client lists?
+  - End with different titles Newton, Isaac Newton SOLVED?
   - Make shortest path work on end.js
 ##### NICETIES
 - onClose(handler)

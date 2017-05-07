@@ -226,7 +226,8 @@ public class WikiInterpreter implements CommandInterpreter {
     }
   }
 
-  private JsonObject getCurPlayerPageInfo(WikiLobby lobby, WikiPlayer player) {
+  private static JsonObject getCurPlayerPageInfo(WikiLobby lobby,
+      WikiPlayer player) {
     WikiPage curPlayerPage = player.getCurPage();
     try {
       return getPlayerPageInfo(curPlayerPage, lobby);
@@ -237,7 +238,18 @@ public class WikiInterpreter implements CommandInterpreter {
     }
   }
 
-  private JsonObject getPlayerPageInfo(WikiPage page, WikiLobby lobby)
+  /**
+   * Gets a more informative version of a page.
+   *
+   * @param page
+   *          The page to get
+   * @param lobby
+   *          THe lobby to get required things from.
+   * @return The serialized page.
+   * @throws IOException
+   *           If it can't be accessed.
+   */
+  public static JsonObject getPlayerPageInfo(WikiPage page, WikiLobby lobby)
       throws IOException {
     // return Main.GSON.toJsonTree(ImmutableMap.of("href", page.url(), "title",
     // page.getTitle(), "blurb", page.getBlurb(), "text",

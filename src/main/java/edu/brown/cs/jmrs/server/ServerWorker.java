@@ -321,6 +321,7 @@ class ServerWorker {
     Client client = clients.getBack(new Client(clientId));
     if (client == null) {
       clientId = conn.hashCode() + "";
+      // starts out connected
       client = new Client(clientId);
       while (!clients.putNoOverwrite(conn, client)) {
         clientId = Math.random() + "";

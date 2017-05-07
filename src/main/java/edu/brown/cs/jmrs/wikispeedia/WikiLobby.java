@@ -1,5 +1,6 @@
 package edu.brown.cs.jmrs.wikispeedia;
 
+import java.io.IOException;
 import java.lang.reflect.Type;
 import java.time.Duration;
 import java.time.Instant;
@@ -34,6 +35,7 @@ import edu.brown.cs.jmrs.web.wikipedia.WikiPage;
 import edu.brown.cs.jmrs.web.wikipedia.WikiPageLinkFinder;
 import edu.brown.cs.jmrs.web.wikipedia.WikiPageLinkFinder.Filter;
 import edu.brown.cs.jmrs.wikispeedia.comms.Command;
+import edu.brown.cs.jmrs.wikispeedia.comms.WikiInterpreter;
 
 /**
  * Coordinates a lobby of players in a Wiki game.
@@ -81,9 +83,16 @@ public class WikiLobby implements Lobby {
       JsonObject lobby = new JsonObject();
 
       lobby.addProperty("id", src.id);
-      lobby.add("startPage", Main.GSON.toJsonTree(src.getStartPage()));
       lobby.addProperty("gameMode", src.gameMode.getGameMode().ordinal());
-      lobby.add("goalPage", Main.GSON.toJsonTree(src.getGoalPage()));
+      try {
+        lobby.add("startPage",
+            WikiInterpreter.getPlayerPageInfo(src.getStartPage(), src));
+        lobby.add("goalPage",
+            WikiInterpreter.getPlayerPageInfo(src.getGoalPage(), src));
+      } catch (IOException e) {
+        lobby.add("startPage", Main.GSON.toJsonTree(src.getStartPage()));
+        lobby.add("goalPage", Main.GSON.toJsonTree(src.getGoalPage()));
+      }
       lobby.addProperty("started", src.started());
       lobby.addProperty("ended", src.ended());
       if (src.started()) {
