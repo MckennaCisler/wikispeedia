@@ -66,15 +66,15 @@ public class WikiLobby implements Lobby {
   private static final long START_DELAY = 5;
 
   private transient Server server;
-  private final String id;
+  private final String     id;
   // map from id to player
   private transient Map<String, WikiPlayer> players;
-  private transient WikiGameMode gameMode = null;
+  private transient WikiGameMode            gameMode = null;
 
-  private Instant startTime = null;
-  private WikiGame game;
+  private Instant         startTime = null;
+  private WikiGame        game;
   private Set<WikiPlayer> winners;
-  private List<Message> messages;
+  private List<Message>   messages;
 
   /**
    * Constructs a new WikiLobby (likely through a Factory in
@@ -474,8 +474,8 @@ public class WikiLobby implements Lobby {
   private class Message {
 
     private Instant timestamp;
-    private String content;
-    private String senderId;
+    private String  content;
+    private String  senderId;
 
     public Message(String content, String senderId) {
       this.content = content;

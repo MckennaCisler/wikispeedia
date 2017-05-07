@@ -11,8 +11,6 @@
 - Stuff in docs folder
 ##### NECESSITIES
 - <b>Fix bugs</b>
-  - BLOCKING 1000 Bug?????
-  - Player must join a lobby bug
   - Check that we use equalsAfterRedirect
   - check that going to pages works with apostrophes, etc. (ACROSS server-client actions)
 - Visualizations for history and endgame ROHAN
