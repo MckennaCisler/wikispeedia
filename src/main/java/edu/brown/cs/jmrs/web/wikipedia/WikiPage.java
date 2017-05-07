@@ -15,6 +15,7 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonSerializationContext;
 import com.google.gson.JsonSerializer;
 
+import edu.brown.cs.jmrs.web.ContentFormatter;
 import edu.brown.cs.jmrs.web.LinkFinder;
 import edu.brown.cs.jmrs.web.Page;
 
@@ -148,6 +149,7 @@ public class WikiPage extends Page {
    * @return The name of this Wikipedia page as indicated by it's url.
    */
   public String getName() {
+    assert url().contains("/");
     int lastSlash = url().lastIndexOf('/');
     if (lastSlash != -1 && lastSlash + 1 < url().length()) {
       return url().substring(lastSlash + 1);
@@ -176,7 +178,25 @@ public class WikiPage extends Page {
         parsedContentOriginal().select("#mw-content-text > p");
     int i = 0;
     do {
-      para = paragraphs.get(i++).text().replaceAll("\\[\\d+\\]", "");
+      para = paragraphs.get(i++).text();
+    } while (para.equals("") && i < paragraphs.size());
+    return para;
+  }
+
+  /**
+   * @return The title of this Wikipedia page.
+   * @param formatter
+   *          The ContentFormatter to use in formatting this page.
+   * @throws IOException
+   *           If the page could not be reached or loaded.
+   */
+  public String getFormattedBlurb(ContentFormatter<WikiPage> formatter)
+      throws IOException {
+    String para;
+    Elements paragraphs = formatter.format(this).select("#mw-content-text > p");
+    int i = 0;
+    do {
+      para = paragraphs.get(i++).text();
     } while (para.equals("") && i < paragraphs.size());
     return para;
   }

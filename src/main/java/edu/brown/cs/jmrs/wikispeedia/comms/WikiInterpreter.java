@@ -120,6 +120,7 @@ public class WikiInterpreter implements CommandInterpreter {
           getPlayerPageInfo(
               WikiPage.fromAny(identifier, Main.WIKI_PAGE_DOC_CACHE), lobby));
     } catch (IOException e) {
+      e.printStackTrace();
       Command.RETURN_GET_PAGE.send(lobby.getServer(), clientId,
           ImmutableMap.of(), String.format("Could not access page %s: %s",
               identifier, e.getMessage()));
@@ -225,22 +226,42 @@ public class WikiInterpreter implements CommandInterpreter {
     }
   }
 
-  private JsonObject getCurPlayerPageInfo(WikiLobby lobby, WikiPlayer player) {
+  private static JsonObject getCurPlayerPageInfo(WikiLobby lobby,
+      WikiPlayer player) {
     WikiPage curPlayerPage = player.getCurPage();
     try {
       return getPlayerPageInfo(curPlayerPage, lobby);
     } catch (IOException e1) {
       // we're just gonna have to send null if this happens
-      return null;
+      throw new AssertionError("Current player page could not be retrieved",
+          e1);
     }
   }
 
-  private JsonObject getPlayerPageInfo(WikiPage page, WikiLobby lobby)
+  /**
+   * Gets a more informative version of a page.
+   *
+   * @param page
+   *          The page to get
+   * @param lobby
+   *          THe lobby to get required things from.
+   * @return The serialized page.
+   * @throws IOException
+   *           If it can't be accessed.
+   */
+  public static JsonObject getPlayerPageInfo(WikiPage page, WikiLobby lobby)
       throws IOException {
-    return Main.GSON.toJsonTree(ImmutableMap.of("href", page.url(), "title",
-        page.getTitle(), "blurb", page.getBlurb(), "text",
-        lobby.getContentFormatter()
-            .stringFormat(page.linksMatching(lobby.getLinkFinder())),
-        "links", lobby.getLinkFinder().linkedPages(page))).getAsJsonObject();
+    // return Main.GSON.toJsonTree(ImmutableMap.of("href", page.url(), "title",
+    // page.getTitle(), "blurb", page.getBlurb(), "text",
+    // lobby.getContentFormatter()
+    // .stringFormat(page.linksMatching(lobby.getLinkFinder())),
+    // "links", lobby.getLinkFinder().linkedPages(page))).getAsJsonObject();
+    return Main.GSON.toJsonTree(
+        ImmutableMap.of("href", page.url(), "title", page.getTitle(), "blurb",
+            page.getFormattedBlurb(lobby.getContentFormatter()), "text",
+            lobby.getContentFormatter()
+                .stringFormat(page.linksMatching(lobby.getLinkFinder())),
+            "links", lobby.getLinkFinder().linkedPages(page)))
+        .getAsJsonObject();
   }
 }
