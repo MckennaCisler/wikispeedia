@@ -8,7 +8,6 @@ import java.util.List;
 import java.util.Set;
 
 import edu.brown.cs.jmrs.io.db.DbConn;
-import edu.brown.cs.jmrs.web.LinkFinder;
 import edu.brown.cs.jmrs.web.wikipedia.WikiPage;
 import edu.brown.cs.jmrs.web.wikipedia.WikiPageLinkFinder.Filter;
 
@@ -19,13 +18,11 @@ import edu.brown.cs.jmrs.web.wikipedia.WikiPageLinkFinder.Filter;
  *
  */
 public class Scraper {
+  private static final int AVG_LINKS_PER_PAGE = 100; // try to underestimate
 
-  // underestimate
-  private static final int     AVG_LINKS_PER_PAGE = 100;
-
-  private final WikiPage       startPage;
-  private int                  depth;
-  private LinkFinder<WikiPage> linkFinder;
+  private final WikiPage startPage;
+  private int depth;
+  private CachingWikiLinkFinder linkFinder;
 
   /**
    * @param wikiDbConn
@@ -124,6 +121,7 @@ public class Scraper {
           linkFinder.linkedPages(page);
           // note accessible
           accessiblePages.add(page);
+
         } catch (IOException e) {
           // skip failed ones
           continue;

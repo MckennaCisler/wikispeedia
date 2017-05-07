@@ -1,6 +1,7 @@
 package edu.brown.cs.jmrs.wikispeedia;
 
 import java.lang.reflect.Type;
+import java.sql.SQLException;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.ArrayList;
@@ -30,7 +31,6 @@ import edu.brown.cs.jmrs.web.wikipedia.WikiAnnotationRemover;
 import edu.brown.cs.jmrs.web.wikipedia.WikiBodyFormatter;
 import edu.brown.cs.jmrs.web.wikipedia.WikiFooterRemover;
 import edu.brown.cs.jmrs.web.wikipedia.WikiPage;
-import edu.brown.cs.jmrs.web.wikipedia.WikiPageLinkFinder;
 import edu.brown.cs.jmrs.web.wikipedia.WikiPageLinkFinder.Filter;
 import edu.brown.cs.jmrs.wikispeedia.comms.Command;
 
@@ -46,17 +46,19 @@ public class WikiLobby implements Lobby {
           ImmutableList.of(new WikiBodyFormatter(), new WikiFooterRemover(),
               new WikiAnnotationRemover()));
 
+  static final double LINK_CACHING_WORKER_PERCENT_ON = 0.5;
   static final LinkFinder<WikiPage> DEFAULT_LINK_FINDER;
   static {
-    // try {
-    DEFAULT_LINK_FINDER =
-        new WikiPageLinkFinder(Filter.DISAMBIGUATION,
-            Filter.NON_ENGLISH_WIKIPEDIA);
-    // new CachingWikiLinkFinder(Main.getWikiDbConn(), Filter.DISAMBIGUATION,
-    // Filter.NON_ENGLISH_WIKIPEDIA);
-    // } catch (SQLException e) {
-    // throw new AssertionError("Could not initialize wikipedia database", e);
-    // }
+    try {
+      DEFAULT_LINK_FINDER =
+          // new WikiPageLinkFinder(Filter.DISAMBIGUATION,
+          // Filter.NON_ENGLISH_WIKIPEDIA);
+          new CachingWikiLinkFinder(Main.getWikiDbConn(),
+              LINK_CACHING_WORKER_PERCENT_ON, Filter.DISAMBIGUATION,
+              Filter.NON_ENGLISH_WIKIPEDIA);
+    } catch (SQLException e) {
+      throw new AssertionError("Could not initialize wikipedia database", e);
+    }
   }
 
   /**
