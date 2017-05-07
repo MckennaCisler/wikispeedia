@@ -13,15 +13,15 @@
   - check that going to pages works with apostrophes, etc. (ACROSS server-client actions)
   - End with different titles Newton, Isaac Newton
   - Coordinates still show
-- Get settings on endpage -> hide content, show end differently (ROHAN)
 - Make end page work with shortest path (ROHAN)
-- Going back (history)  
 - Run ContentFormatter on blurb
 - Weird player must join lobby bug!!!! Race condition? More likely a concurrency issue with the client lists?
 - End with different titles Newton, Isaac Newton SOLVED?
 - Make shortest path work on end.js
+- Bug where lobby can't be started while another game is running
 ##### NICETIES
 - onClose(handler)
+- Deal with start lobby, exit to index
 - Shortest path
   - Add intelligent switcher if DB busy?
   - Fix insane caching sizes (7000???)

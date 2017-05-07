@@ -21,6 +21,8 @@ let hasDrawnPlayerList;
 let docReady = false;
 let setDestinationWhenReady = false;
 let destPage;
+let destTitle;
+let shortestPath = false;
 
 // Time
 let startTime = new Date().getTime();
@@ -37,7 +39,7 @@ $(document).ready(() => {
 	setInterval(updateTimer, 200);
 
 	if (setDestinationWhenReady) {
-		$destination.html("<b>" + destPage + "</b>");
+		$destination.html("<b>" + destTitle + "</b>");
 	}
 });
 
@@ -90,9 +92,11 @@ function settingsCallback(settings) {
 	console.log(settings);
 	console.log("HEREHERHERE");
 
+	shortestPath = settings.gameMode == 1;
+	destTitle = settings.goalPage.title;
 	destPage = titleFromHref(settings.goalPage.name);
 	if (docReady) {
-		$destination.html("<b>" + destPage + "</b>");
+		$destination.html("<b>" + destTitle + "</b>");
 	} else {
 		setDestinationWhenReady = true;
 	}
@@ -114,6 +118,15 @@ function goToPage(href) {
 
 // Callback to the server Request
 function drawPage(page) {
+	console.log("TITLEs");
+	console.log(page.title);
+	console.log(destTitle);
+
+	if (page.title == destTitle && shortestPath) {
+		window.location.href = window.location.origin + "/end";
+		console.log(window.location.href);
+	}
+
   html = page.text;
   href = page.href;
   title = titleFromHref(href);

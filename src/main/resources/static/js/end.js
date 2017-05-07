@@ -8,11 +8,12 @@ let leaderboard = true;
 let recentPlayers = [];
 
 let endPage = "";
-let shortestPath = false;
+let shortestPath = true;
 
 $(document).ready(() => {
 	resize();
 	if (serverReady) {
+		console.log("REGISTERED");
 		serverConn.registerAllPlayers(playersCallback);
 	}
 
@@ -49,6 +50,7 @@ serverConn.whenReadyToRecieve(() => {
 	// TODO: Get settings: game type and end page
 
 	if (docReady) {
+		console.log("REGISTERED");
 		serverConn.registerAllPlayers(playersCallback);
 	} else {
 		serverReady = true;
@@ -62,6 +64,7 @@ serverConn.whenReadyToSend(() => {
 
 function settingsCallback(settings) {
 	shortestPath = settings.gameMode == 1;
+	console.log("SETTTINGS");
 	console.log(settings);
 	endPage = settings.goalPage.name;
 }
@@ -140,6 +143,8 @@ function drawResults(players) {
 	// TODO: Only if it's time trial
 	if (winners.length > 0 && !shortestPath) {
 		$("#stats").html(`<br><i>Winning time: ${millisecondsToStr(winners[0].playTime)}</i>`);
+	} else {
+		$("#stats").html("");
 	}
 }
 
