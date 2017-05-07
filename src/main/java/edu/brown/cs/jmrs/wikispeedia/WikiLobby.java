@@ -100,7 +100,8 @@ public class WikiLobby implements Lobby {
         lobby.addProperty("playTime", src.getPlayTime().toMillis());
       }
       if (src.ended()) {
-        lobby.addProperty("endTime", src.getEndTime().toEpochMilli());
+        lobby.addProperty("endTime",
+            src.getEndTime() != null ? src.getEndTime().toEpochMilli() : null);
         lobby.add("winners", Main.GSON.toJsonTree(src.getWinners()));
         // TODO: Shortest / known path
       }
