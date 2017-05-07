@@ -3,6 +3,8 @@ package edu.brown.cs.jmrs.wikispeedia;
 import java.lang.reflect.Type;
 import java.time.Duration;
 import java.time.Instant;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -11,6 +13,7 @@ import java.util.Set;
 
 import com.google.common.collect.ImmutableList;
 import com.google.gson.Gson;
+import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonSerializationContext;
@@ -68,9 +71,10 @@ public class WikiLobby implements Lobby {
   private transient Map<String, WikiPlayer> players;
   private transient WikiGameMode gameMode = null;
 
-  private Instant startTime = null;
-  private WikiGame game;
-  private Set<WikiPlayer> winners;
+  private Instant                           startTime   = null;
+  private WikiGame                          game;
+  private Set<WikiPlayer>                   winners;
+  private List<Message>                     messages;
 
   /**
    * Constructs a new WikiLobby (likely through a Factory in
@@ -87,6 +91,7 @@ public class WikiLobby implements Lobby {
     this.server = server;
     this.id = id;
     players = new HashMap<>();
+    messages = Collections.synchronizedList(new ArrayList<>());
   }
 
   /****************************************/
@@ -219,6 +224,29 @@ public class WikiLobby implements Lobby {
    */
   public void setPlayerName(String clientId, String uname) {
     players.get(clientId).setName(uname);
+  }
+
+  public void registerMessage(String content) {
+    messages.add(new Message(content));
+  }
+
+  public void sendMessagesToPlayer(String clientId) {
+    Message[] messageArray = messages.toArray(new Message[] {});
+    JsonArray jsonArray = new JsonArray();
+
+    for (Message message : messageArray) {
+      JsonObject jsonMessage = new JsonObject();
+      jsonMessage.addProperty("timestamp", message.getTime().toEpochMilli());
+      jsonMessage.addProperty("message", message.getContent());
+      jsonArray.add(jsonMessage);
+    }
+
+    JsonObject responseObject = new JsonObject();
+    responseObject.addProperty("command", "return_messages");
+    responseObject.add("payload", jsonArray);
+    responseObject.addProperty("error_message", "");
+
+    server.sendToClient(clientId, new Gson().toJson(responseObject));
   }
 
   /**
@@ -439,6 +467,25 @@ public class WikiLobby implements Lobby {
    */
   public Instant getEndTime() {
     return gameMode.getEndTime(this);
+  }
+
+  private class Message {
+
+    private Instant timestamp;
+    private String  content;
+
+    public Message(String content) {
+      this.content = content;
+      timestamp = Instant.now();
+    }
+
+    public Instant getTime() {
+      return timestamp;
+    }
+
+    public String getContent() {
+      return content;
+    }
   }
 
   /**

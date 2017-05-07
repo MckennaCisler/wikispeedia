@@ -148,6 +148,9 @@ $(document).ready(() => {
 		$players.html("");
 		for (let i = 0; i < players.length; i++) {
 			if (players[i].id === serverConn.clientId) {
+				if (!players[i].isLeader) {
+					$("#force").hide();
+				}
 				if (!players[i].ready) {
 					$("<li class=\"list-group-item\"><div class=\"me_li\"><div style=\"align-self: flex-start;\"><b>Me</b></div><button class=\"btn btn-outline-success\" id=\"my_but\" style=\"align-self: flex-end;\">Click when ready</button></li>")
 					.appendTo($players);
@@ -159,7 +162,7 @@ $(document).ready(() => {
 					.appendTo($players);
 				}
 			} else {
-				$("<li class=\"list-group-item\"><input type=\"checkbox\" disabled>&nbsp" + players[i].name + "</li>")
+				$("<li class=\"list-group-item\"><input type=\"checkbox\" disabled" + (players[i].ready ? " checked" : "") + ">&nbsp" + players[i].name + "</li>")
 					.appendTo($players);
 			}
 		}
