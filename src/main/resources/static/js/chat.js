@@ -55,8 +55,12 @@ function displayMessages(messages) { //messages is a list of object of the form 
 		$("#chat_div").html("");
 		for (let i = 0; i < messages.length; i++) {
 			let mess = messages[i];
-			let mStr = `<div class="chat-bubble ${mess.sender_id === serverConn.clientId ? "chat-sender" : "chat-receiver"}">${mess.message}</div>`;
+			let mStr = 
+				`<div class="chat-bubble ${mess.sender_id === serverConn.clientId ? "chat-sender" : "chat-receiver"}">${mess.message}
+					<br><div class="chat-metadata">Sent by: ${mess.sender} at ${new Date(mess.timestamp).toUTCString()}</div>
+				</div>`;
 			$("#chat_div").html($("#chat_div").html() + mStr);
 		}
+		$(".chat-bubble").get($(".chat-bubble").length - 1).scrollIntoView();
 	}
 }
