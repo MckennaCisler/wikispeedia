@@ -63,7 +63,6 @@ public class Insert<T> extends DbStatement<T> {
       ps.executeBatch();
     } catch (SQLException e) {
       throw new UncheckedSqlException(e);
-
     }
   }
 }
