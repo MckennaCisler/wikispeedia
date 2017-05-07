@@ -9,14 +9,12 @@
 - Stuff in docs folder
 ##### NECESSITIES
 - <b>Fix bugs</b>
-  - BLOCKING 1000 Bug?????
-  - Player must join a lobby bug
   - Check that we use equalsAfterRedirect
   - check that going to pages works with apostrophes, etc. (ACROSS server-client actions)
   - End with different titles Newton, Isaac Newton
   - Make shortest path work on end.js
 - Visualizations for history and endgame ROHAN
-- Going back (history)
+- Going back (history)  
 - Run ContentFormatter on blurb
 ##### NICETIES
 - Shortest path
@@ -28,7 +26,6 @@
 ##### STUFF THAT WOULD GIVE US THAT WARM FUZZY FEELING
 - Make an intermittent (or parallel... maybe do it while shortest-path finding?) DB-compare method that randomly double-checks a link list and changes it if needed
 - Hide user's IDs from obvious places (i.e. ALL_PLAYERS) using isCurrentPlayer, etc.
-- Chat everywhere? SEAN
 
 #### Deadlines:
 - <b>Adversary TA Meeting (Wednesday, 4/26)</b>

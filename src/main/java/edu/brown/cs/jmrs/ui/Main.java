@@ -17,8 +17,6 @@ import com.google.gson.GsonBuilder;
 
 import edu.brown.cs.jmrs.io.db.DbConn;
 import edu.brown.cs.jmrs.server.Server;
-import edu.brown.cs.jmrs.server.example.chatroom.ChatInterpreter;
-import edu.brown.cs.jmrs.server.example.chatroom.ChatLobby;
 import edu.brown.cs.jmrs.web.Page;
 import edu.brown.cs.jmrs.web.wikipedia.WikiPage;
 import edu.brown.cs.jmrs.web.wikipedia.WikiPageLinkFinder.Filter;
@@ -33,11 +31,7 @@ import edu.brown.cs.jmrs.wikispeedia.comms.WikiPageHandlers;
 import joptsimple.OptionException;
 import joptsimple.OptionParser;
 import joptsimple.OptionSet;
-import spark.Request;
-import spark.Response;
-import spark.Route;
 import spark.Spark;
-import spark.template.freemarker.FreeMarkerEngine;
 
 /**
  * Primary execution class for Wikispeedia.
@@ -46,14 +40,14 @@ import spark.template.freemarker.FreeMarkerEngine;
  *
  */
 public final class Main {
-  public static final int DEFAULT_SPARK_PORT = 4567;
-  public static final int DEFAULT_SOCKET_PORT = 4568;
-  public static final boolean DEBUG = true;
+  public static final int     DEFAULT_SPARK_PORT  = 4567;
+  public static final int     DEFAULT_SOCKET_PORT = 4568;
+  public static final boolean DEBUG               = true;
 
   /**
    * Global GSON for defining custom JSON serializers on.
    */
-  public static final Gson GSON = registerSerializers();
+  public static final Gson    GSON                = registerSerializers();
 
   /**
    * Registers custom Json (Gson) serializers for this project.
@@ -76,22 +70,22 @@ public final class Main {
   /**
    * Cache for the internals of WikiPages.
    */
-  static final int MAX_WIKI_CACHE_SIZE = 2000;
-  static final int WIKIPAGE_EVICTION_TIMEOUT = 24; // hours
-  public static final LoadingCache<String, Document> WIKI_PAGE_DOC_CACHE =
-      CacheBuilder.newBuilder().maximumSize(MAX_WIKI_CACHE_SIZE)
-          .expireAfterWrite(WIKIPAGE_EVICTION_TIMEOUT, TimeUnit.HOURS)
-          .build(new Page.Loader());
+  static final int                                   MAX_WIKI_CACHE_SIZE          = 2000;
+  static final int                                   WIKIPAGE_EVICTION_TIMEOUT    = 24;                      // hours
+  public static final LoadingCache<String, Document> WIKI_PAGE_DOC_CACHE          = CacheBuilder
+      .newBuilder().maximumSize(MAX_WIKI_CACHE_SIZE)
+      .expireAfterWrite(WIKIPAGE_EVICTION_TIMEOUT, TimeUnit.HOURS)
+      .build(new Page.Loader());
 
   /**
    * DbConn and constants for database Link cache and associated LinkFinder.
    */
-  static final String WIKI_DATABASE_LOC = "data/wikipedia.sqlite3";
-  private static DbConn wikiDbConn;
-  private static final int NUM_DB_CACHING_THREADS = 1;
+  static final String                                WIKI_DATABASE_LOC            = "data/wikipedia.sqlite3";
+  private static DbConn                              wikiDbConn;
+  private static final int                           NUM_DB_CACHING_THREADS       = 1;
   // Runtime.getRuntime().availableProcessors();
-  private static final double CACHING_EXECUTION_PERCENTAGE = 0.99;
-  private static final long CACHING_WAIT_TIMEOUT = 10; // Seconds
+  private static final double                        CACHING_EXECUTION_PERCENTAGE = 0.99;
+  private static final long                          CACHING_WAIT_TIMEOUT         = 10;                      // Seconds
 
   private Main() {
     // override default constructor
@@ -145,9 +139,11 @@ public final class Main {
 
         // Setup Spark for main page and extra serving
         SparkServer.setDebug(DEBUG);
-        SparkServer.runSparkServer((int) options.valueOf("spark-port"),
+        SparkServer.runSparkServer(
+            (int) options.valueOf("spark-port"),
             ImmutableList.of(new WikiPageHandlers(), new WikiMainHandlers()),
-            "/static", "src/main/resources/public");
+            "/static",
+            "src/main/resources/public");
         System.out.println("[ Started Spark ]");
 
         // TODO: how to really stop it?
@@ -165,31 +161,6 @@ public final class Main {
         SparkServer.stop();
         wikiDbConn.close();
       }
-    } else if (options.has("chat-test")) {
-
-      Server server = new Server((serv, str) -> {
-        return new ChatLobby(serv, str);
-      }, new ChatInterpreter(), new Gson());
-      Spark.webSocket("/websocket", server);
-
-      SparkServer.runSparkServer((int) options.valueOf("spark-port"),
-          ImmutableList.of(new SparkHandlers() {
-
-            @Override
-            public void registerHandlers(FreeMarkerEngine freeMarker) {
-              Spark.get("/", new Route() {
-
-                @Override
-                public Object handle(Request request, Response response)
-                    throws Exception {
-                  response.redirect("index.html");
-                  return null;
-                }
-
-              });
-            }
-          }), "/public-testing", "src/main/resources/public-testing");
-      System.out.println("[ Started Chat Test ]");
     } else if (options.has("scrape")) {
       try {
         wikiDbConn = new DbConn(WIKI_DATABASE_LOC);
@@ -201,10 +172,10 @@ public final class Main {
           filters.add(Filter.NON_ENGLISH_WIKIPEDIA);
         }
 
-        Scraper scraper =
-            new Scraper(wikiDbConn,
-                WikiPage.fromAny((String) options.valueOf("scrape-start")),
-                filters.toArray(new Filter[0]));
+        Scraper scraper = new Scraper(
+            wikiDbConn,
+            WikiPage.fromAny((String) options.valueOf("scrape-start")),
+            filters.toArray(new Filter[0]));
 
         scraper.setDepth((int) options.valueOf("scrape-depth"));
 
@@ -236,8 +207,11 @@ public final class Main {
    */
   public static void debugLog(String info) {
     if (DEBUG) {
-      System.out.println(String.format("[ DEBUG : %s ]\n\r\t%s\n\r",
-          new SimpleDateFormat("dd-MM HH:mm:ss").format(new Date()), info));
+      System.out.println(
+          String.format(
+              "[ DEBUG : %s ]\n\r\t%s\n\r",
+              new SimpleDateFormat("dd-MM HH:mm:ss").format(new Date()),
+              info));
     }
   }
 

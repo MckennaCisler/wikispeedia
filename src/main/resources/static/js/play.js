@@ -117,8 +117,10 @@ function drawPage(page) {
   href = page.href;
   title = titleFromHref(href);
 
-	// add to browser history
-	history.pushState({"href": href}, "", "");
+	// add to browser history if not already there
+	if (history.state == null || history.state.href !== href) {
+		history.pushState({"href": href}, "", "");
+	}
 
   if (href != currHref) {
     $title.html("<b>" + title + "</b>");
@@ -149,7 +151,7 @@ function cleanHtml() {
 
   $article.find("img").each(function(index, element) {
     let src = "" + $(element).attr("src");
-    console.log(src);
+    // console.log(src);
 
     if (!src.startsWith("https:")) {
       $(element).attr("src", "https:" + src);

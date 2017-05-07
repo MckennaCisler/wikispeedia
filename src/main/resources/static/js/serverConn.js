@@ -360,7 +360,7 @@ class ServerConn {
         this.pendingResponses[command.name] = {
             "command": command,
             "callback": callback,
-            "errCallback" : () => {}, // no reason
+            "errCallback" : undefined, // no reason
             "timeout" : null          // no reason
         }
     }
@@ -442,20 +442,27 @@ class ServerConn {
                 }
               }
           } else {
-              // (but give any command type access to the top-level error_message)
               const actions = this.pendingResponses[parsedMsg.command];
               window.clearTimeout(actions.timeout);
-              if (actions.errCallback !== undefined) { actions.errCallback(parsedMsg); }
+              if (actions.errCallback !== undefined) {
+                actions.errCallback(parsedMsg);
+              } else if (parsedMsg.command === Command.ERROR.name) {
+                this._handle_error_command(parsedMsg);
+              }
 
               console.log(`\nGOT_ERROR: : ${parsedMsg.command}`);
               console.log(parsedMsg);
           }
       } else if (parsedMsg.error_message !== undefined && parsedMsg.error_message !== "") {
-        const errCallback = this.pendingResponses[Command.ERROR.name].callback;
-        if (errCallback !== undefined) { errCallback(parsedMsg); }
+        this._handle_error_command(parsedMsg);
       } else {
           console.log("\n(The above was an unknown (or unregistered) command: '" + parsedMsg.command + "')");
       }
+    }
+
+    _handle_error_command(parsedMsg) {
+      const errCallback = this.pendingResponses[Command.ERROR.name].callback;
+      if (errCallback !== undefined) { errCallback(parsedMsg); }
     }
 
     ws_onclose() {

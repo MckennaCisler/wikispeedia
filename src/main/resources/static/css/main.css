@@ -171,6 +171,22 @@
     justify-content: space-between;
     width: 100%;
 }
+.chat-bubble {
+	border-radius: 3px;
+	border: 1px solid gray;
+	margin-bottom: 5px;
+}
+.chat-sender {
+	background: #9CE8FF;
+}
+.chat-receiver {
+	background: #E3E3E3;
+}
+.chat-metadata {
+	color: slategray;
+	font-size: 75%;
+}
+
 #main_buttons {
 	margin-top: 15px;
 	align-self: center;
@@ -182,6 +198,7 @@
 
 #chat_div {
 	overflow-y: scroll;
+	height: 45vh;
 }
 
 #counter {
@@ -217,7 +234,7 @@
 
 .my_success {
 	color: white;
-	background-color: #83d1c9;
+	background-color: #47e5d5;
 }
 .my_success:hover {
 	background-color: #3CA399;

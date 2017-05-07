@@ -38,22 +38,21 @@ $(document).ready(function () {
 	});
 
 	$("#back_main").on('click', () => {
-		serverConn.leaveLobby(() => {
-			$("#start_game").prop('disabled', false);
-			$("#start_game").html(`Start your game!`);
-			clearInterval(dotPid);
-			$("#uname_picker").hide();
-			$("#main").show();
-			$("#rules").show();
-			$(`#${lobbyName}`).remove();
-		}, displayServerConnError);
+		serverConn.leaveLobby();
+		$("#start_game").prop('disabled', false);
+		$("#start_game").html(`Start your game!`);
+		clearInterval(dotPid);
+		$("#uname_picker").hide();
+		$("#main").show();
+		$("#rules").show();
+		$(`#${lobbyName}`).remove();
 	});
 
 	$("#music-select").change(() => {
 		let mval = document.getElementById("music-select").options.selectedIndex;
 		setCookie('songChoice', mval);
 	});
-	
+
 	$("#se-chooser").change(() => {
 		if (document.getElementById("se-chooser").checked) {
 			$("#se-boxes").show();
@@ -95,10 +94,10 @@ $(document).ready(function () {
 					$("#start_game").html(`Generating${dotStr}`);
 				}
 			}, 1000);
-			
+
 			let params;
 			if (document.getElementById("se-chooser").checked && ($("#se-start").val() !== "" || $("#se-end").val() !== "")) {
-				params = 
+				params =
 					{
 					"gameMode": mode,
 					"difficulty": $("#difficulty_slider").val() / 100,
@@ -106,7 +105,7 @@ $(document).ready(function () {
 					"goalPage": $("#se-end").val()
 				};
 			} else {
-				params = 
+				params =
 					{
 					"gameMode": mode,
 					"difficulty": $("#difficulty_slider").val() / 100
@@ -187,17 +186,6 @@ function resize() {
 	}
 }
 
-/*function startLobby(callback, errCallback) {
-	serverConn.startLobby(lobbyName.trim(),
-		() => {
-			callback();
-		},
-		(error) => {
-			errCallback(error.error_message);
-			displayServerConnError(error);
-		});
-}*/
-
 // game logic handlers
 serverConn.whenReadyToRecieve(() => {
 	"use strict";
@@ -213,19 +201,29 @@ serverConn.whenReadyToSend(() => {
 function drawLobbies(lobbies) {
 	"use strict";
 	if (lobbies.length === 0) {
-		$(document).ready(() => {
-			$("#open_games").html("No games were found, you'll have to make your own!");
-			$("#open_games").addClass("none-found");
-		});
+		clearLobbies();
 	} else {
 		$(document).ready(() => {
 			$("#open_games").removeClass("none-found");
 			let textStr = "";
 			for (let i = 0; i < lobbies.length; i++) {
-				textStr += '<li class="alobby list-group-item list-group-item-action" id="' +
-					lobbies[i].id + '">' + lobbies[i].id + '</li>';
+				if (!lobbies[i].started) {
+					textStr += '<li class="alobby list-group-item list-group-item-action" id="' +
+						lobbies[i].id + '">' + lobbies[i].id + '</li>';
+				}
 			}
-			$("#open_games").html(textStr);
+			if (textStr !== "") {
+				$("#open_games").html(textStr);
+			} else {
+				clearLobbies();
+			}
 		});
 	}
+}
+
+function clearLobbies() {
+	$(document).ready(() => {
+		$("#open_games").html("No games were found, you'll have to make your own!");
+		$("#open_games").addClass("none-found");
+	});
 }

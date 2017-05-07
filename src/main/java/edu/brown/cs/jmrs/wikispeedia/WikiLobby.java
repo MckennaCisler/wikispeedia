@@ -42,38 +42,104 @@ import edu.brown.cs.jmrs.wikispeedia.comms.Command;
  *
  */
 public class WikiLobby implements Lobby {
-  static final ContentFormatter<WikiPage> DEFAULT_CONTENT_FORMATTER =
-      new ContentFormatterChain<WikiPage>(
-          ImmutableList.of(new WikiBodyFormatter(), new WikiFooterRemover(),
-              new WikiAnnotationRemover()));
+  private class Message {
 
-  static final LinkFinder<WikiPage> DEFAULT_LINK_FINDER;
+    private Instant timestamp;
+    private String  content;
+    private String  senderId;
+
+    public Message(String content, String senderId) {
+      this.content = content;
+      this.senderId = senderId;
+      timestamp = Instant.now();
+    }
+
+    public String getContent() {
+      return content;
+    }
+
+    public String getSender() {
+      return senderId;
+    }
+
+    public Instant getTime() {
+      return timestamp;
+    }
+  }
+
+  /**
+   * Custom serializer for use with GSON.
+   *
+   * @author mcisler
+   *
+   */
+  public static class Serializer implements JsonSerializer<WikiLobby> {
+
+    @Override
+    public JsonElement serialize(
+        WikiLobby src,
+        Type typeOfSrc,
+        JsonSerializationContext context) {
+      JsonObject lobby = new JsonObject();
+
+      lobby.addProperty("id", src.id);
+      lobby.add("startPage", Main.GSON.toJsonTree(src.getStartPage()));
+      lobby.addProperty("gameMode", src.gameMode.getGameMode().ordinal());
+      lobby.add("goalPage", Main.GSON.toJsonTree(src.getGoalPage()));
+      lobby.addProperty("started", src.started());
+      lobby.addProperty("ended", src.ended());
+      if (src.started()) {
+        lobby.addProperty("startTime", src.getStartTime().toEpochMilli());
+        lobby.addProperty("playTime", src.getPlayTime().toMillis());
+      }
+      if (src.ended()) {
+        lobby.addProperty("endTime", src.getEndTime().toEpochMilli());
+        lobby.add("winners", Main.GSON.toJsonTree(src.getWinners()));
+        // TODO: Shortest / known path
+      }
+
+      return lobby;
+    }
+  }
+
+  static final ContentFormatter<WikiPage> DEFAULT_CONTENT_FORMATTER = new ContentFormatterChain<WikiPage>(
+      ImmutableList.of(
+          new WikiBodyFormatter(),
+          new WikiFooterRemover(),
+          new WikiAnnotationRemover()));
+
+  static final LinkFinder<WikiPage>       DEFAULT_LINK_FINDER;
+
   static {
     // try {
-    DEFAULT_LINK_FINDER =
-        new WikiPageLinkFinder(Filter.DISAMBIGUATION,
-            Filter.NON_ENGLISH_WIKIPEDIA);
+    DEFAULT_LINK_FINDER = new WikiPageLinkFinder(
+        Filter.DISAMBIGUATION,
+        Filter.NON_ENGLISH_WIKIPEDIA);
     // new CachingWikiLinkFinder(Main.getWikiDbConn(), Filter.DISAMBIGUATION,
     // Filter.NON_ENGLISH_WIKIPEDIA);
     // } catch (SQLException e) {
     // throw new AssertionError("Could not initialize wikipedia database", e);
     // }
   }
-
   /**
    * Time to delay lobby creation by.
    */
   private static final long START_DELAY = 5;
+  private transient Server  server;
+  private final String      id;
 
-  private transient Server server;
-  private final String id;
   // map from id to player
   private transient Map<String, WikiPlayer> players;
-  private transient WikiGameMode gameMode = null;
+  private transient WikiGameMode            gameMode  = null;
+  private Instant                           startTime = null;
+  private WikiGame                          game;
 
-  private Instant startTime = null;
-  private WikiGame game;
-  private Set<WikiPlayer> winners;
+  private Set<WikiPlayer>                   winners;
+
+  /****************************************/
+  /* LOBBY OVERRIDES */
+  /****************************************/
+
   private List<Message> messages;
 
   /**
@@ -94,81 +160,12 @@ public class WikiLobby implements Lobby {
     messages = Collections.synchronizedList(new ArrayList<>());
   }
 
-  /****************************************/
-  /* LOBBY OVERRIDES */
-  /****************************************/
-
-  /**
-   * Called on lobby creation; structures this lobby to follow a certain game
-   * mode.
-   *
-   * @throws InputError
-   *           If a bad page is specified for start/end.
-   */
-  @Override
-  public void init(JsonObject arguments) throws InputError {
-    Main.debugLog("Generating game...");
-
-    int mode = arguments.get("gameMode").getAsInt();
-    if (mode == WikiGameMode.Mode.TIME_TRIAL.ordinal()) {
-      gameMode = new TimeTrialGameMode();
-
-    } else if (mode == WikiGameMode.Mode.LEAST_CLICKS.ordinal()) {
-      gameMode = new LeastClicksGameMode();
-
-    } else {
-      throw new IllegalArgumentException("Invalid game mode specified");
-    }
-
-    // generate page from difficulty
-    double difficulty = arguments.get("difficulty").getAsDouble();
-    WikiPage startPage, endPage;
-
-    // add custom shortcut to set start and end page specifically.
-    if (arguments.has("startPage")) {
-      startPage =
-          WikiPage.fromAny(arguments.get("startPage").getAsString(),
-              Main.WIKI_PAGE_DOC_CACHE);
-
-      if (!startPage.accessible()) {
-        throw new InputError(String.format(
-            "Page %s is not a valid Wikipedia page!", startPage.getName()));
-      }
-    } else {
-      startPage = GameGenerator.pageWithObscurity(difficulty);
-
-    }
-
-    if (arguments.has("goalPage")) {
-      endPage =
-          WikiPage.fromAny(arguments.get("goalPage").getAsString(),
-              Main.WIKI_PAGE_DOC_CACHE);
-
-      if (!endPage.accessible()) {
-        throw new InputError(String.format(
-            "Page %s is not a valid Wikipedia page!", endPage.getName()));
-      }
-    } else {
-      endPage = GameGenerator.pageWithObscurity(difficulty);
-    }
-
-    game = new WikiGame(startPage, endPage);
-
-    Main.debugLog(String.format("Generated %s game: %s -> %s",
-        mode == WikiGameMode.Mode.TIME_TRIAL.ordinal() ? "time trial"
-            : "least clicks",
-        game.getStart(), game.getGoal()));
-  }
-
-  @Override
-  public boolean isClosed() {
-    return players.isEmpty();
-  }
-
   @Override
   public void addClient(String playerId) {
     if (started()) {
-      Command.sendError(server, playerId,
+      Command.sendError(
+          server,
+          playerId,
           "Game has already started, cannot add player");
       return;
     }
@@ -178,120 +175,6 @@ public class WikiLobby implements Lobby {
     this.players.put(playerId, new WikiPlayer(playerId, this, isLeader));
 
     Command.sendAllPlayers(this);
-  }
-
-  @Override
-  public void removeClient(String playerId) {
-    this.players.remove(playerId);
-    Command.sendAllPlayers(this);
-
-    if (players.size() == 0) {
-      server.closeLobby(id);
-    }
-  }
-
-  @Override
-  public void playerReconnected(String clientId) {
-    if (players.containsKey(clientId)) {
-      players.get(clientId).setConnected(true);
-      Command.sendAllPlayers(this);
-    }
-  }
-
-  @Override
-  public void playerDisconnected(String clientId) {
-    if (players.containsKey(clientId)) {
-      players.get(clientId).setConnected(false);
-      Command.sendAllPlayers(this);
-    }
-  }
-
-  @Override
-  public JsonElement toJson(Gson gson) {
-    return gson.toJsonTree(this);
-  }
-
-  /****************************************/
-  /* STATE HANDLERS / SETTERS */
-  /****************************************/
-
-  /**
-   * Sets the player's name, possibly considering other player's names.
-   *
-   * @param clientId
-   *          The player id of the player to set.
-   * @param uname
-   *          The username to set.
-   */
-  public void setPlayerName(String clientId, String uname) {
-    players.get(clientId).setName(uname);
-  }
-
-  public void registerMessage(String content, String clientId) {
-    messages.add(new Message(content, clientId));
-  }
-
-  public void sendMessagesToPlayer(String clientId) {
-    Message[] messageArray = messages.toArray(new Message[] {});
-    JsonArray jsonArray = new JsonArray();
-
-    for (Message message : messageArray) {
-      JsonObject jsonMessage = new JsonObject();
-      jsonMessage.addProperty("timestamp", message.getTime().toEpochMilli());
-      jsonMessage.addProperty("sender", players.get(clientId).getName());
-      jsonMessage.addProperty("sender_id", message.getSender());
-      jsonMessage.addProperty("message", message.getContent());
-      jsonArray.add(jsonMessage);
-    }
-
-    JsonObject responseObject = new JsonObject();
-    responseObject.addProperty("command", "return_messages");
-    responseObject.add("payload", jsonArray);
-    responseObject.addProperty("error_message", "");
-
-    server.sendToClient(clientId, new Gson().toJson(responseObject));
-  }
-
-  /**
-   * Start the game by setting a start time. Players cannot join after this.
-   *
-   * @param force
-   *          Whether to force a start, i.e. ignore non-ready players.
-   * @throws IllegalStateException
-   *           if a player is not ready.
-   */
-  public void start(boolean force) {
-    if (!force) {
-      for (Entry<String, WikiPlayer> entry : players.entrySet()) {
-        if (!entry.getValue().ready()) {
-          throw new IllegalStateException(String
-              .format("Player %s is not ready", entry.getValue().getName()));
-        }
-      }
-    }
-    // this is how we determine whether started
-    startTime = Instant.now().plusSeconds(START_DELAY);
-
-    // notify players
-    for (Entry<String, WikiPlayer> entry : players.entrySet()) {
-      entry.getValue().setStartTime(startTime);
-    }
-  }
-
-  /**
-   * Stops the game by setting an end time and configuring all players.
-   */
-  public void stop() {
-    assert gameMode.ended(this);
-    for (Entry<String, WikiPlayer> entry : players.entrySet()) {
-      if (!entry.getValue().done()) {
-        entry.getValue().setEndTime(getEndTime());
-      }
-    }
-
-    Main.debugLog(String.format(
-        "Lobby %s finished; \n\twinners: %s \n\tplayTime: %s\n\tendTime: %s",
-        id, getWinners(), getPlayTime(), getEndTime()));
   }
 
   /**
@@ -340,23 +223,11 @@ public class WikiLobby implements Lobby {
     return false;
   }
 
-  /****************************************/
-  /* GETTERS */
-  /****************************************/
-
   /**
-   * @return The default LinkFinder for all lobbies, setup in this lobby.
+   * @return Whether the lobby has ended, based on its internal game mode.
    */
-  public LinkFinder<WikiPage> getDefaultLinkFinder() {
-    return DEFAULT_LINK_FINDER;
-  }
-
-  /**
-   * @return The LinkFinder associated with this lobby's GameMode, used in
-   *         finding links from WikiPages.
-   */
-  public LinkFinder<WikiPage> getLinkFinder() {
-    return gameMode.getLinkFinder();
+  public boolean ended() {
+    return gameMode.ended(this);
   }
 
   /**
@@ -367,18 +238,31 @@ public class WikiLobby implements Lobby {
     return gameMode.getContentFormatter();
   }
 
+  /****************************************/
+  /* STATE HANDLERS / SETTERS */
+  /****************************************/
+
+  /**
+   * @return The default LinkFinder for all lobbies, setup in this lobby.
+   */
+  public LinkFinder<WikiPage> getDefaultLinkFinder() {
+    return DEFAULT_LINK_FINDER;
+  }
+
+  /**
+   * @return When this lobby ended.
+   * @throws IllegalStateException
+   *           If the lobby has not ended or was not started.
+   */
+  public Instant getEndTime() {
+    return gameMode.getEndTime(this);
+  }
+
   /**
    * @return The game of this lobby
    */
   public WikiGame getGame() {
     return game;
-  }
-
-  /**
-   * @return The start wiki page of this lobby.
-   */
-  public WikiPage getStartPage() {
-    return game.getStart();
   }
 
   /**
@@ -389,17 +273,11 @@ public class WikiLobby implements Lobby {
   }
 
   /**
-   * @return The server associated with this lobby.
+   * @return The LinkFinder associated with this lobby's GameMode, used in
+   *         finding links from WikiPages.
    */
-  public Server getServer() {
-    return server;
-  }
-
-  /**
-   * @return The players in this map.
-   */
-  public List<WikiPlayer> getPlayers() {
-    return ImmutableList.copyOf(players.values());
+  public LinkFinder<WikiPage> getLinkFinder() {
+    return gameMode.getLinkFinder();
   }
 
   /**
@@ -412,30 +290,15 @@ public class WikiLobby implements Lobby {
   }
 
   /**
-   * @return The player who won the game.
-   * @throws IllegalStateException
-   *           If the game has not ended.
+   * @return The players in this map.
    */
-  public Set<WikiPlayer> getWinners() {
-    if (!ended()) {
-      throw new IllegalStateException("Lobby has not ended");
-    }
-    return winners;
+  public List<WikiPlayer> getPlayers() {
+    return ImmutableList.copyOf(players.values());
   }
 
-  /**
-   * @return Whether the lobby has started the game.
-   */
-  public boolean started() {
-    return startTime != null;
-  }
-
-  /**
-   * @return Whether the lobby has ended, based on its internal game mode.
-   */
-  public boolean ended() {
-    return gameMode.ended(this);
-  }
+  /****************************************/
+  /* GETTERS */
+  /****************************************/
 
   /**
    * @return The current time the lobby has been started, i.e. the duration
@@ -452,6 +315,20 @@ public class WikiLobby implements Lobby {
   }
 
   /**
+   * @return The server associated with this lobby.
+   */
+  public Server getServer() {
+    return server;
+  }
+
+  /**
+   * @return The start wiki page of this lobby.
+   */
+  public WikiPage getStartPage() {
+    return game.getStart();
+  }
+
+  /**
    * @return When this lobby was started.
    * @throws IllegalStateException
    *           If the lobby has not been started.
@@ -464,75 +341,219 @@ public class WikiLobby implements Lobby {
   }
 
   /**
-   * @return When this lobby ended.
+   * @return The player who won the game.
    * @throws IllegalStateException
-   *           If the lobby has not ended or was not started.
+   *           If the game has not ended.
    */
-  public Instant getEndTime() {
-    return gameMode.getEndTime(this);
-  }
-
-  private class Message {
-
-    private Instant timestamp;
-    private String content;
-    private String senderId;
-
-    public Message(String content, String senderId) {
-      this.content = content;
-      this.senderId = senderId;
-      timestamp = Instant.now();
+  public Set<WikiPlayer> getWinners() {
+    if (!ended()) {
+      throw new IllegalStateException("Lobby has not ended");
     }
-
-    public Instant getTime() {
-      return timestamp;
-    }
-
-    public String getSender() {
-      return senderId;
-    }
-
-    public String getContent() {
-      return content;
-    }
+    return winners;
   }
 
   /**
-   * Custom serializer for use with GSON.
+   * Called on lobby creation; structures this lobby to follow a certain game
+   * mode.
    *
-   * @author mcisler
-   *
+   * @throws InputError
+   *           If a bad page is specified for start/end.
    */
-  public static class Serializer implements JsonSerializer<WikiLobby> {
+  @Override
+  public void init(JsonObject arguments) throws InputError {
+    Main.debugLog("Generating game...");
 
-    @Override
-    public JsonElement serialize(WikiLobby src, Type typeOfSrc,
-        JsonSerializationContext context) {
-      JsonObject lobby = new JsonObject();
+    int mode = arguments.get("gameMode").getAsInt();
+    if (mode == WikiGameMode.Mode.TIME_TRIAL.ordinal()) {
+      gameMode = new TimeTrialGameMode();
 
-      lobby.addProperty("id", src.id);
-      lobby.add("startPage", Main.GSON.toJsonTree(src.getStartPage()));
-      lobby.addProperty("gameMode", src.gameMode.getGameMode().ordinal());
-      lobby.add("goalPage", Main.GSON.toJsonTree(src.getGoalPage()));
-      lobby.addProperty("started", src.started());
-      lobby.addProperty("ended", src.ended());
-      if (src.started()) {
-        lobby.addProperty("startTime", src.getStartTime().toEpochMilli());
-        lobby.addProperty("playTime", src.getPlayTime().toMillis());
+    } else if (mode == WikiGameMode.Mode.LEAST_CLICKS.ordinal()) {
+      gameMode = new LeastClicksGameMode();
+
+    } else {
+      throw new IllegalArgumentException("Invalid game mode specified");
+    }
+
+    // generate page from difficulty
+    double difficulty = arguments.get("difficulty").getAsDouble();
+    WikiPage startPage, endPage;
+
+    // add custom shortcut to set start and end page specifically.
+    if (arguments.has("startPage")) {
+      startPage = WikiPage.fromAny(
+          arguments.get("startPage").getAsString(),
+          Main.WIKI_PAGE_DOC_CACHE);
+
+      if (!startPage.accessible()) {
+        throw new InputError(
+            String.format(
+                "Page %s is not a valid Wikipedia page!",
+                startPage.getName()));
       }
-      if (src.ended()) {
-        lobby.addProperty("endTime", src.getEndTime().toEpochMilli());
-        lobby.add("winners", Main.GSON.toJsonTree(src.getWinners()));
-        // TODO: Shortest / known path
-      }
+    } else {
+      startPage = GameGenerator.pageWithObscurity(difficulty);
 
-      return lobby;
+    }
+
+    if (arguments.has("goalPage")) {
+      endPage = WikiPage.fromAny(
+          arguments.get("goalPage").getAsString(),
+          Main.WIKI_PAGE_DOC_CACHE);
+
+      if (!endPage.accessible()) {
+        throw new InputError(
+            String.format(
+                "Page %s is not a valid Wikipedia page!",
+                endPage.getName()));
+      }
+    } else {
+      endPage = GameGenerator.pageWithObscurity(difficulty);
+    }
+
+    game = new WikiGame(startPage, endPage);
+
+    Main.debugLog(
+        String.format(
+            "Generated %s game: %s -> %s",
+            mode == WikiGameMode.Mode.TIME_TRIAL.ordinal() ? "time trial"
+                : "least clicks",
+            game.getStart(),
+            game.getGoal()));
+  }
+
+  @Override
+  public boolean isClosed() {
+    return players.isEmpty();
+  }
+
+  @Override
+  public void playerDisconnected(String clientId) {
+    if (players.containsKey(clientId)) {
+      players.get(clientId).setConnected(false);
+      Command.sendAllPlayers(this);
     }
   }
 
   @Override
+  public void playerReconnected(String clientId) {
+    if (players.containsKey(clientId)) {
+      players.get(clientId).setConnected(true);
+      Command.sendAllPlayers(this);
+    }
+  }
+
+  public void registerMessage(String content, String clientId) {
+    messages.add(new Message(content, clientId));
+  }
+
+  @Override
+  public void removeClient(String playerId) {
+    this.players.remove(playerId);
+    Command.sendAllPlayers(this);
+
+    if (players.size() == 0) {
+      server.closeLobby(id);
+    }
+  }
+
+  public void sendMessagesToPlayer(String clientId) {
+    Message[] messageArray = messages.toArray(new Message[] {});
+    JsonArray jsonArray = new JsonArray();
+
+    for (Message message : messageArray) {
+      JsonObject jsonMessage = new JsonObject();
+      jsonMessage.addProperty("timestamp", message.getTime().toEpochMilli());
+      jsonMessage.addProperty("sender", players.get(clientId).getName());
+      jsonMessage.addProperty("sender_id", message.getSender());
+      jsonMessage.addProperty("message", message.getContent());
+      jsonArray.add(jsonMessage);
+    }
+
+    JsonObject responseObject = new JsonObject();
+    responseObject.addProperty("command", "return_messages");
+    responseObject.add("payload", jsonArray);
+    responseObject.addProperty("error_message", "");
+
+    server.sendToClient(clientId, new Gson().toJson(responseObject));
+  }
+
+  /**
+   * Sets the player's name, possibly considering other player's names.
+   *
+   * @param clientId
+   *          The player id of the player to set.
+   * @param uname
+   *          The username to set.
+   */
+  public void setPlayerName(String clientId, String uname) {
+    players.get(clientId).setName(uname);
+  }
+
+  /**
+   * Start the game by setting a start time. Players cannot join after this.
+   *
+   * @param force
+   *          Whether to force a start, i.e. ignore non-ready players.
+   * @throws IllegalStateException
+   *           if a player is not ready.
+   */
+  public void start(boolean force) {
+    if (!force) {
+      for (Entry<String, WikiPlayer> entry : players.entrySet()) {
+        if (!entry.getValue().ready()) {
+          throw new IllegalStateException(
+              String.format(
+                  "Player %s is not ready",
+                  entry.getValue().getName()));
+        }
+      }
+    }
+    // this is how we determine whether started
+    startTime = Instant.now().plusSeconds(START_DELAY);
+
+    // notify players
+    for (Entry<String, WikiPlayer> entry : players.entrySet()) {
+      entry.getValue().setStartTime(startTime);
+    }
+  }
+
+  /**
+   * @return Whether the lobby has started the game.
+   */
+  public boolean started() {
+    return startTime != null;
+  }
+
+  /**
+   * Stops the game by setting an end time and configuring all players.
+   */
+  public void stop() {
+    assert gameMode.ended(this);
+    for (Entry<String, WikiPlayer> entry : players.entrySet()) {
+      if (!entry.getValue().done()) {
+        entry.getValue().setEndTime(getEndTime());
+      }
+    }
+
+    Main.debugLog(
+        String.format(
+            "Lobby %s finished; \n\twinners: %s \n\tplayTime: %s\n\tendTime: %s",
+            id,
+            getWinners(),
+            getPlayTime(),
+            getEndTime()));
+  }
+
+  @Override
+  public JsonElement toJson(Gson gson) {
+    return gson.toJsonTree(this);
+  }
+
+  @Override
   public String toString() {
-    return String.format("%s (%s)", id,
+    return String.format(
+        "%s (%s)",
+        id,
         started() ? (ended() ? "ended" : "started") : "not started");
   }
 

@@ -27,6 +27,17 @@ public class Server {
   protected CommandInterpreter interpreter;
   protected final Gson         gson;
 
+  /**
+   * Constructor specifying factory for lobbies, a command interpreter for said
+   * lobbies, and a Gson instance to use for JSONification.
+   *
+   * @param lobbyFactory
+   *          Factory for creating new lobbies
+   * @param interpreter
+   *          Command interpreter for custom commands
+   * @param gson
+   *          Gson instance
+   */
   public Server(
       BiFunction<Server, String, ? extends Lobby> lobbyFactory,
       CommandInterpreter interpreter,
@@ -36,10 +47,12 @@ public class Server {
     this.gson = gson;
   }
 
-  public void sendToClient(String clientId, String message) {
-    server.sendToClient(server.getClient(clientId), message);
-  }
-
+  /**
+   * Closes the given lobby.
+   *
+   * @param lobbyId
+   *          The id of the lobby to close
+   */
   public void closeLobby(String lobbyId) {
     server.closeLobby(lobbyId);
   }
@@ -58,5 +71,17 @@ public class Server {
   @OnWebSocketConnect
   public void onOpen(Session conn) throws Exception {
     GlobalThreadManager.submit(new ClientConnectedHandler(server, conn));
+  }
+
+  /**
+   * Sends the given message to the client with the given id.
+   *
+   * @param clientId
+   *          The id of the client to send the message to
+   * @param message
+   *          The message to send to the client of the given id
+   */
+  public void sendToClient(String clientId, String message) {
+    server.sendToClient(server.getClient(clientId), message);
   }
 }

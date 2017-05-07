@@ -92,11 +92,8 @@ public final class GameGenerator {
     do {
       start = pageWithObscurity(obscurity);
       goal = pageWithObscurity(obscurity);
-      // goDownFromRetrying(start, obscurityFilter(obscurity));
 
-      // simple equality is probably fine because we likely reached them from
-      // the same page
-    } while (start.equals(goal));
+    } while (start.equalsAfterRedirectSafe(goal));
     return new WikiGame(start, goal);
   }
 

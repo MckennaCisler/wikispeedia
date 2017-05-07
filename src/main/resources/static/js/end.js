@@ -10,6 +10,7 @@ let recentPlayers = [];
 let endPage = "";
 
 $(document).ready(() => {
+	resize();
 	if (serverReady) {
 		serverConn.registerAllPlayers(playersCallback);
 	}
@@ -28,6 +29,17 @@ $(document).ready(() => {
 
 	docReady = true;
 });
+
+$(window).resize(resize);
+
+function resize() {
+	"use strict";
+	if ($(window).width() <= 650) {
+		$("#disp-buttons").hide();
+	} else {
+		$("#disp-buttons").show();
+	}
+}
 
 serverConn.whenReadyToRecieve(() => {
 	serverConn.registerError(displayServerConnErrorRedirectHome);

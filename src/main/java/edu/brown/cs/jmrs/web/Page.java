@@ -34,10 +34,11 @@ public class Page implements Node<Page, Link> {
   private String url;
 
   // only one of the following will be used
-  private Document parsed;
+  private Document                       parsed;
   private LoadingCache<String, Document> docCache;
-  private boolean cached; // note this is not universal; it may have been
-                          // evicted separately.
+  private boolean                        cached;  // note this is not universal;
+                                                  // it may have been
+                                                  // evicted separately.
 
   /**
    * Creates a page based on the given URL. Content is downloaded upon request
@@ -320,7 +321,8 @@ public class Page implements Node<Page, Link> {
     if (page == null) {
       return false;
     }
-    return finalUrl().equals(page.finalUrl());
+    throw new UnsupportedOperationException();
+    // return finalUrl().equals(page.finalUrl());
   }
 
   /**
