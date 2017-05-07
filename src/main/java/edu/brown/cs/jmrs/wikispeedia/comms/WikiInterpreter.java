@@ -87,7 +87,8 @@ public class WikiInterpreter implements CommandInterpreter {
       case SEND_MESSAGE:
         lobby.registerMessage(
             command.get("payload").getAsJsonObject().get("message")
-                .getAsString());
+                .getAsString(),
+            clientId);
         for (WikiPlayer client : lobby.getPlayers()) {
           lobby.sendMessagesToPlayer(client.getId());
         }
@@ -233,8 +234,12 @@ public class WikiInterpreter implements CommandInterpreter {
             .url();
       }
 
-      Main.debugLog(String.format("%s going back to %s; history: %s",
-          player.getName(), reqPage, player.getPath()));
+      Main.debugLog(
+          String.format(
+              "%s going back to %s; history: %s",
+              player.getName(),
+              reqPage,
+              player.getPath()));
 
       WikiPage reqPrevPage = WikiPage
           .fromAny(reqPage, Main.WIKI_PAGE_DOC_CACHE);
