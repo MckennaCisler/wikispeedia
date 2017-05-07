@@ -46,8 +46,7 @@
 </head>
 <body>
 	<div class="top">
-		<h1 title="Wikispeedia" style="padding-top: 10px; display: inline-block;"><a class="title-a" href="/">Wikispeedia</a></h1>
-		<button id="chat_button" style="float: right;" class="btn btn-secondary mr-2 mt-2">Chat</button>
+		<h1 title="Wikispeedia" style="margin-top: 10px; margin-left: 10px; display: inline-block;"><a class="title-a" href="/">Wikispeedia</a></h1>
 	</div>
 
 	<div class="container-fluid text-center main_content" id="main">
@@ -98,8 +97,17 @@
 								<option value="3" title="by Smashmouth">All Star (Nick Copper 8-Bit Remix)</option>
 							</select>
 							<br><br>
-							<!--<p>Oponent progress visible <input type="checkbox" name="opprogress"></p>
-							<p><b>Allowed Links: </b>Images <input type="checkbox" name="im_links"> Disambiguation pages <input type="checkbox" name="disam_pages" checked=""></p>-->
+							Pick your own start and end articles? <input type="checkbox" id="se-chooser">
+							<br>
+							<div id="se-boxes">
+								<div style="padding-bottom: 5px; padding-top: 5px;">
+									Start: <input type="text" id="se-start" placeholder="Smash Mouth">
+								</div>
+								<div>
+									End: <input type="text" id="se-end" placeholder="Communist Revolution">
+								</div>
+							</div>
+							<br>
 						</div>
 
 						<button class="btn my_success" id="start_game">Start your game!</button>

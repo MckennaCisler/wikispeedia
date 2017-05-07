@@ -1,5 +1,4 @@
 ### Post demo
- - Demo first
  - Have a preset path
  - Talk less about difficulties
  - More confidence
