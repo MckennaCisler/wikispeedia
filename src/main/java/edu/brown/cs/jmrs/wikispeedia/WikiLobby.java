@@ -216,7 +216,7 @@ public class WikiLobby implements Lobby {
   }
 
   public void registerMessage(String content, String clientId) {
-    messages.add(new Message(content, clientId));
+    messages.add(new Message(content, players.get(clientId).getName()));
   }
 
   public void sendMessagesToPlayer(String clientId) {
