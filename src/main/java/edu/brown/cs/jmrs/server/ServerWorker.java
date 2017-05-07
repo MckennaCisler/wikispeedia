@@ -328,8 +328,8 @@ class ServerWorker {
         client = new Client(clientId);
       }
     } else if (!client.isConnected()) {
-      clients.put(conn, client);
       client.toggleConnected();
+      clients.put(conn, client);
     } else {
       throw new InputError("Don't steal identities");
     }
