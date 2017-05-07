@@ -55,19 +55,21 @@ public class LeastClicksGameMode implements WikiGameMode {
           // after others are done)
           WikiPlayer first = done.poll();
           Set<WikiPlayer> winners = new HashSet<>();
-          winners.add(first);
 
-          while (first.getEndTime().equals(done.peek())) {
-            winners.add(first);
-            first = done.poll();
+          WikiPlayer next = first;
+          while (next != null
+              && next.getPathLength() == first.getPathLength()) {
+            winners.add(next);
+            // reiterate
+            next = done.poll();
           }
-
           return winners;
         }
       }
       return new HashSet<>(done);
     }
     return ImmutableSet.of();
+
   }
 
   @Override
