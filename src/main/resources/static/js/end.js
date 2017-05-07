@@ -4,10 +4,19 @@ let setWinner = false;
 let docReady = false;
 let serverReady = false;
 
+let leaderboard = true;
+let recentPlayers = [];
+
 $(document).ready(() => {
 	if (serverReady) {
 		serverConn.registerAllPlayers(playersCallback);
 	}
+
+	$("#disp-buttons").on("change", (event) => {
+		leaderboard = event.target.id == "lead";
+		console.log(recentPlayers);
+		playersCallback(recentPlayers);
+	});
 
 	docReady = true;
 });
@@ -28,7 +37,12 @@ serverConn.whenReadyToSend(() => {
 
 // Updates the player to time map and redraws the results
 function playersCallback(players) {
-	drawResults(players);
+	recentPlayers = players;
+	if (leaderboard) {
+		drawResults(players);
+	} else {
+		drawHistory(players);
+	}
 }
 
 // Draws the results
@@ -84,8 +98,14 @@ function drawResults(players) {
 
 	$("#winner").html(winnerStr);
 
+	$("#stats").html("");
 	// TODO: Only if it's time trial
 	if (winners.length > 0) {
-		$("#leaderboard").append(`<br><i>Winning time: ${millisecondsToStr(winners[0].playTime)}</i>`);
+		$("#stats").html(`<br><i>Winning time: ${millisecondsToStr(winners[0].playTime)}</i>`);
 	}
+}
+
+function drawHistory(players) {
+	$("#leaderboard").html("");
+	$("#stats").html("");
 }
