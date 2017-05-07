@@ -3,6 +3,7 @@
 // globals for use in game logic
 let isMaking;
 let lobbyName;
+let dotPid;
 
 $(document).ready(function () {
 	"use strict";
@@ -12,6 +13,7 @@ $(document).ready(function () {
 	setCookie('songChoice', '');
 	//document.cookie = 'timePlayed=; expires=Thu, 01 Jan 1970 00:00:01 GMT;';
 	$("#advanced_ops").hide();
+	$("#se-boxes").hide();
 	$("#difficulty_slider").slider();
 	$("#advanced").on('click', () => {
 		if ($("#advanced_ops").is(":hidden")) {
@@ -39,6 +41,7 @@ $(document).ready(function () {
 		serverConn.leaveLobby(() => {
 			$("#start_game").prop('disabled', false);
 			$("#start_game").html(`Start your game!`);
+			clearInterval(dotPid);
 			$("#uname_picker").hide();
 			$("#main").show();
 			$("#rules").show();
@@ -49,6 +52,14 @@ $(document).ready(function () {
 	$("#music-select").change(() => {
 		let mval = document.getElementById("music-select").options.selectedIndex;
 		setCookie('songChoice', mval);
+	});
+	
+	$("#se-chooser").change(() => {
+		if (document.getElementById("se-chooser").checked) {
+			$("#se-boxes").show();
+		} else {
+			$("#se-boxes").hide();
+		}
 	});
 
 	$("#start_game").on('click', () => {
@@ -69,13 +80,40 @@ $(document).ready(function () {
 
 			//make loader show up here
 			$("#start_game").prop('disabled', true);
-			$("#start_game").html(`<div class="loader2"></div>`);
-
-			serverConn.startLobby(lobbyName.trim(),
-				{
+			$("#start_game").html("Generating...");
+			let numd = 3;
+			dotPid = setInterval(() => {
+				if (numd === 3) {
+					$("#start_game").html("Generating");
+					numd = 0;
+				} else if (numd === 2 || numd === 1 || numd === 0) {
+					numd++;
+					let dotStr = "";
+					for (let i = 0; i < numd; i++) {
+						dotStr += ".";
+					}
+					$("#start_game").html(`Generating${dotStr}`);
+				}
+			}, 1000);
+			
+			let params;
+			if (document.getElementById("se-chooser").checked && ($("#se-start").val() !== "" || $("#se-end").val() !== "")) {
+				params = 
+					{
+					"gameMode": mode,
+					"difficulty": $("#difficulty_slider").val() / 100,
+					"startPage": $("#se-start").val(),
+					"goalPage": $("#se-end").val()
+				};
+			} else {
+				params = 
+					{
 					"gameMode": mode,
 					"difficulty": $("#difficulty_slider").val() / 100
-				},
+				}
+			}
+
+			serverConn.startLobby(lobbyName.trim(), params,
 				() => {
 					$("#main").hide();
 					$("#rules").hide();
@@ -85,6 +123,7 @@ $(document).ready(function () {
 				(e) => {
 					$("#start_game").prop('disabled', false);
 					$("#start_game").html(`Start your game!`);
+					clearInterval(dotPid);
 					displayServerConnError(e);
 				});
 			console.log(lobbyName);

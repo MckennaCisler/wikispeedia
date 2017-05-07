@@ -1,3 +1,11 @@
+### Post demo
+ - Have a preset path
+ - Talk less about difficulties
+ - More confidence
+ - leader board choice on end
+ - set your own pages
+ - Practice
+
 #### General todo
 ##### Documentation
 - Stuff in docs folder
