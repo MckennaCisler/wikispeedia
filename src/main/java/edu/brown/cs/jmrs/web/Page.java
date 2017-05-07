@@ -313,7 +313,7 @@ public class Page implements Node<Page, Link> {
    * @throws IOException
    *           If either page could not be accessed.
    */
-  public boolean equalAfterRedirect(Page page) throws IOException {
+  public boolean equalsAfterRedirect(Page page) throws IOException {
     if (this == page) {
       return true;
     }
@@ -329,9 +329,9 @@ public class Page implements Node<Page, Link> {
    * @return Whether this page equals page, trying to check after redirect but
    *         reverting to old otherwise.
    */
-  public boolean equalAfterRedirectSafe(Page page) {
+  public boolean equalsAfterRedirectSafe(Page page) {
     try {
-      return equalAfterRedirect(page);
+      return equalsAfterRedirect(page);
     } catch (IOException e) {
       return equals(page);
     }

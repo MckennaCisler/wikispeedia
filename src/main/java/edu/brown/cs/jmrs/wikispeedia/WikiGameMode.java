@@ -62,4 +62,8 @@ public interface WikiGameMode {
    */
   Instant getEndTime(WikiLobby wikiLobby);
 
+  /**
+   * @return The game mode type of this mode.
+   */
+  Mode getGameMode();
 }

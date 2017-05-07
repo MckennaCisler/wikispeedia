@@ -117,16 +117,11 @@ public class WikiLobby implements Lobby {
 
     // generate page from difficulty
     double difficulty = arguments.get("difficulty").getAsDouble();
-    game = GameGenerator.withObscurity(difficulty);
-
-    Main.debugLog(String.format("Generated %s game: %s -> %s",
-        mode == WikiGameMode.Mode.TIME_TRIAL.ordinal() ? "time trial"
-            : "least clicks",
-        game.getStart(), game.getGoal()));
+    WikiPage startPage, endPage;
 
     // add custom shortcut to set start and end page specifically.
     if (arguments.has("startPage")) {
-      WikiPage startPage =
+      startPage =
           WikiPage.fromAny(arguments.get("startPage").getAsString(),
               Main.WIKI_PAGE_DOC_CACHE);
 
@@ -134,21 +129,29 @@ public class WikiLobby implements Lobby {
         throw new InputError(String.format(
             "Page %s is not a valid Wikipedia page!", startPage.getName()));
       }
-
-      game = new WikiGame(startPage, game.getGoal());
+    } else {
+      startPage = GameGenerator.pageWithObscurity(difficulty);
     }
+
     if (arguments.has("goalPage")) {
-      WikiPage endPage =
-          WikiPage.fromAny(arguments.get("endPage").getAsString(),
+      endPage =
+          WikiPage.fromAny(arguments.get("goalPage").getAsString(),
               Main.WIKI_PAGE_DOC_CACHE);
 
       if (!endPage.accessible()) {
         throw new InputError(String.format(
             "Page %s is not a valid Wikipedia page!", endPage.getName()));
       }
-
-      game = new WikiGame(game.getStart(), endPage);
+    } else {
+      endPage = GameGenerator.pageWithObscurity(difficulty);
     }
+
+    game = new WikiGame(startPage, endPage);
+
+    Main.debugLog(String.format("Generated %s game: %s -> %s",
+        mode == WikiGameMode.Mode.TIME_TRIAL.ordinal() ? "time trial"
+            : "least clicks",
+        game.getStart(), game.getGoal()));
   }
 
   @Override
@@ -453,6 +456,7 @@ public class WikiLobby implements Lobby {
 
       lobby.addProperty("id", src.id);
       lobby.add("startPage", Main.GSON.toJsonTree(src.getStartPage()));
+      lobby.addProperty("gameMode", src.gameMode.getGameMode().ordinal());
       lobby.add("goalPage", Main.GSON.toJsonTree(src.getGoalPage()));
       lobby.addProperty("started", src.started());
       lobby.addProperty("ended", src.ended());

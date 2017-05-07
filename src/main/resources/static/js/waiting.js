@@ -94,7 +94,9 @@ $(document).ready(() => {
 	$title2.html("Loading...");
 
 	$("#force").on('click', () => {
-		startGame();
+		serverConn.forceBeginGame(() => {
+			startGame();
+		}, displayServerConnError);
 	});
 
 	$("#leave").on('click', () => {

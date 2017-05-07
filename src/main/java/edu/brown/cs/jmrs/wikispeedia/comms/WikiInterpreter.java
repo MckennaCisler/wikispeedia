@@ -49,6 +49,8 @@ public class WikiInterpreter implements CommandInterpreter {
           lobby.start(true);
           Command.sendBeginGame(lobby);
         } catch (IllegalStateException e) {
+          Main.debugLog(String
+              .format("Lobby %s failed to start in force begin game", lobby));
           Command.sendBeginGame(lobby, e.getMessage());
         }
         break;

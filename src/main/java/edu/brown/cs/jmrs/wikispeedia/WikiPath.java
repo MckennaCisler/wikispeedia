@@ -66,7 +66,7 @@ public class WikiPath extends ArrayList<Visit> {
   public boolean contains(WikiPage page) {
     for (Visit visit : this) {
       // try to do deep equality, but if it fails revert to shallow
-      if (visit.getPage().equalAfterRedirectSafe(page)) {
+      if (visit.getPage().equalsAfterRedirectSafe(page)) {
         return true;
       }
     }

@@ -227,7 +227,7 @@ public class WikiPlayer {
           String.format("Player %s has already reached the goal", name));
     }
 
-    if (getCurPage().equalAfterRedirect(goalPage)) {
+    if (getCurPage().equalsAfterRedirect(goalPage)) {
       this.endTime = endTimeIfSo;
       return true;
     }
@@ -274,7 +274,7 @@ public class WikiPlayer {
 
     // we assume that the curPage page has been cached already (speed issue)
     if (lobby.getLinkFinder().linkedPages(getCurPage()).contains(page)) {
-      if (!page.equals(getCurPage())) {
+      if (!page.equalsAfterRedirect(getCurPage())) {
         path.add(page);
       }
       checkIfDone(Instant.now());
@@ -301,7 +301,7 @@ public class WikiPlayer {
     WikiPage prevPage;
     do {
       prevPage = path.remove(path.size() - 1).getPage();
-    } while (path.size() > 0 && !prevPage.equalAfterRedirectSafe(page));
+    } while (path.size() > 0 && !prevPage.equalsAfterRedirectSafe(page));
 
     // it should be in there
     assert path.size() > 0;

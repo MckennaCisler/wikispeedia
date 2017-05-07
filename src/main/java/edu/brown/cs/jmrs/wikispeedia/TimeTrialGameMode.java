@@ -19,7 +19,10 @@ import edu.brown.cs.jmrs.web.wikipedia.WikiPage;
  *
  */
 public class TimeTrialGameMode implements WikiGameMode {
-  public static final WikiGameMode.Mode MODE = WikiGameMode.Mode.TIME_TRIAL;
+  @Override
+  public Mode getGameMode() {
+    return WikiGameMode.Mode.TIME_TRIAL;
+  }
 
   @Override
   public LinkFinder<WikiPage> getLinkFinder() {
@@ -84,4 +87,5 @@ public class TimeTrialGameMode implements WikiGameMode {
     }
     return new ArrayList<>(wikiLobby.getWinners()).get(0).getEndTime();
   }
+
 }
