@@ -127,6 +127,14 @@ class ServerWorker {
     if (client != null) {
       // if we've seen this client, make sure we sync on them
       synchronized (client) {
+        if (client.locked()) {
+          try {
+            client.wait();
+          } catch (InterruptedException e) {
+            e.printStackTrace();
+          }
+        }
+
         setupConnectedClient(conn, clientId);
       }
     } else {
@@ -201,6 +209,8 @@ class ServerWorker {
     Client client = clients.get(conn);
     if (client != null) {
       synchronized (client) {
+        client.lock(true);
+
         if (client.getLobby() == null) {
           notInLobbies.remove(client.getId());
         }
@@ -219,6 +229,8 @@ class ServerWorker {
         } else {
           clients.remove(conn);
         }
+        client.lock(false);
+        client.notifyAll();
       }
     } else {
       // remove if expired
@@ -347,7 +359,7 @@ class ServerWorker {
    * @throws InputError
    *           If a client claims to have an id that is already in use
    */
-  public String setClientId(Session conn, String clientId) throws InputError {
+  private String setClientId(Session conn, String clientId) throws InputError {
     Client client = clients.getBack(new Client(clientId));
 
     if (client == null) {

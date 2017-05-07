@@ -15,6 +15,7 @@ class Client implements Comparable<Client> {
   private String  id;
   private Lobby   lobby;
   private boolean connected;
+  private boolean locked;
   private Date    cookieExpiration;
 
   /**
@@ -62,6 +63,14 @@ class Client implements Comparable<Client> {
    */
   public String getId() {
     return id;
+  }
+
+  public synchronized boolean locked() {
+    return locked;
+  }
+
+  public synchronized void lock(boolean discVal) {
+    locked = discVal;
   }
 
   /**

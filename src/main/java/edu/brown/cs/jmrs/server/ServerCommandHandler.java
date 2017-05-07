@@ -101,93 +101,96 @@ class ServerCommandHandler implements Runnable {
 
         if (server.getClient(conn).getId().length() > 0) {
           Client player = server.getClient(conn);
-          // do server commands here
-          try {
-            switch (Commands.safeValueOf(commandString.toUpperCase())) {
-              case START_LOBBY:
-                jsonObject.addProperty("command", "start_lobby_response");
-                if (!commandPayload.has("lobby_id")) {
-                  throw new InputError("No lobby ID provided");
-                }
-                String lobbyId = commandPayload.get("lobby_id").getAsString();
-                Lobby lobby = server.createLobby(lobbyId);
-
-                // note lobby will not be null
-                synchronized (lobby) {
-                  if (commandPayload.has("arguments")) {
-                    lobby.init(
-                        commandPayload.get("arguments").getAsJsonObject());
+          synchronized (player) {
+            // do server commands here
+            try {
+              switch (Commands.safeValueOf(commandString.toUpperCase())) {
+                case START_LOBBY:
+                  jsonObject.addProperty("command", "start_lobby_response");
+                  if (!commandPayload.has("lobby_id")) {
+                    throw new InputError("No lobby ID provided");
                   }
-                  lobby.addClient(player.getId());
-                  player.setLobby(lobby);
-                  server.lobbylessMap().remove(player.getId());
-                  server.updateLobbylessClients();
-                }
-                jsonObject.addProperty("error_message", "");
-                toClient = gson.toJson(jsonObject);
-                server.sendToClient(conn, toClient);
-                return;
+                  String lobbyId = commandPayload.get("lobby_id").getAsString();
+                  Lobby lobby = server.createLobby(lobbyId);
 
-              case LEAVE_LOBBY:
-                jsonObject.addProperty("command", "leave_lobby_response");
-                if (player.getLobby() == null) {
-                  throw new InputError(
-                      "This client is not registered with any lobby");
-                }
-                synchronized (player.getLobby()) {
-                  player.getLobby().removeClient(player.getId());
-                  player.setLobby(null);
-                  server.lobbylessMap().put(player.getId(), player);
-                  server.updateLobbylessClients();
-                }
-                jsonObject.addProperty("error_message", "");
-                toClient = gson.toJson(jsonObject);
-                server.sendToClient(conn, toClient);
-                return;
-
-              case JOIN_LOBBY:
-                jsonObject.addProperty("command", "join_lobby_response");
-                if (!commandPayload.has("lobby_id")) {
-                  throw new InputError("No lobby ID provided");
-                }
-                String lobbyId2 = commandPayload.get("lobby_id").getAsString();
-                Lobby lobby2 = server.getLobby(lobbyId2);
-                if (lobby2 == null) {
-                  throw new InputError("No lobby with specified ID exists");
-                }
-                synchronized (lobby2) {
-                  Lobby playerLobby = player.getLobby();
-                  if (playerLobby != null) {
-                    playerLobby.removeClient(player.getId());
+                  // note lobby will not be null
+                  synchronized (lobby) {
+                    if (commandPayload.has("arguments")) {
+                      lobby.init(
+                          commandPayload.get("arguments").getAsJsonObject());
+                    }
+                    lobby.addClient(player.getId());
+                    player.setLobby(lobby);
+                    server.lobbylessMap().remove(player.getId());
+                    server.updateLobbylessClients();
                   }
-                  lobby2.addClient(player.getId());
-                  player.setLobby(lobby2);
-                  server.lobbylessMap().remove(player.getId());
-                  server.updateLobbylessClients();
-                }
-                jsonObject.addProperty("error_message", "");
-                toClient = gson.toJson(jsonObject);
-                server.sendToClient(conn, toClient);
-                return;
-              default: // equivalent to NULL, i.e. that the command type was
-                       // not in the Commands enum
-
-                if (player.getLobby() != null) {
-                  // if not a server command pass it to the lobby
-                  interpreter.interpret(player.getLobby(), player.getId(),
-                      commandMap);
-                } else {
-                  jsonObject.addProperty("error_message",
-                      "Player must join a lobby first");
+                  jsonObject.addProperty("error_message", "");
                   toClient = gson.toJson(jsonObject);
                   server.sendToClient(conn, toClient);
-                }
-                return;
+                  return;
+
+                case LEAVE_LOBBY:
+                  jsonObject.addProperty("command", "leave_lobby_response");
+                  if (player.getLobby() == null) {
+                    throw new InputError(
+                        "This client is not registered with any lobby");
+                  }
+                  synchronized (player.getLobby()) {
+                    player.getLobby().removeClient(player.getId());
+                    player.setLobby(null);
+                    server.lobbylessMap().put(player.getId(), player);
+                    server.updateLobbylessClients();
+                  }
+                  jsonObject.addProperty("error_message", "");
+                  toClient = gson.toJson(jsonObject);
+                  server.sendToClient(conn, toClient);
+                  return;
+
+                case JOIN_LOBBY:
+                  jsonObject.addProperty("command", "join_lobby_response");
+                  if (!commandPayload.has("lobby_id")) {
+                    throw new InputError("No lobby ID provided");
+                  }
+                  String lobbyId2 =
+                      commandPayload.get("lobby_id").getAsString();
+                  Lobby lobby2 = server.getLobby(lobbyId2);
+                  if (lobby2 == null) {
+                    throw new InputError("No lobby with specified ID exists");
+                  }
+                  synchronized (lobby2) {
+                    Lobby playerLobby = player.getLobby();
+                    if (playerLobby != null) {
+                      playerLobby.removeClient(player.getId());
+                    }
+                    lobby2.addClient(player.getId());
+                    player.setLobby(lobby2);
+                    server.lobbylessMap().remove(player.getId());
+                    server.updateLobbylessClients();
+                  }
+                  jsonObject.addProperty("error_message", "");
+                  toClient = gson.toJson(jsonObject);
+                  server.sendToClient(conn, toClient);
+                  return;
+                default: // equivalent to NULL, i.e. that the command type was
+                         // not in the Commands enum
+
+                  if (player.getLobby() != null) {
+                    // if not a server command pass it to the lobby
+                    interpreter.interpret(player.getLobby(), player.getId(),
+                        commandMap);
+                  } else {
+                    jsonObject.addProperty("error_message",
+                        "Player must join a lobby first");
+                    toClient = gson.toJson(jsonObject);
+                    server.sendToClient(conn, toClient);
+                  }
+                  return;
+              }
+            } catch (InputError e) {
+              jsonObject.addProperty("error_message", e.getMessage());
+              toClient = gson.toJson(jsonObject);
+              server.sendToClient(conn, toClient);
             }
-          } catch (InputError e) {
-            jsonObject.addProperty("error_message", e.getMessage());
-            toClient = gson.toJson(jsonObject);
-            server.sendToClient(conn, toClient);
           }
         } else {
           jsonObject.addProperty("error_message",
