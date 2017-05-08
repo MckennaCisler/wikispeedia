@@ -19,9 +19,9 @@ import edu.brown.cs.jmrs.server.customizable.Lobby;
  */
 public class LobbyManager {
 
-  private final ReentrantReadWriteLock rwl = new ReentrantReadWriteLock();
-  private final Lock                   r   = rwl.readLock();
-  private final Lock                   w   = rwl.writeLock();
+  private final ReentrantReadWriteLock                rwl = new ReentrantReadWriteLock();
+  private final Lock                                  r   = rwl.readLock();
+  private final Lock                                  w   = rwl.writeLock();
 
   private ConcurrentHashMap<String, Lobby>            lobbies;
   private BiFunction<Server, String, ? extends Lobby> lobbyFactory;

@@ -185,9 +185,9 @@ public class WikiLobby implements Lobby {
       return;
     }
     // first is leader
-    boolean isLeader = this.players.size() == 0;
+    boolean isLeader = players.size() == 0;
 
-    this.players.put(playerId, new WikiPlayer(playerId, this, isLeader));
+    players.put(playerId, new WikiPlayer(playerId, this, isLeader));
 
     Command.sendAllPlayers(this);
   }
@@ -437,6 +437,10 @@ public class WikiLobby implements Lobby {
 
   @Override
   public boolean isClosed() {
+    if (players.size() == 0) {
+      boolean isEmpty = players.isEmpty();
+      String fuck = "me";
+    }
     return players.isEmpty();
   }
 
