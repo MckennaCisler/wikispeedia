@@ -22,6 +22,7 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonSerializationContext;
 import com.google.gson.JsonSerializer;
 
+import edu.brown.cs.jmrs.collect.Functional;
 import edu.brown.cs.jmrs.io.db.DbConn;
 import edu.brown.cs.jmrs.server.InputError;
 import edu.brown.cs.jmrs.server.Server;
@@ -303,8 +304,9 @@ public class WikiLobby implements Lobby {
   /**
    * @return The players in this map.
    */
-  public List<WikiPlayer> getPlayers() {
-    return ImmutableList.copyOf(players.values());
+  public List<WikiPlayer> getConnectedPlayers() {
+    return Functional.filter(new ArrayList<>(players.values()),
+        WikiPlayer::connected);
   }
 
   /****************************************/

@@ -1,11 +1,8 @@
 package edu.brown.cs.jmrs.wikispeedia.comms;
 
-import java.util.List;
-
 import com.google.common.collect.ImmutableMap;
 import com.google.gson.JsonObject;
 
-import edu.brown.cs.jmrs.collect.Functional;
 import edu.brown.cs.jmrs.server.Server;
 import edu.brown.cs.jmrs.ui.Main;
 import edu.brown.cs.jmrs.wikispeedia.WikiLobby;
@@ -173,10 +170,7 @@ public enum Command {
    * @param errorMessage
    *          An error message to send as well.
    */
-  public void send(
-      Server server,
-      String clientId,
-      Object data,
+  public void send(Server server, String clientId, Object data,
       String errorMessage) {
     server.sendToClient(clientId, build(data, errorMessage));
   }
@@ -191,9 +185,7 @@ public enum Command {
    * @param errorMessage
    *          The error message.
    */
-  public static void sendError(
-      Server server,
-      String clientId,
+  public static void sendError(Server server, String clientId,
       String errorMessage) {
     Main.debugLog("Command.ERROR sent: " + errorMessage);
     ERROR.send(server, clientId, ImmutableMap.of(), errorMessage);
@@ -223,10 +215,8 @@ public enum Command {
    *          An error message to send as well.
    */
   public void sendToAll(WikiLobby lobby, Object data, String errorMessage) {
-    for (WikiPlayer player : lobby.getPlayers()) {
-      if (player.connected()) {
-        send(lobby.getServer(), player.getId(), data, errorMessage);
-      }
+    for (WikiPlayer player : lobby.getConnectedPlayers()) {
+      send(lobby.getServer(), player.getId(), data, errorMessage);
     }
   }
 
@@ -238,14 +228,9 @@ public enum Command {
    *          The lobby to get players from.
    */
   public static void sendAllPlayers(WikiLobby lobby) {
-    Main.debugLog(
-        String.format(
-            "All players in lobby '%s': %s",
-            lobby,
-            lobby.getPlayers()));
-    List<WikiPlayer> connectedPlayers = Functional
-        .filter(lobby.getPlayers(), WikiPlayer::connected);
-    Command.ALL_PLAYERS.sendToAll(lobby, connectedPlayers);
+    Main.debugLog(String.format("All players in lobby '%s': %s", lobby,
+        lobby.getConnectedPlayers()));
+    Command.ALL_PLAYERS.sendToAll(lobby, lobby.getConnectedPlayers());
   }
 
   /**

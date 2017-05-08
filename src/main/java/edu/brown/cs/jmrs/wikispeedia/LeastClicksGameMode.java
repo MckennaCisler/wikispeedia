@@ -43,7 +43,7 @@ public class LeastClicksGameMode implements WikiGameMode {
       Queue<WikiPlayer> done =
           new PriorityQueue<>((p1, p2) -> Integer.compare(p1.getPathLength(),
               p2.getPathLength()));
-      for (WikiPlayer player : lobby.getPlayers()) {
+      for (WikiPlayer player : lobby.getConnectedPlayers()) {
         if (player.done()) {
           done.add(player);
         }
@@ -75,8 +75,8 @@ public class LeastClicksGameMode implements WikiGameMode {
   @Override
   public boolean ended(WikiLobby wikiLobby) {
     // all players must be done
-    for (WikiPlayer player : wikiLobby.getPlayers()) {
-      if (player.connected() && !player.done()) {
+    for (WikiPlayer player : wikiLobby.getConnectedPlayers()) {
+      if (!player.done()) {
         return false;
       }
     }
@@ -90,10 +90,12 @@ public class LeastClicksGameMode implements WikiGameMode {
     }
 
     // if there are no players (a completely expired lobby), just send null
-    if (wikiLobby.getPlayers().size() > 0) {
+    if (wikiLobby.getConnectedPlayers().size() > 0) {
       // get last player's end time
-      Instant laggardTime = wikiLobby.getPlayers().get(0).getEndTime();
-      for (WikiPlayer player : wikiLobby.getPlayers()) {
+      assert wikiLobby.getConnectedPlayers().get(0).done();
+      Instant laggardTime = wikiLobby.getConnectedPlayers().get(0).getEndTime();
+      for (WikiPlayer player : wikiLobby.getConnectedPlayers()) {
+        assert player.done();
         // note that lobby being ended implies all players are done.
         if (player.getEndTime().isAfter(laggardTime)) {
           laggardTime = player.getEndTime();
