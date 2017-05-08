@@ -1,7 +1,6 @@
 package edu.brown.cs.jmrs.server;
 
 import java.net.HttpCookie;
-import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Queue;
@@ -78,29 +77,6 @@ class ServerWorker {
 
     jsonObject.add("payload", lobbyArray);
     return jsonObject;
-  }
-
-  /**
-   * Checks disconnected but stored players, and if they have expired cookies
-   * references to them are removed.
-   *
-   * THIS MAY BREAK STUFF
-   */
-  private void checkDisconnectedPlayers() {
-    if (!disconnectedClients.isEmpty()) {
-      Date now = new Date();
-      Client p = disconnectedClients.poll();
-      synchronized (p) {
-        while (p.getCookieExpiration().before(now)) {
-          clients.remove(clients.getReversed(p));
-          if (disconnectedClients.isEmpty()) {
-            return;
-          }
-          p = disconnectedClients.poll();
-        }
-        disconnectedClients.add(p);
-      }
-    }
   }
 
   /**

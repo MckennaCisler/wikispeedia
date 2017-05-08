@@ -1,7 +1,5 @@
 package edu.brown.cs.jmrs.server;
 
-import java.util.Date;
-
 import edu.brown.cs.jmrs.server.customizable.Lobby;
 
 /**
@@ -16,7 +14,6 @@ class Client implements Comparable<Client> {
   private Lobby   lobby;
   private boolean connected;
   private boolean locked;
-  private Date    cookieExpiration;
 
   /**
    * Constructor with id parameter, defaults connected to true, lobby to null,
@@ -32,7 +29,7 @@ class Client implements Comparable<Client> {
 
   @Override
   public int compareTo(Client p) {
-    return cookieExpiration.compareTo(p.getCookieExpiration());
+    return id.compareTo(p.id);
   }
 
   @Override
@@ -45,15 +42,6 @@ class Client implements Comparable<Client> {
       }
     }
     return false;
-  }
-
-  /**
-   * returns the expiration date of the client's cookie.
-   *
-   * @return the expiration date of the client's cookie
-   */
-  public synchronized Date getCookieExpiration() {
-    return cookieExpiration;
   }
 
   /**
@@ -94,17 +82,6 @@ class Client implements Comparable<Client> {
    */
   public synchronized boolean isConnected() {
     return connected;
-  }
-
-  /**
-   * Sets the expiration date of the cookie, so the client's information will be
-   * erased from the server if they disconnect.
-   *
-   * @param date
-   *          The expiration date of the client's cookie
-   */
-  public synchronized void setCookieExpiration(Date date) {
-    this.cookieExpiration = date;
   }
 
   /**
