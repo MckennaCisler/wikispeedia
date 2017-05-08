@@ -6,3 +6,6 @@ Cat -> Furry -> Hairless_dog -> Dog
 
 ### Kin-Ball
 Known to be impossible?
+
+### US - Patriots
+US -> Boston -> New England -> Patriots
