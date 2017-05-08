@@ -18,9 +18,9 @@ fi
 # First, we put the CLASSPATH in .classpath if the pom.xml is newer
 # than out existing .classpath file. (We avoid this command if
 # .classpath is fresh, since it's rather slow.)
-#if [ ! .mvn-classpath -nt pom.xml ]; then
-#  mvn dependency:build-classpath -Dmdep.outputFile=.mvn-classpath -q
-#fi
+if [ ! .mvn-classpath -nt pom.xml ]; then
+  mvn dependency:build-classpath -Dmdep.outputFile=.mvn-classpath -q
+fi
 
 # Now, we set $CP to the contents of the .classpath file.
 CP=$(cat .mvn-classpath)
