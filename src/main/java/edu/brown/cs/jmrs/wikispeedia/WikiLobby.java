@@ -2,6 +2,7 @@ package edu.brown.cs.jmrs.wikispeedia;
 
 import java.io.IOException;
 import java.lang.reflect.Type;
+import java.sql.SQLException;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.ArrayList;
@@ -21,6 +22,7 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonSerializationContext;
 import com.google.gson.JsonSerializer;
 
+import edu.brown.cs.jmrs.collect.Functional;
 import edu.brown.cs.jmrs.io.db.DbConn;
 import edu.brown.cs.jmrs.server.InputError;
 import edu.brown.cs.jmrs.server.Server;
@@ -33,7 +35,6 @@ import edu.brown.cs.jmrs.web.wikipedia.WikiAnnotationRemover;
 import edu.brown.cs.jmrs.web.wikipedia.WikiBodyFormatter;
 import edu.brown.cs.jmrs.web.wikipedia.WikiFooterRemover;
 import edu.brown.cs.jmrs.web.wikipedia.WikiPage;
-import edu.brown.cs.jmrs.web.wikipedia.WikiPageLinkFinder;
 import edu.brown.cs.jmrs.web.wikipedia.WikiPageLinkFinder.Filter;
 import edu.brown.cs.jmrs.wikispeedia.comms.Command;
 import edu.brown.cs.jmrs.wikispeedia.comms.WikiInterpreter;
@@ -118,16 +119,18 @@ public class WikiLobby implements Lobby {
 
   static final LinkFinder<WikiPage> DEFAULT_LINK_FINDER;
 
+  static final double CACHING_THREAD_CPU_USAGE = 0.75;
   static {
-    // try {
-    DEFAULT_LINK_FINDER =
-        new WikiPageLinkFinder(Filter.DISAMBIGUATION,
-            Filter.NON_ENGLISH_WIKIPEDIA);
-    // new CachingWikiLinkFinder(Main.getWikiDbConn(), Filter.DISAMBIGUATION,
-    // Filter.NON_ENGLISH_WIKIPEDIA);
-    // } catch (SQLException e) {
-    // throw new AssertionError("Could not initialize wikipedia database", e);
-    // }
+    try {
+      DEFAULT_LINK_FINDER =
+          // new WikiPageLinkFinder(Filter.DISAMBIGUATION,
+          // Filter.NON_ENGLISH_WIKIPEDIA);
+          new CachingWikiLinkFinder(Main.getWikiDbConn(),
+              CACHING_THREAD_CPU_USAGE, Filter.DISAMBIGUATION,
+              Filter.NON_ENGLISH_WIKIPEDIA);
+    } catch (SQLException e) {
+      throw new AssertionError("Could not initialize wikipedia database", e);
+    }
   }
   /**
    * Time to delay lobby creation by.
@@ -301,8 +304,9 @@ public class WikiLobby implements Lobby {
   /**
    * @return The players in this map.
    */
-  public List<WikiPlayer> getPlayers() {
-    return ImmutableList.copyOf(players.values());
+  public List<WikiPlayer> getConnectedPlayers() {
+    return Functional.filter(new ArrayList<>(players.values()),
+        WikiPlayer::connected);
   }
 
   /****************************************/

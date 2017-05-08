@@ -86,7 +86,7 @@ public class WikiInterpreter implements CommandInterpreter {
       case SEND_MESSAGE:
         lobby.registerMessage(command.get("payload").getAsJsonObject()
             .get("message").getAsString(), clientId);
-        for (WikiPlayer client : lobby.getPlayers()) {
+        for (WikiPlayer client : lobby.getConnectedPlayers()) {
           lobby.sendMessagesToPlayer(client.getId());
         }
         break;
