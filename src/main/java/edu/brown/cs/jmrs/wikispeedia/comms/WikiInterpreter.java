@@ -208,13 +208,14 @@ public class WikiInterpreter implements CommandInterpreter {
           WikiPage.fromAny(reqPage, Main.WIKI_PAGE_DOC_CACHE);
 
       // try to go back; it'll throw a NoSuchElementException on failure
+      // and will set player.getCurPage() to the right value
       player.goBackPage(reqPrevPage);
 
       // let people know
       Command.sendAllPlayers(lobby);
 
       Command.RETURN_GOTO_PAGE.send(lobby.getServer(), clientId,
-          getPlayerPageInfo(reqPrevPage, lobby));
+          getPlayerPageInfo(player.getCurPage(), lobby));
 
     } catch (NoSuchElementException e) {
       Command.RETURN_GOTO_PAGE.send(lobby.getServer(), clientId, curPageInfo,

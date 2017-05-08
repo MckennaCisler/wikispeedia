@@ -24,28 +24,29 @@ import edu.brown.cs.jmrs.web.wikipedia.WikiPage;
  *
  */
 public class WikiPlayer {
+  private static final int MAX_NAME_LENGTH = 30;
   /**
    * Identifiers.
    */
-  private final String id;
-  private String name;
+  private final String     id;
+  private String           name;
 
   private transient WikiLobby lobby;
 
   /**
    * State variables (endTime is only set upon completion).
    */
-  private final boolean isLeader;
+  private final boolean     isLeader;
   private transient Instant startTime;
   private transient Instant endTime;
-  private boolean ready; // for match starting
-  private boolean connected;
+  private boolean           ready;    // for match starting
+  private boolean           connected;
 
   /**
    * WikiPath and location data (in case where start and end page are different
    * for each player in lobby).
    */
-  private final WikiPath path; // curPage is last page in here
+  private final WikiPath path;     // curPage is last page in here
   private final WikiPage startPage;
   private final WikiPage goalPage;
 
@@ -75,7 +76,10 @@ public class WikiPlayer {
    *          This player's name.
    */
   public void setName(String n) {
-    name = n;
+    assert n.length() > 0;
+    name =
+        n.substring(0,
+            n.length() > MAX_NAME_LENGTH ? MAX_NAME_LENGTH : n.length());
   }
 
   /****************************************/
@@ -136,6 +140,8 @@ public class WikiPlayer {
    * @return The time this player started.
    */
   public final Instant getStartTime() {
+    Main.debugLog(String.format("Player start: %s | lobby start: %s", startTime,
+        lobby.getStartTime()));
     assert lobby.getStartTime().equals(startTime);
     return startTime;
   }
@@ -300,16 +306,18 @@ public class WikiPlayer {
       if (goToPage(page)) {
         return;
       }
-      throw new NoSuchElementException(String
-          .format("Page %s not in player %s's history", page.getName(), name));
+      throw new NoSuchElementException(
+          String.format("Page %s not in player %s's history or available ahead",
+              page.getName(), name));
     }
 
     WikiPage prevPage;
+    int i = path.size() - 1;
     do {
-      prevPage = path.remove(path.size() - 1).getPage();
-    } while (path.size() > 0 && !prevPage.equalsAfterRedirectSafe(page));
+      prevPage = path.get(i--).getPage();
+    } while (i >= 0 && !prevPage.equalsAfterRedirectSafe(page));
 
-    // add it back because we removed it
+    // add the found prevPage to the path
     path.add(prevPage);
   }
 
