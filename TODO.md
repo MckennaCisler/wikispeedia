@@ -9,8 +9,8 @@
 - Stuff in docs folder
 ##### NECESSITIES
 - <b>Fix bugs</b>
-  - Weird player must join lobby bug!!!! Race condition? More likely a concurrency issue with the client lists?
-- Bug where lobby can't be started while another game is running
+  - Fix overflows
+  - Weird player must join lobby bug!!!! Race condition? More likely a concurrency issue with the client lists? DONE??????
 ##### NICETIES
 - Shortest path
   - Add intelligent switcher if DB busy?
