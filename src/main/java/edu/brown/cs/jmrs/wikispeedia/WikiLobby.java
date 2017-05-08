@@ -6,11 +6,11 @@ import java.time.Duration;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
@@ -164,7 +164,7 @@ public class WikiLobby implements Lobby {
   public WikiLobby(Server server, String id, DbConn wikiDbConn) {
     this.server = server;
     this.id = id;
-    players = new HashMap<>();
+    players = new ConcurrentHashMap<>();
     messages = Collections.synchronizedList(new ArrayList<>());
     winners = ImmutableSet.of();
   }
@@ -177,9 +177,9 @@ public class WikiLobby implements Lobby {
       return;
     }
     // first is leader
-    boolean isLeader = this.players.size() == 0;
+    boolean isLeader = players.size() == 0;
 
-    this.players.put(playerId, new WikiPlayer(playerId, this, isLeader));
+    players.put(playerId, new WikiPlayer(playerId, this, isLeader));
 
     Command.sendAllPlayers(this);
   }
@@ -422,6 +422,10 @@ public class WikiLobby implements Lobby {
 
   @Override
   public boolean isClosed() {
+    if (players.size() == 0) {
+      boolean isEmpty = players.isEmpty();
+      String fuck = "me";
+    }
     return players.isEmpty();
   }
 
@@ -464,7 +468,16 @@ public class WikiLobby implements Lobby {
     this.players.remove(playerId);
     Command.sendAllPlayers(this);
 
-    if (players.size() == 0) {
+    boolean closeLobby = true;
+
+    for (WikiPlayer player : players.values().toArray(new WikiPlayer[] {})) {
+      if (player.connected()) {
+        closeLobby = false;
+        break;
+      }
+    }
+
+    if (players.size() == 0 || closeLobby) {
       server.closeLobby(id);
     }
   }
@@ -480,7 +493,8 @@ public class WikiLobby implements Lobby {
     for (Message message : messageArray) {
       JsonObject jsonMessage = new JsonObject();
       jsonMessage.addProperty("timestamp", message.getTime().toEpochMilli());
-      jsonMessage.addProperty("sender", players.get(clientId).getName());
+      jsonMessage.addProperty("sender",
+          players.get(message.getSender()).getName());
       jsonMessage.addProperty("sender_id", message.getSender());
       jsonMessage.addProperty("message", message.getContent());
       jsonArray.add(jsonMessage);

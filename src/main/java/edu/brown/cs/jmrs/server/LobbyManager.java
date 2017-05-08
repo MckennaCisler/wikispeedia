@@ -124,8 +124,11 @@ public class LobbyManager {
    *          The id of the lobby to remove
    */
   public void remove(String lobbyId) {
-    w.lock();
-    lobbies.remove(lobbyId);
-    w.unlock();
+    try {
+      w.lock();
+      lobbies.remove(lobbyId);
+    } finally {
+      w.unlock();
+    }
   }
 }

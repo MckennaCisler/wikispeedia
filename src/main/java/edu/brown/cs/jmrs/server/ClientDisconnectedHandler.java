@@ -3,7 +3,7 @@ package edu.brown.cs.jmrs.server;
 import org.eclipse.jetty.websocket.api.Session;
 
 /**
- * Handles when a websocket disconnects.
+ * Handles when a websocket connects.
  *
  * @author shastin1
  *

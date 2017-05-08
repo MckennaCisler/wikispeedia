@@ -50,8 +50,10 @@ class ServerWorker {
    * @param gson
    *          Gson instance for JSONification of lobbies
    */
-  public ServerWorker(Server server,
-      BiFunction<Server, String, ? extends Lobby> lobbyFactory, Gson gson) {
+  ServerWorker(
+      Server server,
+      BiFunction<Server, String, ? extends Lobby> lobbyFactory,
+      Gson gson) {
     this.server = server;
     lobbies = new LobbyManager(lobbyFactory);
     clients = new ConcurrentBiMap<>();
@@ -89,14 +91,16 @@ class ServerWorker {
     if (!disconnectedClients.isEmpty()) {
       Date now = new Date();
       Client p = disconnectedClients.poll();
-      while (p.getCookieExpiration().before(now)) {
-        clients.remove(clients.getReversed(p));
-        if (disconnectedClients.isEmpty()) {
-          return;
+      synchronized (p) {
+        while (p.getCookieExpiration().before(now)) {
+          clients.remove(clients.getReversed(p));
+          if (disconnectedClients.isEmpty()) {
+            return;
+          }
+          p = disconnectedClients.poll();
         }
-        p = disconnectedClients.poll();
+        disconnectedClients.add(p);
       }
-      disconnectedClients.add(p);
     }
   }
 
@@ -108,7 +112,10 @@ class ServerWorker {
    *          The client connection that just connected
    */
   public void clientConnected(Session conn) {
-    checkDisconnectedPlayers();
+    // checkDisconnectedPlayers();
+    /**
+     * THIS IS SCARY STUFF IT BREAKS EVERYTHING
+     */
 
     String clientId = "";
     List<HttpCookie> cookies = conn.getUpgradeRequest().getCookies();
@@ -121,40 +128,17 @@ class ServerWorker {
       }
     }
 
-    // notify client of their id
-
-    String toClient = "";
-    String trueId = "";
-
-    JsonObject jsonObject = new JsonObject();
-    jsonObject.addProperty("command", "notify_id");
-    try {
-      trueId = setClientId(conn, clientId);
-
-      jsonObject.addProperty("client_id", trueId);
-      jsonObject.addProperty("error_message", "");
-      toClient = gson.toJson(jsonObject);
-      sendToClient(conn, toClient);
-
-    } catch (InputError e) {
-      jsonObject.addProperty("client_id", "");
-      jsonObject.addProperty("error_message", e.getMessage());
-      toClient = gson.toJson(jsonObject);
-      sendToClient(conn, toClient);
-    }
-
-    Client client = clients.get(conn);
+    Client client = clients.getBack(new Client(clientId));
     if (client != null) {
-      // if they are not in a lobby, give them a list of lobbies
-      if (client.getLobby() == null) {
-        notInLobbies.put(client.getId(), client);
-      } else {
-        // if they are already in a lobby and thus reconnecting, note that
-        // they're reconnecting
-        client.getLobby().playerReconnected(client.getId());
+      // if we've seen this client, make sure we sync on them
+      synchronized (client) {
+        setupConnectedClient(conn, clientId);
       }
+    } else {
+      // if we haven't seen them, we can proceed
+      setupConnectedClient(conn, clientId);
     }
-    sendLobbies(client);
+    Main.debugLog("Known clients: " + clients.values());
   }
 
   /**
@@ -165,38 +149,51 @@ class ServerWorker {
    *          The client who disconnected
    */
   public void clientDisconnected(Session conn) {
+    // get cookie experiation in case it may have expired (in which case we
+    // remove this conn)
     Date expiration = new Date();
     List<HttpCookie> cookies = conn.getUpgradeRequest().getCookies();
     for (HttpCookie cookie : cookies) {
       if (cookie.getName().equals("client_id")) {
         String cookieVal = cookie.getValue();
-        expiration =
-            Date.from(Instant.ofEpochMilli(Long
-                .parseLong(cookieVal.substring(cookieVal.indexOf(":") + 1))));
+        expiration = Date.from(
+            Instant.ofEpochMilli(
+                Long.parseLong(
+                    cookieVal.substring(cookieVal.indexOf(":") + 1))));
         break;
       }
     }
 
     Client client = clients.get(conn);
-    if (client != null && client.getLobby() == null) {
-      notInLobbies.remove(client.getId());
-    }
+    if (client != null) {
+      synchronized (client) {
 
-    if (expiration.after(new Date())) {
-      if (client != null) {
-        assert client.isConnected();
-        client.toggleConnected();
+        if (client.getLobby() == null) {
+          notInLobbies.remove(client.getId());
+        }
 
-        client.setCookieExpiration(expiration);
-        disconnectedClients.add(client);
+        // remove if expired
+        if (expiration.after(new Date())) {
+          assert client.isConnected();
+          client.toggleConnected();
 
-        if (client.getLobby() != null) {
-          client.getLobby().playerDisconnected(client.getId());
+          client.setCookieExpiration(expiration);
+          disconnectedClients.add(client);
+
+          if (client.getLobby() != null) {
+            client.getLobby().playerDisconnected(client.getId());
+          }
+        } else {
+          clients.remove(conn);
         }
       }
     } else {
-      clients.remove(conn);
+      // remove if expired
+      if (!expiration.after(new Date())) {
+        clients.remove(conn);
+      }
     }
+    Main.debugLog("Known clients: " + clients.values());
   }
 
   /**
@@ -317,8 +314,9 @@ class ServerWorker {
    * @throws InputError
    *           If a client claims to have an id that is already in use
    */
-  public String setClientId(Session conn, String clientId) throws InputError {
+  private String setClientId(Session conn, String clientId) throws InputError {
     Client client = clients.getBack(new Client(clientId));
+
     if (client == null) {
       clientId = conn.hashCode() + "";
       // starts out connected
@@ -328,12 +326,54 @@ class ServerWorker {
         client = new Client(clientId);
       }
     } else if (!client.isConnected()) {
-      client.toggleConnected();
-      clients.put(conn, client);
+      synchronized (client) {
+        client.toggleConnected();
+        clients.put(conn, client);
+      }
     } else {
       throw new InputError("Don't steal identities");
     }
     return client.getId();
+  }
+
+  private void setupConnectedClient(Session conn, String clientId) {
+    // notify client of their id
+    String toClient = "";
+    String trueId = "";
+
+    JsonObject jsonObject = new JsonObject();
+    jsonObject.addProperty("command", "notify_id");
+    try {
+      // NOTE that this adds the client to clients
+      trueId = setClientId(conn, clientId);
+
+      jsonObject.addProperty("client_id", trueId);
+      jsonObject.addProperty("error_message", "");
+      toClient = gson.toJson(jsonObject);
+      sendToClient(conn, toClient);
+
+    } catch (InputError e) {
+      jsonObject.addProperty("client_id", "");
+      jsonObject.addProperty("error_message", e.getMessage());
+      toClient = gson.toJson(jsonObject);
+      sendToClient(conn, toClient);
+    }
+
+    // a new client with potentially a new id (made from hashcode)
+    Client newClient = clients.get(conn);
+    if (newClient != null) {
+      synchronized (newClient) {
+        // if they are not in a lobby, give them a list of lobbies
+        if (newClient.getLobby() == null) {
+          notInLobbies.put(newClient.getId(), newClient);
+          sendLobbies(newClient);
+        } else {
+          // if they are already in a lobby and thus reconnecting, note that
+          // they're reconnecting
+          newClient.getLobby().playerReconnected(newClient.getId());
+        }
+      }
+    }
   }
 
   /**

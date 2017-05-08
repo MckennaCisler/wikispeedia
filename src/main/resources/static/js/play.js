@@ -76,10 +76,10 @@ serverConn.whenReadyToSend(() => {
 		serverConn.getSettings("", GAME_STATE.STARTED, settingsCallback, settingsError);
 
 		window.onpopstate = (function(event) {
-			if (event.state.href !== undefined) {
+			if (event.state != null && event.state.href !== undefined) {
 		  	serverConn.goBackPage(event.state.href, drawPage, errorPage);
 			} else {
-				console.log("Unknown state was popped");
+				console.log("Non-wiki state was popped");
 			}
 		}).bind(this);
 });
