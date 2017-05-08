@@ -49,11 +49,11 @@ public class CachingWikiLinkFinder extends WikiPageLinkFinder {
 
   private final CacherService cacherService;
 
-  private final Query<Link> lookup;
+  private final Query<Link>  lookup;
   private final Insert<Link> cacher;
 
   /**
-   * Creats a CachingWikiEdgeFinder that caches (and hangs while doing so) all
+   * Creates a CachingWikiEdgeFinder that caches (and hangs while doing so) all
    * found links on the spot.
    *
    * @param conn
@@ -186,12 +186,13 @@ public class CachingWikiLinkFinder extends WikiPageLinkFinder {
    *
    */
   class CacherWorker implements Runnable {
-    private static final int INITIAL_BATCH_SIZE = 50; // keep it low on startup
+    private static final int    INITIAL_BATCH_SIZE = 50; // keep it low on
+                                                         // startup
     private static final double BATCH_SIZES_TO_AVG = 5;
-    private double desiredExecutionTime;
+    private double              desiredExecutionTime;
 
     private final BlockingQueue<Link> linksToCache;
-    private int curBatchSize;
+    private int                       curBatchSize;
 
     /**
      * Creates and starts a CacherWorker.
@@ -242,7 +243,7 @@ public class CachingWikiLinkFinder extends WikiPageLinkFinder {
    *
    */
   class CacherService extends ScheduledThreadPoolExecutor {
-    public static final int MAX_THREAD_EXECUTE_PERIOD = 2000; // ms
+    public static final int           MAX_THREAD_EXECUTE_PERIOD = 2000; // ms
     private final BlockingQueue<Link> linksToCache;
 
     /**

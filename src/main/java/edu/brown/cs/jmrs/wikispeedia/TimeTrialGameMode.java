@@ -41,7 +41,7 @@ public class TimeTrialGameMode implements WikiGameMode {
     Queue<WikiPlayer> done =
         new PriorityQueue<>(
             (p1, p2) -> p1.getPlayTime().compareTo(p2.getPlayTime()));
-    for (WikiPlayer player : lobby.getPlayers()) {
+    for (WikiPlayer player : lobby.getConnectedPlayers()) {
       if (player.done()) {
         done.add(player);
       }
@@ -65,7 +65,7 @@ public class TimeTrialGameMode implements WikiGameMode {
   @Override
   public boolean ended(WikiLobby wikiLobby) {
     // if any players is done
-    for (WikiPlayer player : wikiLobby.getPlayers()) {
+    for (WikiPlayer player : wikiLobby.getConnectedPlayers()) {
       if (player.done()) {
         return true;
       }
