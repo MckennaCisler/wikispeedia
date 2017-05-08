@@ -106,6 +106,13 @@
           <showWarnings>true</showWarnings>
           <showDeprecation>true</showDeprecation>
         </configuration>
+        <executions>
+            <execution>
+                <id>copy-dependencies</id>
+                <phase>package</phase>
+                <goals><goal>copy-dependencies</goal></goals>
+            </execution>
+        </executions>
       </plugin>
       <plugin>
         <groupId>com.heroku.sdk</groupId>
