@@ -1,7 +1,6 @@
 package edu.brown.cs.jmrs.server;
 
 import java.net.HttpCookie;
-import java.time.Instant;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -50,10 +49,8 @@ class ServerWorker {
    * @param gson
    *          Gson instance for JSONification of lobbies
    */
-  ServerWorker(
-      Server server,
-      BiFunction<Server, String, ? extends Lobby> lobbyFactory,
-      Gson gson) {
+  ServerWorker(Server server,
+      BiFunction<Server, String, ? extends Lobby> lobbyFactory, Gson gson) {
     this.server = server;
     lobbies = new LobbyManager(lobbyFactory);
     clients = new ConcurrentBiMap<>();
@@ -86,6 +83,8 @@ class ServerWorker {
   /**
    * Checks disconnected but stored players, and if they have expired cookies
    * references to them are removed.
+   *
+   * THIS MAY BREAK STUFF
    */
   private void checkDisconnectedPlayers() {
     if (!disconnectedClients.isEmpty()) {
@@ -112,10 +111,7 @@ class ServerWorker {
    *          The client connection that just connected
    */
   public void clientConnected(Session conn) {
-    // checkDisconnectedPlayers();
-    /**
-     * THIS IS SCARY STUFF IT BREAKS EVERYTHING
-     */
+    Main.debugLog("Player connected");
 
     String clientId = "";
     List<HttpCookie> cookies = conn.getUpgradeRequest().getCookies();
@@ -149,49 +145,26 @@ class ServerWorker {
    *          The client who disconnected
    */
   public void clientDisconnected(Session conn) {
-    // get cookie experiation in case it may have expired (in which case we
-    // remove this conn)
-    Date expiration = new Date();
-    List<HttpCookie> cookies = conn.getUpgradeRequest().getCookies();
-    for (HttpCookie cookie : cookies) {
-      if (cookie.getName().equals("client_id")) {
-        String cookieVal = cookie.getValue();
-        expiration = Date.from(
-            Instant.ofEpochMilli(
-                Long.parseLong(
-                    cookieVal.substring(cookieVal.indexOf(":") + 1))));
-        break;
-      }
-    }
+    Main.debugLog("Player disconnected: " + clients.get(conn));
 
     Client client = clients.get(conn);
     if (client != null) {
       synchronized (client) {
-
         if (client.getLobby() == null) {
           notInLobbies.remove(client.getId());
         }
 
-        // remove if expired
-        if (expiration.after(new Date())) {
-          assert client.isConnected();
-          client.toggleConnected();
+        assert client.isConnected();
+        client.toggleConnected();
 
-          client.setCookieExpiration(expiration);
-          disconnectedClients.add(client);
+        disconnectedClients.add(client);
 
-          if (client.getLobby() != null) {
-            client.getLobby().playerDisconnected(client.getId());
-          }
-        } else {
-          clients.remove(conn);
+        if (client.getLobby() != null) {
+          client.getLobby().playerDisconnected(client.getId());
         }
       }
     } else {
-      // remove if expired
-      if (!expiration.after(new Date())) {
-        clients.remove(conn);
-      }
+      Main.debugLog("Connection had no associated client");
     }
     Main.debugLog("Known clients: " + clients.values());
   }
@@ -363,6 +336,7 @@ class ServerWorker {
     Client newClient = clients.get(conn);
     if (newClient != null) {
       synchronized (newClient) {
+        assert newClient.isConnected();
         // if they are not in a lobby, give them a list of lobbies
         if (newClient.getLobby() == null) {
           notInLobbies.put(newClient.getId(), newClient);
