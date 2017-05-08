@@ -1,1 +1,1 @@
-web: bash ./run --gui --spark-port 5000
+web: bash ./hrun --gui --spark-port 5000
