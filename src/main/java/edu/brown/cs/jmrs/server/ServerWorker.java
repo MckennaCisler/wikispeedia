@@ -184,13 +184,13 @@ class ServerWorker {
             client.getLobby().playerDisconnected(client.getId());
           }
         } else {
-          clients.remove(conn);
+          // clients.remove(conn);
         }
       }
     } else {
       // remove if expired
       if (!expiration.after(new Date())) {
-        clients.remove(conn);
+        // clients.remove(conn);
       }
     }
     Main.debugLog("Known clients: " + clients.values());
