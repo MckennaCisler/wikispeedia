@@ -141,8 +141,11 @@ public class WikiLobby implements Lobby {
    * Time to delay lobby creation by.
    */
   private static final long START_DELAY = 5;
-  private transient Server  server;
-  private final String      id;
+
+  private static final int MAX_ID_LENGTH = 30;
+
+  private transient Server server;
+  private final String     id;
 
   // map from id to player
   private transient Map<String, WikiPlayer> players;
@@ -165,13 +168,16 @@ public class WikiLobby implements Lobby {
    * @param server
    *          The server it was called from.
    * @param id
-   *          The id of this lobby.
+   *          The id of this lobby. Cut off at a certain number of characters.
    * @param wikiDbConn
    *          The database connection to the wikipedia database.
    */
   public WikiLobby(Server server, String id, DbConn wikiDbConn) {
     this.server = server;
-    this.id = id;
+    assert id.length() > 0;
+    this.id =
+        id.substring(0,
+            id.length() > MAX_ID_LENGTH ? MAX_ID_LENGTH : id.length());
     players = new ConcurrentHashMap<>();
     messages = Collections.synchronizedList(new ArrayList<>());
     winners = ImmutableSet.of();
@@ -431,10 +437,6 @@ public class WikiLobby implements Lobby {
 
   @Override
   public boolean isClosed() {
-    if (players.size() == 0) {
-      boolean isEmpty = players.isEmpty();
-      String fuck = "me";
-    }
     return players.isEmpty();
   }
 

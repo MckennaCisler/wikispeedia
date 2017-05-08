@@ -10,7 +10,7 @@
 ##### NECESSITIES
 - <b>Fix bugs</b>
   - Fix overflows
-  - Weird player must join lobby bug!!!! Race condition? More likely a concurrency issue with the client lists? DONE??????
+  - When player disconnects before lobby is done, what happens?
 ##### NICETIES
 - Shortest path
   - Add intelligent switcher if DB busy?
