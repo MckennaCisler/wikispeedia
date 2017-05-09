@@ -201,7 +201,7 @@ const Command = {
 class ServerConn {
     constructor(source) {
         // constants
-        this.COMMAND_TIMEOUT = 10000; // some can take a while
+        this.COMMAND_TIMEOUT = 35000; // some can take a while
         this.CLIENT_ID_COOKIE_EXPIRATION = 1440; // 24 hours
         this.STOP_LOGGING_RECIEVED_MESSAGES_TIMEOUT = 5000;
 
