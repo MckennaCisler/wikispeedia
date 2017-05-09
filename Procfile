@@ -1,1 +1,1 @@
-web: sh target/appassembler/bin/wikispeedia
+web: sh target/appassembler/bin/wikispeedia $PORT

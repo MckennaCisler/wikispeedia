@@ -140,7 +140,7 @@
               <commandLineArguments>
                 <commandLineArgument>--gui</commandLineArgument>
                 <commandLineArgument>--spark-port</commandLineArgument>
-                <commandLineArgument>5000</commandLineArgument>
+                <!--<commandLineArgument>5000</commandLineArgument>-->
               </commandLineArguments>
               <id>wikispeedia</id>
             </program>
