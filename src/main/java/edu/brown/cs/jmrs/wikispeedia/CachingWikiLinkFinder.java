@@ -47,6 +47,8 @@ public class CachingWikiLinkFinder extends WikiPageLinkFinder {
           + "CREATE INDEX IF NOT EXISTS start_index ON links (start);");
   // +"start-links INT,"+"end-links INT"
 
+  private static final double RE_CACHE_PROBABILITY = 0.1;
+
   private final CacherService cacherService;
 
   private final Query<Link>  lookup;
@@ -70,7 +72,7 @@ public class CachingWikiLinkFinder extends WikiPageLinkFinder {
         conn.makeQuery("SELECT * FROM links WHERE start=?", LINK_READER, true);
     cacher =
         conn.makeInsert(
-            "INSERT OR IGNORE INTO links (start, end) VALUES (?, ?)",
+            "INSERT OR REPLACE INTO links (start, end) VALUES (?, ?)",
             LINK_WRITER);
 
     // nullify worker to signify to just do it on this thread
@@ -110,7 +112,7 @@ public class CachingWikiLinkFinder extends WikiPageLinkFinder {
   public Set<String> links(WikiPage page) throws IOException {
     // try database
     List<Link> links = lookup.query(page.url());
-    if (links.isEmpty()) {
+    if (links.isEmpty() || shouldReCache()) {
       // grab links using WikiPage link finder in normal way
       Set<String> urls = super.links(page);
 
@@ -124,11 +126,15 @@ public class CachingWikiLinkFinder extends WikiPageLinkFinder {
         Functional.map(links, (link) -> link.getDestination().url()));
   }
 
+  private boolean shouldReCache() {
+    return Math.random() <= RE_CACHE_PROBABILITY;
+  }
+
   @Override
   public Set<WikiPage> linkedPages(WikiPage page) throws IOException {
     // try database
     List<Link> links = lookup.query(page.url());
-    if (links.isEmpty()) {
+    if (links.isEmpty() || shouldReCache()) {
       // grab links using WikiPage link finder in normal way
       Set<WikiPage> pages = super.linkedPages(page);
 
@@ -144,7 +150,7 @@ public class CachingWikiLinkFinder extends WikiPageLinkFinder {
   @Override
   public Set<Link> edges(Page node) {
     List<Link> links = lookup.query(node.url());
-    if (links.isEmpty()) {
+    if (links.isEmpty() || shouldReCache()) {
       // grab edges using wikipage link finder in normal way
       Set<Link> edges = super.edges(node);
 

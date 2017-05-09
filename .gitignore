@@ -50,3 +50,5 @@ local.properties
 ########
 
 .DS_Store
+
+scrape-results.txt
