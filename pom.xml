@@ -125,6 +125,37 @@
               </arguments>
           </configuration>
       </plugin>
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>appassembler-maven-plugin</artifactId>
+        <version>1.10</version>
+        <configuration>
+          <platforms>
+            <platform>windows</platform>
+            <platform>unix</platform>
+          </platforms>
+          <programs>
+            <program>
+              <mainClass>edu.brown.cs.jmrs.ui.Main</mainClass>
+              <commandLineArguments>
+                <commandLineArgument>--gui</commandLineArgument>
+                <commandLineArgument>--spark-port</commandLineArgument>
+                <commandLineArgument>5000</commandLineArgument>
+              </commandLineArguments>
+              <id>wikispeedia</id>
+            </program>
+          </programs>
+        </configuration>
+        <executions>
+          <execution>
+            <id>package</id>
+            <phase>package</phase>
+            <goals>
+              <goal>assemble</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
     </plugins>
   </build>
 

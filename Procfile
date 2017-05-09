@@ -1,1 +1,1 @@
-web: bash mvn exec:java
+web: sh target/appassembler/bin/wikispeedia
