@@ -58,7 +58,6 @@ function resize() {
 
 serverConn.whenReadyToRecieve(() => {
     serverConn.registerError(displayServerConnErrorRedirectHome);
-		serverConn.registerClose(displayConnCloseMsg);
 		serverConn.registerAllPlayers(newUpdate);
     serverConn.registerEndGame(() => {
 		setCookie('timePlayed', audio.currentTime);

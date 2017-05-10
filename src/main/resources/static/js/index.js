@@ -24,6 +24,7 @@ $(document).ready(function () {
 			$("#advanced_im").attr("src", "lib/assets/side-triangle.png");
 		}
 	});
+	$("#open_games").html("<b>Loading...</b>");
 
 	$("#open_games").on('click', (event) => {
 		isMaking = false;
@@ -191,7 +192,6 @@ serverConn.whenReadyToRecieve(() => {
 	"use strict";
 	serverConn.registerAllLobbies(drawLobbies);
 	serverConn.registerError(displayServerConnError);
-	serverConn.registerClose(displayConnCloseMsg);
 });
 
 serverConn.whenReadyToSend(() => {

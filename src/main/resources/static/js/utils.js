@@ -46,11 +46,7 @@ function displayErrorRedirect(msg, redirect, error_code) {
 }
 
 function clearError() {
-    // TODO
-}
-
-function displayConnCloseMsg() {
-  displayErrorRedirect("Connection to server lost. Please refresh.", "/");
+  clear_my_alert();
 }
 
 function displayServerConnErrorRedirectHome(error) {
