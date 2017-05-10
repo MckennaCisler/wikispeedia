@@ -45,7 +45,6 @@ function resize() {
 
 serverConn.whenReadyToRecieve(() => {
 	serverConn.registerError(displayServerConnErrorRedirectHome);
-	serverConn.registerClose(displayConnCloseMsg);
 
 	// TODO: Get settings: game type and end page
 

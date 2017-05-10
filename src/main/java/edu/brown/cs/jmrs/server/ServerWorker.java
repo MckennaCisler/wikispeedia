@@ -27,6 +27,7 @@ import edu.brown.cs.jmrs.ui.Main;
  *
  */
 class ServerWorker {
+  private static final long CLIENT_IDLE_TIMEOUT = 1000 * 60 * 60;
 
   private Server                           server;
   private LobbyManager                     lobbies;
@@ -48,10 +49,8 @@ class ServerWorker {
    * @param gson
    *          Gson instance for JSONification of lobbies
    */
-  public ServerWorker(
-      Server server,
-      BiFunction<Server, String, ? extends Lobby> lobbyFactory,
-      Gson gson) {
+  ServerWorker(Server server,
+      BiFunction<Server, String, ? extends Lobby> lobbyFactory, Gson gson) {
     this.server = server;
     lobbies = new LobbyManager(lobbyFactory);
     clients = new ConcurrentBiMap<>();
@@ -111,10 +110,10 @@ class ServerWorker {
   public void clientConnected(Session conn) {
     Main.debugLog("Player connected");
 
-    long hourMilli = 1000 * 60 * 60;
-    conn.setIdleTimeout(hourMilli); // Allows client to be AFK for an hour
-                                    // before the websocket automatically
-                                    // closes. Default is 5 minutes.
+    conn.setIdleTimeout(CLIENT_IDLE_TIMEOUT); // Allows client to be AFK for an
+                                              // hour before the websocket
+                                              // automatically closes. Default
+                                              // is 5 minutes.
 
     checkDisconnectedClients();
 

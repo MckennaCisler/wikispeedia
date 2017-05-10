@@ -6,7 +6,7 @@ function my_alert(alertText) {
 }
 function my_alert_cb(alertText, callback) {
 	"use strict";
-	$("body").append(`<div class="modal fade" id="m${errNum}">
+	$("body").append(`<div class="modal fade alert-msg" id="m${errNum}" data-animation="false">
 	  <div class="modal-dialog" role="document">
 		<div class="modal-content">
 		  <div class="modal-header">
@@ -24,4 +24,8 @@ function my_alert_cb(alertText, callback) {
 	$(`#m${errNum} .close`).click(callback);
 	$(`#m${errNum}`).modal();
 	errNum++;
+}
+
+function clear_my_alert() {
+	$(`.alert-msg .close`).click();
 }
