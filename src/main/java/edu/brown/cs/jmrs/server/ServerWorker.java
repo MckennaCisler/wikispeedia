@@ -111,6 +111,11 @@ class ServerWorker {
   public void clientConnected(Session conn) {
     Main.debugLog("Player connected");
 
+    long hourMilli = 1000 * 60 * 60;
+    conn.setIdleTimeout(hourMilli); // Allows client to be AFK for an hour
+                                    // before the websocket automatically
+                                    // closes. Default is 5 minutes.
+
     checkDisconnectedClients();
 
     String clientId = "";
