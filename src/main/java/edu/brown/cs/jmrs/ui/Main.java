@@ -209,7 +209,7 @@ public final class Main {
    */
   public static void debugLog(String info) {
     if (VERBOSE_LOG) {
-      System.out.println(String.format("[ DEBUG : %s ]\n\r\t%s\n\r",
+      System.out.println(String.format("[ DEBUG : %s ] %s\n\r",
           new SimpleDateFormat("dd-MM HH:mm:ss").format(new Date()), info));
     }
   }

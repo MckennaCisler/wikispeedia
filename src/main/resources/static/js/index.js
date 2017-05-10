@@ -191,7 +191,6 @@ serverConn.whenReadyToRecieve(() => {
 	"use strict";
 	serverConn.registerAllLobbies(drawLobbies);
 	serverConn.registerError(displayServerConnError);
-	serverConn.registerClose(displayConnCloseMsg);
 });
 
 serverConn.whenReadyToSend(() => {
