@@ -154,19 +154,18 @@ class ServerWorker {
 
     Client client = clients.get(conn);
     if (client != null) {
-      synchronized (client) {
-        if (client.getLobby() == null) {
-          notInLobbies.remove(client.getId());
-        }
+      if (client.getLobby() == null) {
+        notInLobbies.remove(client.getId());
+        clients.remove(conn);
+      }
 
-        assert client.isConnected();
-        client.toggleConnected();
+      assert client.isConnected();
+      client.toggleConnected();
 
-        disconnectedClients.add(client);
+      disconnectedClients.add(client);
 
-        if (client.getLobby() != null) {
-          client.getLobby().playerDisconnected(client.getId());
-        }
+      if (client.getLobby() != null) {
+        client.getLobby().playerDisconnected(client.getId());
       }
     } else {
       Main.debugLog("Connection had no associated client");
