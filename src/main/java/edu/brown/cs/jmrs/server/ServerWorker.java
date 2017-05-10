@@ -1,11 +1,11 @@
 package edu.brown.cs.jmrs.server;
 
 import java.net.HttpCookie;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.Queue;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.PriorityBlockingQueue;
 import java.util.function.BiFunction;
 
 import org.eclipse.jetty.websocket.api.Session;
@@ -32,7 +32,7 @@ class ServerWorker {
   private LobbyManager                     lobbies;
   private ConcurrentBiMap<Session, Client> clients;
   private Map<String, Client>              notInLobbies;
-  private Queue<Client>                    disconnectedClients;
+  private List<Client>                     disconnectedClients;
   private Gson                             gson;
   private MessageQueue                     messageQueue;
 
@@ -48,13 +48,15 @@ class ServerWorker {
    * @param gson
    *          Gson instance for JSONification of lobbies
    */
-  ServerWorker(Server server,
-      BiFunction<Server, String, ? extends Lobby> lobbyFactory, Gson gson) {
+  public ServerWorker(
+      Server server,
+      BiFunction<Server, String, ? extends Lobby> lobbyFactory,
+      Gson gson) {
     this.server = server;
     lobbies = new LobbyManager(lobbyFactory);
     clients = new ConcurrentBiMap<>();
     notInLobbies = new ConcurrentHashMap<>();
-    disconnectedClients = new PriorityBlockingQueue<>();
+    disconnectedClients = Collections.synchronizedList(new ArrayList<>());
     this.gson = gson;
     messageQueue = new MessageQueue();
   }
@@ -80,6 +82,26 @@ class ServerWorker {
   }
 
   /**
+   * Iterates through disconnected clients and deletes those not in active
+   * lobbies.
+   */
+  public void checkDisconnectedClients() {
+    synchronized (disconnectedClients) {
+      for (Client client : disconnectedClients.toArray(new Client[] {})) {
+        Lobby lobby = client.getLobby();
+        if (lobby == null) {
+          Exception e = new Exception();
+          int line = e.getStackTrace()[0].getLineNumber();
+          Main.debugLog(
+              "ServerWorker line " + line + ": This should be impossible");
+        } else if (lobby.isClosed()) {
+          clients.remove(client);
+        }
+      }
+    }
+  }
+
+  /**
    * Connects given client and sets their id, sends that id to the client, and
    * sends a list of all lobbies to the client.
    *
@@ -88,6 +110,8 @@ class ServerWorker {
    */
   public void clientConnected(Session conn) {
     Main.debugLog("Player connected");
+
+    checkDisconnectedClients();
 
     String clientId = "";
     List<HttpCookie> cookies = conn.getUpgradeRequest().getCookies();
