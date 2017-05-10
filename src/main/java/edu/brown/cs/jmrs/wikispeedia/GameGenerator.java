@@ -2,9 +2,11 @@ package edu.brown.cs.jmrs.wikispeedia;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.Set;
 
 import com.google.common.base.Predicate;
+import com.google.common.collect.ImmutableSet;
 import com.google.common.primitives.Doubles;
 
 import edu.brown.cs.jmrs.ui.Main;
@@ -22,7 +24,9 @@ import edu.brown.cs.jmrs.web.wikipedia.WikiPageLinkFinder.Filter;
  */
 public final class GameGenerator {
   private static final LinkFinder<WikiPage> WIKI_LINK_FINDER =
-      new WikiPageLinkFinder(Filter.NON_ENGLISH_WIKIPEDIA);
+      new WikiPageLinkFinder(WikiLobby.DEFAULT_CONTENT_FORMATTER,
+          Filter.NON_ENGLISH_WIKIPEDIA);
+
   private static final WikiPage START_PAGE = WikiPage.fromName("Main_Page");
 
   static {
@@ -94,7 +98,7 @@ public final class GameGenerator {
       goal = pageWithObscurity(obscurity);
 
     } while (start.equalsAfterRedirectSafe(goal));
-    return new WikiGame(start, goal);
+    return new WikiGame(start, goal, ImmutableSet.of());
   }
 
   /**
@@ -123,8 +127,27 @@ public final class GameGenerator {
    * @return The WikiGame defined by both pages.
    */
   public static WikiGame ofDist(int pageDist) {
+    return ofDist(pageDist, false);
+  }
+
+  /**
+   * Generates a WikiGame (essentially pair of pages) the given distance apart.
+   *
+   * @param pageDist
+   *          The distance the pages should be apart.
+   * @param withSpace
+   *          Whether to include the space of pages found during generation.
+   * @return The WikiGame defined by both pages.
+   */
+  public static WikiGame ofDist(int pageDist, boolean withSpace) {
     WikiPage start = getRandomPage();
-    return new WikiGame(start, goDownFrom(start, pageDist));
+    if (withSpace) {
+      Set<WikiPage> space = new HashSet<>();
+      return new WikiGame(start, goDownFrom(start, pageDist, space), space);
+    } else {
+      return new WikiGame(start, goDownFrom(start, pageDist),
+          ImmutableSet.of());
+    }
   }
 
   /**************************************************************/
@@ -137,6 +160,15 @@ public final class GameGenerator {
     }
 
     return goDownFrom(getRandomLink(start), depth - 1);
+  }
+
+  private static WikiPage goDownFrom(WikiPage start, int depth,
+      Set<WikiPage> space) {
+    if (depth == 0) {
+      return start;
+    }
+
+    return goDownFrom(getRandomLink(start, space), depth - 1, space);
   }
 
   /**
@@ -197,7 +229,7 @@ public final class GameGenerator {
    *
    * @return A WikiPage off page that is guaranteed to be accessible.
    */
-  private static WikiPage getRandomLink(WikiPage page) {
+  static WikiPage getRandomLink(WikiPage page) {
     try {
       Set<String> links = WIKI_LINK_FINDER.links(page);
       int tries = 0;
@@ -217,10 +249,45 @@ public final class GameGenerator {
     return page;
   }
 
+  /**
+   * Gets a random link (WikiPage) outgoing from a page, adding to the given
+   * space.
+   *
+   * @param The
+   *          space to add to.
+   *
+   * @return A WikiPage off page that is guaranteed to be accessible.
+   */
+  static WikiPage getRandomLink(WikiPage page, Set<WikiPage> space) {
+    try {
+      Set<WikiPage> links = WIKI_LINK_FINDER.linkedPages(page);
+      space.addAll(links);
+
+      int tries = 0;
+      while (tries < links.size()) {
+        WikiPage newPage = getRandomLinkFromPages(links);
+        if (newPage.accessible(true)) {
+          return newPage;
+        } else {
+          Main.debugLog("Could not access page: " + newPage);
+        }
+        tries++;
+      }
+      // if we run out of tries
+    } catch (IOException e) {
+      // if root page error occurs
+    }
+    return page;
+  }
+
   private static WikiPage getRandomLinkFrom(Set<String> links) {
     return new WikiPage(
         new ArrayList<>(links).get((int) (Math.random() * links.size())),
         Main.WIKI_PAGE_DOC_CACHE);
+  }
+
+  private static WikiPage getRandomLinkFromPages(Set<WikiPage> links) {
+    return new ArrayList<>(links).get((int) (Math.random() * links.size()));
   }
 
   /**

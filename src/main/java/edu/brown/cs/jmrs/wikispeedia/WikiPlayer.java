@@ -15,6 +15,7 @@ import com.google.gson.JsonSerializer;
 
 import edu.brown.cs.jmrs.ui.Main;
 import edu.brown.cs.jmrs.web.wikipedia.WikiPage;
+import edu.brown.cs.jmrs.wikispeedia.comms.Command;
 
 /**
  * A player in a Wiki lobby, storing state information about their curPage page
@@ -37,9 +38,9 @@ public class WikiPlayer {
    * State variables (endTime is only set upon completion).
    */
   private final boolean     isLeader;
-  private transient Instant startTime;
-  private transient Instant endTime;
-  private boolean           ready;    // for match starting
+  private transient Instant startTime = null;
+  private transient Instant endTime   = null;
+  private boolean           ready;           // for match starting
   private boolean           connected;
 
   /**
@@ -59,12 +60,12 @@ public class WikiPlayer {
    *          Whether this player started their lobby.
    */
   public WikiPlayer(String id, WikiLobby lobby, boolean isLeader) {
-    super();
     this.isLeader = isLeader;
     ready = false;
     connected = true;
     this.id = id;
     this.name = "";
+    assert lobby != null;
     this.lobby = lobby;
     this.startPage = lobby.getStartPage();
     this.goalPage = lobby.getGoalPage();
@@ -140,8 +141,9 @@ public class WikiPlayer {
    * @return The time this player started.
    */
   public final Instant getStartTime() {
-    Main.debugLog(String.format("Player start: %s | lobby start: %s", startTime,
-        lobby.getStartTime()));
+    // Main.debugLog(String.format("Player start: %s | lobby start: %s",
+    // startTime,
+    // lobby.getStartTime()));
     assert lobby.getStartTime().equals(startTime);
     return startTime;
   }
@@ -215,6 +217,9 @@ public class WikiPlayer {
    */
   public synchronized void setReady(boolean ready) {
     this.ready = ready;
+
+    // update other players in lobby and possibly start game
+    lobby.checkAllReady();
   }
 
   /**
@@ -286,6 +291,10 @@ public class WikiPlayer {
         path.add(page);
       }
       checkIfDone(Instant.now());
+
+      // upon success, check for winner in lobby and notify people
+      lobby.checkForWinner();
+      Command.sendAllPlayers(lobby);
       return true;
     }
     return false;
@@ -319,6 +328,9 @@ public class WikiPlayer {
 
     // add the found prevPage to the path
     path.add(prevPage);
+
+    // let people know
+    Command.sendAllPlayers(lobby);
   }
 
   private void checkLobbyState() {

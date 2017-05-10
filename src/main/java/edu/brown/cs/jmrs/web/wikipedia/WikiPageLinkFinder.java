@@ -5,6 +5,7 @@ import java.util.Set;
 import java.util.function.Predicate;
 
 import edu.brown.cs.jmrs.ui.Main;
+import edu.brown.cs.jmrs.web.ContentFormatter;
 import edu.brown.cs.jmrs.web.Link;
 import edu.brown.cs.jmrs.web.LinkFinder;
 import edu.brown.cs.jmrs.web.LinkFinderMethod;
@@ -17,7 +18,7 @@ import edu.brown.cs.jmrs.web.LinkFinderMethod;
  */
 public class WikiPageLinkFinder implements LinkFinder<WikiPage> {
   private final LinkFinderMethod<WikiPage> linkFinderMethod;
-  private final Predicate<String> filterMethod;
+  private final Predicate<String>          filterMethod;
 
   /**
    * An enum of possible link filters ("invalidators") to apply to this
@@ -48,13 +49,17 @@ public class WikiPageLinkFinder implements LinkFinder<WikiPage> {
   /**
    * Constucts a WikiPageLinkFinder.
    *
+   * @param formatter
+   *          Formatter to use before.
    * @param filters
    *          A series of filters to ignore links by.
    */
-  public WikiPageLinkFinder(Filter... filters) {
+  public WikiPageLinkFinder(ContentFormatter<WikiPage> formatter,
+      Filter... filters) {
     this.linkFinderMethod =
         new LinkFinderMethod<WikiPage>().select("#mw-content-text a[href]")
-            .factory(url -> new WikiPage(url, Main.WIKI_PAGE_DOC_CACHE));
+            .factory(url -> new WikiPage(url, Main.WIKI_PAGE_DOC_CACHE))
+            .formatter(formatter);
     this.filterMethod = getFilterMethod(filters);
   }
 

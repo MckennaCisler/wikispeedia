@@ -31,13 +31,13 @@ import spark.template.freemarker.FreeMarkerEngine;
  *
  */
 public class WikiPageHandlers implements SparkHandlers {
-  private static LinkFinder<WikiPage> linkFinder =
-      new WikiPageLinkFinder(Filter.DISAMBIGUATION,
-          Filter.NON_ENGLISH_WIKIPEDIA);
   private static ContentFormatter<WikiPage> contentFormatter =
       new ContentFormatterChain<WikiPage>(
           ImmutableList.of(new WikiBodyFormatter(), new WikiFooterRemover(),
               new WikiAnnotationRemover()));
+  private static LinkFinder<WikiPage>       linkFinder       =
+      new WikiPageLinkFinder(contentFormatter, Filter.DISAMBIGUATION,
+          Filter.NON_ENGLISH_WIKIPEDIA);
 
   @Override
   public void registerHandlers(FreeMarkerEngine freeMarker) {

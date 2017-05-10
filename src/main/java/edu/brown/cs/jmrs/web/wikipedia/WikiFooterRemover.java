@@ -18,12 +18,18 @@ public class WikiFooterRemover implements ContentFormatter<WikiPage> {
   public Element format(Element input) {
     // remove everything after "See Also" (inclusive)
     Elements seeAlso = input.select("#mw-content-text > *:has(#See_also)");
-    seeAlso.nextAll().remove();
+    Elements afterSeeAlso = seeAlso.nextAll();
+    if (afterSeeAlso.size() > 0) {
+      afterSeeAlso.remove();
+    }
     seeAlso.remove();
     // remove everything after "External Links" (inclusive)
     Elements externalLinks =
         input.select("#mw-content-text > *:has(#External_links)");
-    externalLinks.nextAll().remove();
+    Elements afterExternalLinks = externalLinks.nextAll();
+    if (afterExternalLinks.size() > 0) {
+      afterExternalLinks.remove();
+    }
     externalLinks.remove();
 
     // remove others specifically
