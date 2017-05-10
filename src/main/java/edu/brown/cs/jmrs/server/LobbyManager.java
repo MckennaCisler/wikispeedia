@@ -8,6 +8,8 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.function.BiFunction;
 
+import com.google.gson.JsonObject;
+
 import edu.brown.cs.jmrs.server.customizable.Lobby;
 
 /**
@@ -47,8 +49,14 @@ public class LobbyManager {
    * @param server
    *          The server instance to pass to the lobby
    * @return A new lobby with the given id, or null if said id is taken
+   * @throws InputError
+   *           If the given id is already in use by another lobby
    */
-  public Lobby create(String lobbyId, Server server) {
+  public Lobby create(
+      String lobbyId,
+      Server server,
+      Client client,
+      JsonObject args) throws InputError {
     r.lock();
     if (lobbies.containsKey(lobbyId)) {
       Lobby lobby = lobbies.get(lobbyId);
@@ -65,6 +73,11 @@ public class LobbyManager {
     r.unlock();
     Lobby lobby = lobbyFactory.apply(server, lobbyId);
     w.lock();
+    if (args != null) {
+      lobby.init(args);
+    }
+    lobby.addClient(client.getId());
+    client.setLobby(lobby);
     lobbies.put(lobbyId, lobby);
     w.unlock();
     return lobby;

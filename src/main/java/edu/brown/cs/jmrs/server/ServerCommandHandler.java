@@ -119,19 +119,11 @@ class ServerCommandHandler implements Runnable {
                     throw new InputError("No lobby ID provided");
                   }
                   String lobbyId = commandPayload.get("lobby_id").getAsString();
-                  Lobby lobby = server.createLobby(lobbyId);
-
-                  // note lobby will not be null
-                  synchronized (lobby) {
-                    if (commandPayload.has("arguments")) {
-                      lobby.init(
-                          commandPayload.get("arguments").getAsJsonObject());
-                    }
-                    lobby.addClient(player.getId());
-                    player.setLobby(lobby);
-                    server.lobbylessMap().remove(player.getId());
-                    server.updateLobbylessClients();
+                  JsonObject args = null;
+                  if (commandPayload.has("arguments")) {
+                    args = commandPayload.get("arguments").getAsJsonObject();
                   }
+                  server.createLobby(lobbyId, player, args);
                   jsonObject.addProperty("error_message", "");
                   toClient = gson.toJson(jsonObject);
                   server.sendToClient(conn, toClient);
