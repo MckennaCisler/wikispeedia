@@ -204,8 +204,9 @@ class ServerConn {
         this.COMMAND_TIMEOUT = 35000; // some can take a while
         this.CLIENT_ID_COOKIE_EXPIRATION = 1440; // 24 hours
         this.STOP_LOGGING_RECIEVED_MESSAGES_TIMEOUT = 5000;
-        this.RECONNECT_TRY_INTERVAL = 5000; // ms
+        this.RECONNECT_TRY_INTERVAL = 10000; // ms
 
+        this.source = source;
         this.clientId = "";
         this.readyToSend = false;
         this.logRecievedMessages = true;
@@ -254,34 +255,37 @@ class ServerConn {
          * Called on close.
          */
         this.closeCallback;
+
+        this.reconnecting = false;
     }
 
 
     _setupWs() {
-      this.ws = new WebSocket("ws://" + source);
+      this.ws = new WebSocket("ws://" + this.source);
       this.ws.onopen = this.ws_onopen.bind(this);
       this.ws.onmessage = this.ws_onmessage.bind(this);
       this.ws.onclose = this.ws_onclose.bind(this);
     }
 
     _reconnect() {
+      this.reconnecting = true;
       this._setupWs();
 
       this.pendingResponses["notify_id"] =  {
           "command": { type: COMMAND_TYPE.SERVER }, // all we need
           "callback": (message) => {
-              clearError();
+              console.log("INFO: Reconnected");
               this._setId(message.client_id);
+              clearError();
+              this.reconnecting = false;
           },
           "errCallback" : () => {}, // no reason
           "timeout" : window.setTimeout(() => {
               // loop here on full connection loss
-              clearError();
-              displayError(`Could not connect to server... trying again`);
               this._reconnect();
           }, this.RECONNECT_TRY_INTERVAL) // NOTE: this is where it mainly differs
       }
-      console.log("INFO: Reconnected");
+      console.log("INFO: tried to reconnect");
     }
 
     _setId(id) {
@@ -503,8 +507,11 @@ class ServerConn {
 
     ws_onclose() {
       console.log("INFO: Connection was closed - reconnecting");
-      this.closeCallback();
-      displayError(`Connection to server lost... trying to reconnect in ${this.RECONNECT_TRY_INTERVAL/1000.0} seconds`);
+      if (this.closeCallback != undefined) { this.closeCallback(); }
+      // loops this message if websocket is not connected
+      if (!this.reconnecting) {
+        displayError(`Connection to server lost... trying to reconnect in ${this.RECONNECT_TRY_INTERVAL/1000.0} seconds`);
+      }
       window.setTimeout(this._reconnect.bind(this), this.RECONNECT_TRY_INTERVAL);
     }
 
