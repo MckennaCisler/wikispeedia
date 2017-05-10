@@ -193,11 +193,14 @@ class ServerWorker {
    * @throws InputError
    *           If the given id is already in use by another lobby
    */
-  public Lobby createLobby(String lobbyId) throws InputError {
-    Lobby lobby = lobbies.create(lobbyId, server);
+  public Lobby createLobby(String lobbyId, Client client, JsonObject args)
+      throws InputError {
+    Lobby lobby = lobbies.create(lobbyId, server, client, args);
     if (lobby == null) {
       throw new InputError("Lobby ID in use");
     } else {
+      lobbylessMap().remove(client.getId());
+      updateLobbylessClients();
       return lobby;
     }
   }
