@@ -283,6 +283,32 @@ public class Page implements Node<Page, Link> {
     }
   }
 
+  protected String urlEnd() {
+    return urlEnd(url());
+  }
+
+  /**
+   * @param u
+   *          The url.
+   * @return The last part of u past a final slash, if it exists. "" otherwise.
+   */
+  public static String urlEnd(String u) {
+    // remove a VERY last slash
+    if (u.length() > 1 && u.charAt(u.length() - 1) == '/') {
+      u = u.substring(0, u.length() - 1);
+    }
+
+    int httpSlashes = u.indexOf("://");
+    // three characters to clear
+    u = u.substring(httpSlashes != -1 ? httpSlashes + 3 : 0);
+    int lastSlash = u.lastIndexOf('/');
+    if (lastSlash != -1 && lastSlash + 1 < u.length()) {
+      return u.substring(lastSlash + 1);
+    } else {
+      return "";
+    }
+  }
+
   @Override
   public int hashCode() {
     return Objects.hashCode(url);

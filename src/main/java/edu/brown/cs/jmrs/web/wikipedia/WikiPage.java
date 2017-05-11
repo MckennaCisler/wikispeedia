@@ -129,16 +129,11 @@ public class WikiPage extends Page {
       LoadingCache<String, Document> docCache) {
     String cleanedId = cleanUrl(identifier);
 
-    // remove a VERY last slash
-    if (cleanedId.charAt(cleanedId.length() - 1) == '/') {
-      cleanedId = cleanedId.substring(0, cleanedId.length() - 2);
-    }
-
-    int lastSlash = cleanedId.lastIndexOf('/');
+    String lastPart = urlEnd(cleanedId);
 
     // extract title and add it onto full link to be safe
-    if (lastSlash != -1) {
-      return WikiPage.fromName(cleanedId.substring(lastSlash + 1), docCache);
+    if (!lastPart.equals("")) {
+      return WikiPage.fromName(lastPart, docCache);
     } else {
       // already just a title
       return WikiPage.fromName(cleanedId, docCache);
@@ -150,12 +145,8 @@ public class WikiPage extends Page {
    */
   public String getName() {
     assert url().contains("/");
-    int lastSlash = url().lastIndexOf('/');
-    if (lastSlash != -1 && lastSlash + 1 < url().length()) {
-      return url().substring(lastSlash + 1);
-    } else {
-      return url();
-    }
+    String lastPart = urlEnd();
+    return lastPart.equals("") ? url() : lastPart;
   }
 
   /**

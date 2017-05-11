@@ -2,21 +2,14 @@ package edu.brown.cs.jmrs.wikispeedia.comms;
 
 import java.io.IOException;
 
-import com.google.common.collect.ImmutableList;
-
 import edu.brown.cs.jmrs.ui.Main;
 import edu.brown.cs.jmrs.ui.SparkHandlers;
 import edu.brown.cs.jmrs.ui.SparkServer;
 import edu.brown.cs.jmrs.web.ContentFormatter;
-import edu.brown.cs.jmrs.web.ContentFormatterChain;
 import edu.brown.cs.jmrs.web.LinkFinder;
-import edu.brown.cs.jmrs.web.wikipedia.WikiAnnotationRemover;
-import edu.brown.cs.jmrs.web.wikipedia.WikiBodyFormatter;
-import edu.brown.cs.jmrs.web.wikipedia.WikiFooterRemover;
 import edu.brown.cs.jmrs.web.wikipedia.WikiPage;
-import edu.brown.cs.jmrs.web.wikipedia.WikiPageLinkFinder;
-import edu.brown.cs.jmrs.web.wikipedia.WikiPageLinkFinder.Filter;
 import edu.brown.cs.jmrs.wikispeedia.GameGenerator;
+import edu.brown.cs.jmrs.wikispeedia.WikiLobby;
 import spark.QueryParamsMap;
 import spark.Request;
 import spark.Response;
@@ -31,13 +24,10 @@ import spark.template.freemarker.FreeMarkerEngine;
  *
  */
 public class WikiPageHandlers implements SparkHandlers {
-  private static LinkFinder<WikiPage> linkFinder =
-      new WikiPageLinkFinder(Filter.DISAMBIGUATION,
-          Filter.NON_ENGLISH_WIKIPEDIA);
+  private static LinkFinder<WikiPage>       linkFinder       =
+      WikiLobby.DEFAULT_LINK_FINDER;
   private static ContentFormatter<WikiPage> contentFormatter =
-      new ContentFormatterChain<WikiPage>(
-          ImmutableList.of(new WikiBodyFormatter(), new WikiFooterRemover(),
-              new WikiAnnotationRemover()));
+      WikiLobby.DEFAULT_CONTENT_FORMATTER;
 
   @Override
   public void registerHandlers(FreeMarkerEngine freeMarker) {

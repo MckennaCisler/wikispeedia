@@ -1,13 +1,17 @@
 package edu.brown.cs.jmrs.web.wikipedia;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.Set;
 import java.util.function.Predicate;
+
+import com.google.common.collect.ImmutableList;
 
 import edu.brown.cs.jmrs.ui.Main;
 import edu.brown.cs.jmrs.web.Link;
 import edu.brown.cs.jmrs.web.LinkFinder;
 import edu.brown.cs.jmrs.web.LinkFinderMethod;
+import edu.brown.cs.jmrs.web.Page;
 
 /**
  * A link finder which finds only interal wikipedia links on a page.
@@ -17,7 +21,7 @@ import edu.brown.cs.jmrs.web.LinkFinderMethod;
  */
 public class WikiPageLinkFinder implements LinkFinder<WikiPage> {
   private final LinkFinderMethod<WikiPage> linkFinderMethod;
-  private final Predicate<String> filterMethod;
+  private final Predicate<String>          filterMethod;
 
   /**
    * An enum of possible link filters ("invalidators") to apply to this
@@ -28,7 +32,8 @@ public class WikiPageLinkFinder implements LinkFinder<WikiPage> {
    */
   public enum Filter {
     DISAMBIGUATION((url) -> url.contains("(disambiguation)")), //
-    NON_ENGLISH_WIKIPEDIA((url) -> !url.contains("en.wikipedia.org"));
+    NON_ENGLISH_WIKIPEDIA((url) -> !url.contains("en.wikipedia.org")), //
+    NO_DATES(WikiPageLinkFinder::isDate);
 
     // a method to IGNORE links by (if it's true, the link is filtered out)
     private Predicate<String> method;
@@ -43,6 +48,24 @@ public class WikiPageLinkFinder implements LinkFinder<WikiPage> {
     boolean test(String url) {
       return method.test(url);
     }
+  }
+
+  private static final List<String> MONTHS =
+      ImmutableList.of("january", "february", "narch", "april", "may", "june",
+          "july", "august", "september", "october", "november", "december");
+
+  static boolean isDate(String url) {
+    String[] name = Page.urlEnd(url).split("_|\\s+");
+
+    if (name.length >= 2 && MONTHS.contains(name[0].toLowerCase())) {
+      try {
+        Integer.parseInt(name[1]);
+        return true;
+      } catch (NumberFormatException e) {
+        return false;
+      }
+    }
+    return false;
   }
 
   /**
