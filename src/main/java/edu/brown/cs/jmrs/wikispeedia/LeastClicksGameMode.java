@@ -40,12 +40,11 @@ public class LeastClicksGameMode implements WikiGameMode {
   @Override
   public Set<WikiPlayer> checkForWinners(WikiLobby lobby) {
     if (ended(lobby)) {
-      // this should be true when lobby is ended in this mode
-      assert lobby.getConnectedPlayers().size() == Functional
-          .filter(lobby.getConnectedPlayers(), WikiPlayer::done).size();
-
       // sort by path length
       Queue<WikiPlayer> done = getDoneSorted(lobby);
+
+      // this should be true when lobby is ended in this mode
+      assert lobby.getConnectedPlayers().size() == done.size();
 
       // remove all those that are not equal (in case this was called
       // after others are done)
@@ -108,7 +107,6 @@ public class LeastClicksGameMode implements WikiGameMode {
       throw new IllegalStateException("Lobby has not ended.");
     }
 
-    // if there are no players (a completely expired lobby), just send null
     if (wikiLobby.getConnectedPlayers().size() > 0) {
       // get last player's end time
       assert wikiLobby.getConnectedPlayers().get(0).done();
@@ -122,6 +120,7 @@ public class LeastClicksGameMode implements WikiGameMode {
       }
       return laggardTime;
     }
+    // if there are no players (a completely expired lobby), just send null
     return null;
   }
 }

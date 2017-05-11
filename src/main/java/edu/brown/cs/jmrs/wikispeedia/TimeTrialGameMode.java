@@ -2,12 +2,14 @@ package edu.brown.cs.jmrs.wikispeedia;
 
 import java.time.Instant;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.PriorityQueue;
 import java.util.Queue;
 import java.util.Set;
 
 import com.google.common.collect.ImmutableSet;
 
+import edu.brown.cs.jmrs.ui.Main;
 import edu.brown.cs.jmrs.web.ContentFormatter;
 import edu.brown.cs.jmrs.web.LinkFinder;
 import edu.brown.cs.jmrs.web.wikipedia.WikiPage;
@@ -37,7 +39,8 @@ public class TimeTrialGameMode implements WikiGameMode {
 
   @Override
   public Set<WikiPlayer> checkForWinners(WikiLobby lobby) {
-    // sort by play time
+    // sort by play time (there should only be one who is done() and has less,
+    // but check anyways)
     Queue<WikiPlayer> done =
         new PriorityQueue<>(
             (p1, p2) -> p1.getPlayTime().compareTo(p2.getPlayTime()));
@@ -54,8 +57,10 @@ public class TimeTrialGameMode implements WikiGameMode {
       } else if (done.size() == 1) {
         return ImmutableSet.of(done.peek());
       } else {
-        throw new IllegalStateException(
-            "More than two people were done when checking for winners");
+        Main.debugLog(
+            "More than two people were done when checking for winners: "
+                + done);
+        return new HashSet<>(done);
       }
     } else {
       return lobby.getWinners();
@@ -64,7 +69,7 @@ public class TimeTrialGameMode implements WikiGameMode {
 
   @Override
   public boolean ended(WikiLobby wikiLobby) {
-    // if any players is done
+    // if any connected player is done
     for (WikiPlayer player : wikiLobby.getConnectedPlayers()) {
       if (player.done()) {
         return true;

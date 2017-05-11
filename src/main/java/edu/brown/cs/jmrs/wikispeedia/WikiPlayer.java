@@ -138,13 +138,11 @@ public class WikiPlayer {
   }
 
   /**
-   * @return The time this player started.
+   * @return The time the lobby this player is in started, or null if not
+   *         started.
    */
   public final Instant getStartTime() {
-    // Main.debugLog(String.format("Player start: %s | lobby start: %s",
-    // startTime,
-    // lobby.getStartTime()));
-    assert lobby.getStartTime().equals(startTime);
+    assert startTime.equals(lobby.getStartTime());
     return startTime;
   }
 
@@ -165,8 +163,10 @@ public class WikiPlayer {
    * @throws IllegalStateException
    *           If the lobby has not been started.
    */
-  public final Duration getPlayTime() {
-    return Duration.between(startTime, done() ? endTime : Instant.now());
+  public synchronized Duration getPlayTime() {
+    // done() is equivalent to endTime != null
+    assert startTime.equals(lobby.getStartTime());
+    return Duration.between(startTime, done() ? getEndTime() : Instant.now());
   }
 
   /**
@@ -253,9 +253,10 @@ public class WikiPlayer {
    * @param startTime
    *          The startTime to set
    */
-  public void setStartTime(Instant startTime) {
+  void setStartTime(Instant startTime) {
     assert this.startTime == null;
     assert startTime != null;
+    assert startTime.equals(lobby.getStartTime());
     this.startTime = startTime;
     path.setStartTime(startTime);
   }

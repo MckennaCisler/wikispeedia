@@ -183,7 +183,7 @@ public class WikiLobby implements Lobby {
   }
 
   @Override
-  public void addClient(String playerId) {
+  public synchronized void addClient(String playerId) {
     if (started()) {
       Command.sendError(server, playerId,
           "Game has already started, cannot add player");
@@ -247,7 +247,6 @@ public class WikiLobby implements Lobby {
    * @return Whether the lobby has ended, based on its internal game mode.
    */
   public boolean ended() {
-    // winners = gameMode.checkForWinners(this);
     return gameMode.ended(this);
   }
 
@@ -489,13 +488,13 @@ public class WikiLobby implements Lobby {
   }
 
   @Override
-  public void removeClient(String playerId) {
+  public synchronized void removeClient(String playerId) {
     this.players.remove(playerId);
     Command.sendAllPlayers(this);
 
     boolean closeLobby = true;
 
-    for (WikiPlayer player : players.values().toArray(new WikiPlayer[] {})) {
+    for (WikiPlayer player : players.values()) {
       if (player.connected()) {
         closeLobby = false;
         break;
@@ -555,17 +554,17 @@ public class WikiLobby implements Lobby {
    */
   public void start(boolean force) {
     if (!force) {
-      for (Entry<String, WikiPlayer> entry : players.entrySet()) {
-        if (!entry.getValue().ready()) {
-          throw new IllegalStateException(String
-              .format("Player %s is not ready", entry.getValue().getName()));
+      // only connected players
+      for (WikiPlayer player : getConnectedPlayers()) {
+        if (!player.ready()) {
+          throw new IllegalStateException(
+              String.format("Player %s is not ready", player.getName()));
         }
       }
     }
     // this is how we determine whether started
     startTime = Instant.now().plusSeconds(START_DELAY);
 
-    // notify players
     for (Entry<String, WikiPlayer> entry : players.entrySet()) {
       entry.getValue().setStartTime(startTime);
     }
@@ -583,7 +582,9 @@ public class WikiLobby implements Lobby {
    */
   public void stop() {
     assert gameMode.ended(this);
+    // all players
     for (Entry<String, WikiPlayer> entry : players.entrySet()) {
+      // !done() equivalent to endTime == null
       if (!entry.getValue().done()) {
         entry.getValue().setEndTime(getEndTime());
       }

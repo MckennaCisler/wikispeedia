@@ -22,101 +22,39 @@ import com.google.gson.JsonObject;
 
 import edu.brown.cs.jmrs.server.InputError;
 import edu.brown.cs.jmrs.ui.Main;
-import edu.brown.cs.jmrs.web.wikipedia.FakeServer;
 import edu.brown.cs.jmrs.web.wikipedia.WikiPage;
 
 /**
  * An oracle tester to randomly generate games and runs them through WikiLobby.
  *
+ * NOTE: The probabilities in this are finely tuned to make sure games finish in
+ * a reasonable time. There are many that are VERY hard to tune!
+ *
  * @author mcisler
  */
 public class WikiGameOracle {
-  private static final int NUM_LOBBIES_TO_TEST = 8;
+  private static final int NUM_LOBBIES_TO_TEST = 1;
 
-  private static List<WikiPage> samplePages = new ArrayList<>();
-
-  static {
-    samplePages.add(WikiPage.fromName("Gilbert_Strang"));
-    samplePages.add(WikiPage.fromName("Thai_solar_calendar"));
-    samplePages.add(WikiPage.fromName("Collectivization_in_Romania"));
-    samplePages.add(WikiPage.fromName("Charles_Dupuy"));
-    samplePages
-        .add(WikiPage.fromName("French_Maastricht_Treaty_referendum,_1992"));
-    samplePages.add(WikiPage.fromName("Recep_Tayyip_Erdoğan"));
-    samplePages.add(WikiPage.fromName("Hotak_dynasty"));
-    samplePages.add(WikiPage.fromName("Cabinet_Office_Briefing_Room"));
-    samplePages.add(WikiPage.fromName("Stephen_Mallory"));
-    samplePages.add(WikiPage.fromName("Genuine_Risk"));
-    samplePages.add(WikiPage.fromName("Porphyria"));
-    samplePages
-        .add(WikiPage.fromName("List_of_diplomatic_missions_in_Georgia"));
-    samplePages.add(WikiPage.fromName("French_Open"));
-    samplePages.add(WikiPage.fromName("Pakistani_cuisine"));
-    samplePages.add(WikiPage.fromName("Reptiles"));
-    samplePages.add(WikiPage.fromName("Spectrum_Sports,_Inc._v._McQuillan"));
-    samplePages.add(WikiPage.fromName("Donn_Handicap"));
-    samplePages.add(WikiPage.fromName("Demographics_of_Cuba"));
-    samplePages.add(WikiPage.fromName("Don_Adams"));
-    samplePages.add(WikiPage.fromName("Ghaznavids"));
-    samplePages.add(
-        WikiPage.fromName("Institute_of_Electrical_and_Electronics_Engineers"));
-    samplePages.add(WikiPage.fromName("Dewan"));
-    samplePages.add(WikiPage.fromName("501(c)(3)"));
-    samplePages.add(WikiPage.fromName("Narasimhaiengar_Mukunda"));
-    samplePages.add(WikiPage.fromName("Anti-Secession_Law"));
-    samplePages.add(WikiPage.fromName("Soviet_war_in_Afghanistan"));
-    samplePages.add(WikiPage.fromName("Governor_of_Nevada"));
-    samplePages.add(WikiPage.fromName("Sainte-Foy,_Quebec_City"));
-    samplePages.add(WikiPage.fromName("Al-Qata'i"));
-    samplePages.add(WikiPage.fromName("Swale_(horse)"));
-    samplePages.add(WikiPage.fromName("Doctoral_advisor"));
-    samplePages.add(WikiPage.fromName("Vijay_Balakrishna_Shenoy"));
-    samplePages.add(WikiPage.fromName("Cavalry_in_the_American_Civil_War"));
-    samplePages.add(WikiPage.fromName("Automobile_Dacia"));
-    samplePages.add(WikiPage.fromName("Formant"));
-    samplePages.add(WikiPage.fromName("Albert_Smith_White"));
-    samplePages.add(WikiPage.fromName("Georgian_art"));
-    samplePages.add(WikiPage.fromName("Federal_War"));
-    samplePages.add(WikiPage.fromName("Résistons!"));
-    samplePages.add(WikiPage.fromName("University_of_Karachi"));
-    samplePages.add(WikiPage.fromName("Washington_D.C."));
-    samplePages.add(WikiPage.fromName("Neville_Chamberlain"));
-    samplePages.add(WikiPage.fromName("Transportation_in_the_Philippines"));
-    samplePages.add(WikiPage.fromName("Civil_Rights_Act_of_1875"));
-    samplePages.add(WikiPage.fromName("Civil_Rights_Act_of_1866"));
-    samplePages.add(WikiPage.fromName("Bărăgan_Plain"));
-    samplePages.add(WikiPage.fromName("David_Lidington"));
-    samplePages.add(
-        WikiPage.fromName("List_of_U.S._counties_named_after_U.S._Presidents"));
-    samplePages.add(WikiPage.fromName("Battle_of_Coamo"));
-    samplePages.add(WikiPage.fromName("Baotou"));
-    samplePages.add(WikiPage.fromName("Battle_of_Ponta_Delgada"));
-    samplePages.add(WikiPage.fromName("Law_school"));
-    samplePages.add(WikiPage.fromName("Henry_Bilson-Legge"));
-    samplePages.add(WikiPage.fromName("2013–14_Tunisian_political_crisis"));
-    samplePages.add(WikiPage.fromName("Guerrilla_warfare"));
-    samplePages.add(WikiPage.fromName("Ben_Brush"));
-    samplePages.add(WikiPage.fromName("Australia"));
-    samplePages.add(WikiPage.fromName("Georgian_era"));
-    samplePages.add(WikiPage.fromName("European_Single_Market"));
-  }
-
-  private static final int NUM_TIME_TRIAL_GEN_PLAYERS = 3;
+  private static final int NUM_TIME_TRIAL_GEN_PLAYERS = 16;
+  private static final int TIME_TRIAL_GAME_PAGE_DIST  = 1;
 
   /**
    * The oracle for time trial oracle.
    */
   @Test
   public void timeTrialOracle() {
-    for (int i = 0; i < NUM_LOBBIES_TO_TEST; i++) {
-      WikiGame game = getGame();
-      WikiLobby lobby =
-          getLobby(WikiGameMode.Mode.TIME_TRIAL, NUM_TIME_TRIAL_GEN_PLAYERS,
-              game);
-      setupPlayers(lobby);
-      // don't have to start because all ready
-      assertTrue(lobby.started());
-      playGame(lobby, game, this::checkTimeTrialEndState);
+    // don't run normally
+    if (Main.DEBUG) {
+      for (int i = 0; i < NUM_LOBBIES_TO_TEST; i++) {
+        WikiGame game = getGame(TIME_TRIAL_GAME_PAGE_DIST);
+        WikiLobby lobby =
+            getLobby(WikiGameMode.Mode.TIME_TRIAL, NUM_TIME_TRIAL_GEN_PLAYERS,
+                game);
+        setupPlayers(lobby);
+        // don't have to start because all ready
+        assertTrue(lobby.started());
+        playGame(lobby, game, this::checkTimeTrialEndState);
+      }
     }
   }
 
@@ -125,23 +63,28 @@ public class WikiGameOracle {
    */
   @Test
   public void timeTrialOracleForced() {
-    for (int i = 0; i < NUM_LOBBIES_TO_TEST; i++) {
-      WikiGame game = getGame();
-      WikiLobby lobby =
-          getLobby(WikiGameMode.Mode.TIME_TRIAL, NUM_TIME_TRIAL_GEN_PLAYERS,
-              game);
-      setupPlayersForce(lobby);
-      // watch for odd chance
-      if (!lobby.started()) {
-        lobby.start(true);
+    // don't run normally
+    if (Main.DEBUG) {
+      for (int i = 0; i < NUM_LOBBIES_TO_TEST; i++) {
+        WikiGame game = getGame(TIME_TRIAL_GAME_PAGE_DIST);
+        WikiLobby lobby =
+            getLobby(WikiGameMode.Mode.TIME_TRIAL, NUM_TIME_TRIAL_GEN_PLAYERS,
+                game);
+        setupPlayersForce(lobby);
+        // on the likely chance they weren't all ready
+        if (!lobby.started()) {
+          lobby.start(true);
+        }
+        assertTrue(lobby.started());
+        playGame(lobby, game, this::checkTimeTrialEndState);
       }
-      assertTrue(lobby.started());
-      playGame(lobby, game, this::checkTimeTrialEndState);
     }
   }
 
   private void checkTimeTrialEndState(WikiLobby lobby) {
-    // TODO Test players leaving?
+    for (WikiPlayer player : lobby.getAllPlayers()) {
+      setDisconnectedWithProb(lobby, player, END_GAME_DISCONNECT_PROB);
+    }
 
     assertTrue(lobby.started());
     assertTrue(lobby.ended());
@@ -168,25 +111,33 @@ public class WikiGameOracle {
   }
 
   private static final int NUM_LEAST_CLICKS_GEN_PLAYERS = 3;
+  private static final int LEAST_CLICKS_GAME_PAGE_DIST  = 1;
 
   /**
    * The oracle for least clicks game mode.
    */
   @Test
   public void leastClicksOracle() {
-    for (int i = 0; i < NUM_LOBBIES_TO_TEST; i++) {
-      WikiGame game = getGame();
-      WikiLobby lobby =
-          getLobby(WikiGameMode.Mode.LEAST_CLICKS, NUM_LEAST_CLICKS_GEN_PLAYERS,
-              game);
-      setupPlayers(lobby);
-      // don't have to start because all ready
-      assertTrue(lobby.started());
-      playGame(lobby, game, this::checkLeastClicksEndState);
+    // don't run normally
+    if (Main.DEBUG) {
+      for (int i = 0; i < NUM_LOBBIES_TO_TEST; i++) {
+        WikiGame game = getGame(LEAST_CLICKS_GAME_PAGE_DIST);
+        WikiLobby lobby =
+            getLobby(WikiGameMode.Mode.LEAST_CLICKS,
+                NUM_LEAST_CLICKS_GEN_PLAYERS, game);
+        setupPlayers(lobby);
+        // don't have to start because all ready
+        assertTrue(lobby.started());
+        playGame(lobby, game, this::checkLeastClicksEndState);
+      }
     }
   }
 
   private void checkLeastClicksEndState(WikiLobby lobby) {
+    for (WikiPlayer player : lobby.getAllPlayers()) {
+      setDisconnectedWithProb(lobby, player, END_GAME_DISCONNECT_PROB);
+    }
+
     assertTrue(lobby.started());
     assertTrue(lobby.ended());
     assertTrue(lobby.getWinners().size() > 0);
@@ -216,21 +167,30 @@ public class WikiGameOracle {
     }
   }
 
-  private static final double INITIAL_DISCONNECT_PROB = 0.05; // this has fewer
-                                                              // iterations
-  private static final double IN_GAME_DISCONNECT_PROB = 0.02;
-  private static final int    MAX_TURNS               = 500;
-  private static final double PLAYER_GO_FORWARD_PROB  = 0.9;
-  private static final double PLAYER_GO_BACK_PROB     = 0.15;
-  private static final double BAD_PLAYER_PAGE_PROB    = 0.075;
-  private static final double GO_TO_VISITED_PROB      = 0.1;  // speed issue
+  private static final double INITIAL_DISCONNECT_PROB = 0.025; // this
+  // has fewer
+  // iterations
+  private static final double IN_GAME_DISCONNECT_PROB  = 0.05;
+  private static final double END_GAME_DISCONNECT_PROB = 0.1; // get
+  // some
+  // reconnects
+  private static final int    MAX_TURNS              = 500;
+  private static final double BAD_PLAYER_PAGE_PROB   = 0.075;
+  private static final double PLAYER_GO_FORWARD_PROB = 0.9;
+  private static final double PLAYER_GO_BACK_PROB    = 0.25; // not getting
+                                                             // stuck
+  private static final double GO_TO_VISITED_PROB     = 0.2;  // speed issue
 
   private void playGame(WikiLobby lobby, WikiGame game,
       Consumer<WikiLobby> endCb) {
+    assertTrue(lobby.started());
     int turn = 0;
     while (turn < MAX_TURNS) {
       for (WikiPlayer player : lobby.getConnectedPlayers()) {
-        assertEquals(lobby.getPlayTime(), player.getPlayTime()); // TODO: !!!!
+        assertTrue(lobby.started());
+        // make sure to use duration overridden equals
+        // assertTrue(lobby.getPlayTime().equals(player.getPlayTime())); //
+        // TODO:?
 
         // disconnect some
         setDisconnectedWithProb(lobby, player, IN_GAME_DISCONNECT_PROB);
@@ -240,66 +200,69 @@ public class WikiGameOracle {
           return;
         }
 
-        if (withProb(PLAYER_GO_FORWARD_PROB)) {
-          WikiPage prevPage = player.getCurPage();
-          try {
-            WikiPage pageToGoTo;
-            if (withProb(BAD_PLAYER_PAGE_PROB)) {
-              pageToGoTo = getRandomPage(game.getSpace());
-            } else {
-              // don't go to one's in path if we can help it
-              do {
-                pageToGoTo =
-                    getRandomLink(player.getCurPage(), game.getSpace());
-              } while (player.getPath().contains(pageToGoTo)
-                  && !withProb(GO_TO_VISITED_PROB)); // invert to break
-            }
+        // for least clicks mode where it won't end
+        if (!player.getCurPage().equalsAfterRedirectSafe(lobby.getGoalPage())) {
+          if (withProb(PLAYER_GO_FORWARD_PROB)) {
+            WikiPage prevPage = player.getCurPage();
+            try {
+              WikiPage pageToGoTo;
+              if (withProb(BAD_PLAYER_PAGE_PROB)) {
+                pageToGoTo = getRandomPage(game.getSpace());
+              } else {
+                // don't go to one's in path if we can help it
+                do {
+                  pageToGoTo = getRandomLink(player, game.getSpace());
+                } while (player.getPath().contains(pageToGoTo)
+                    && !withProb(GO_TO_VISITED_PROB)); // invert to break
+              }
 
-            // may need to consider other option here
-            if (player.goToPage(pageToGoTo)) {
-              assertTrue(
-                  pageToGoTo.equalsAfterRedirectSafe(player.getCurPage()));
-            } else {
+              // may need to consider other option here
+              if (player.goToPage(pageToGoTo)) {
+                assertTrue(
+                    pageToGoTo.equalsAfterRedirectSafe(player.getCurPage()));
+              } else {
+                assertTrue(
+                    prevPage.equalsAfterRedirectSafe(player.getCurPage()));
+              }
+            } catch (IOException e) {
+              // just ignore
               assertTrue(prevPage.equalsAfterRedirectSafe(player.getCurPage()));
             }
-          } catch (IOException e) {
-            // just ignore
-            assertTrue(prevPage.equalsAfterRedirectSafe(player.getCurPage()));
-          }
-        }
-
-        // break on end
-        if (lobby.ended()) {
-          endCb.accept(lobby);
-          return;
-        }
-
-        if (withProb(PLAYER_GO_BACK_PROB)) {
-          WikiPage pageToGoBackTo;
-          if (withProb(BAD_PLAYER_PAGE_PROB)) {
-            pageToGoBackTo = getRandomPage(game.getSpace());
-          } else {
-            pageToGoBackTo =
-                player.getPath()
-                    .get((int) (Math.random() * player.getPathLength()))
-                    .getPage();
           }
 
-          WikiPage prevPage = player.getCurPage();
-          try {
-            player.goBackPage(pageToGoBackTo);
-            assertTrue(
-                pageToGoBackTo.equalsAfterRedirectSafe(player.getCurPage()));
-          } catch (IOException e) {
-            // just ignore
-            assertTrue(prevPage.equalsAfterRedirectSafe(player.getCurPage()));
-          } catch (NoSuchElementException e) {
-            assertTrue(prevPage.equalsAfterRedirectSafe(player.getCurPage()));
+          // break on end
+          if (lobby.ended()) {
+            endCb.accept(lobby);
+            return;
           }
-        }
 
-        // shouldn't be able to end on a back
-        assertTrue(!lobby.ended());
+          if (withProb(PLAYER_GO_BACK_PROB)) {
+            WikiPage pageToGoBackTo;
+            if (withProb(BAD_PLAYER_PAGE_PROB)) {
+              pageToGoBackTo = getRandomPage(game.getSpace());
+            } else {
+              pageToGoBackTo =
+                  player.getPath()
+                      .get((int) (Math.random() * player.getPathLength()))
+                      .getPage();
+            }
+
+            WikiPage prevPage = player.getCurPage();
+            try {
+              player.goBackPage(pageToGoBackTo);
+              assertTrue(
+                  pageToGoBackTo.equalsAfterRedirectSafe(player.getCurPage()));
+            } catch (IOException e) {
+              // just ignore
+              assertTrue(prevPage.equalsAfterRedirectSafe(player.getCurPage()));
+            } catch (NoSuchElementException e) {
+              assertTrue(prevPage.equalsAfterRedirectSafe(player.getCurPage()));
+            }
+          }
+
+          // shouldn't be able to end on a back
+          assertTrue(!lobby.ended());
+        }
       }
       turn++;
     }
@@ -358,13 +321,6 @@ public class WikiGameOracle {
     }
     generatePlayers(lobby, numPlayers);
 
-    System.out
-        .println(
-            String.format("Generated %s lobby with %d players (%s -> %s) :",
-                mode.equals(WikiGameMode.Mode.TIME_TRIAL) ? "time trial"
-                    : "least clicks",
-                numPlayers, game.getStart(), game.getGoal()));
-
     return lobby;
   }
 
@@ -389,26 +345,36 @@ public class WikiGameOracle {
    * Page getters.
    */
 
-  private WikiPage getRandomLink(WikiPage curPage, Set<WikiPage> possible) {
+  private static final double LOOKAHEAD_PROB = 0.75;
+
+  private WikiPage getRandomLink(WikiPlayer player, Set<WikiPage> possible) {
     Set<WikiPage> links;
     try {
-      links = WikiLobby.DEFAULT_LINK_FINDER.linkedPages(curPage);
+      links = WikiLobby.DEFAULT_LINK_FINDER.linkedPages(player.getCurPage());
 
+      // NOTE: Ensure that virtual players get the link when the get on a page
+      // with it
       for (WikiPage link : links) {
-        if (possible.contains(link)) {
+        // too slow to try for full equality
+        if (player.getLobby().getGoalPage().equals(link)) {
           return link;
         }
       }
+
+      for (WikiPage link : links) {
+        if (possible.contains(link) && !withProb(LOOKAHEAD_PROB)) {
+          return link;
+        }
+      }
+
     } catch (IOException e) {
       // do nothing
     }
-    return curPage;
+    return player.getCurPage();
   }
 
-  private static final int GAME_PAGE_DIST = 5;
-
-  private WikiGame getGame() {
-    return GameGenerator.ofDist(GAME_PAGE_DIST, true);
+  private WikiGame getGame(int ofDist) {
+    return GameGenerator.ofDist(ofDist, true);
   }
 
   private WikiPage getRandomPage(Set<WikiPage> possible) {

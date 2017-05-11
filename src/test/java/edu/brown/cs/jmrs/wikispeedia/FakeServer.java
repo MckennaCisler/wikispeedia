@@ -1,4 +1,4 @@
-package edu.brown.cs.jmrs.web.wikipedia;
+package edu.brown.cs.jmrs.wikispeedia;
 
 import org.eclipse.jetty.websocket.api.Session;
 
