@@ -179,14 +179,19 @@ public class WikiPage extends Page {
 
   private String getBlurbFrom(Element doc) {
     String para = "";
-    Elements paragraphs = doc.select("#mw-content-text p");
+    Elements paragraphs = doc.select("#mw-content-text > p");
     // weird edge case
     paragraphs.addAll(doc.select("#mw-parser-output > p"));
-    int i = 0;
-    while (i < paragraphs.size() && para.equals("")) {
-      para = paragraphs.get(i++).text();
+
+    if (paragraphs.size() > 0) {
+      int i = 0;
+      do {
+        para = paragraphs.get(i++).text();
+      } while (i < paragraphs.size() && para.equals(""));
+      return para;
     }
-    return para;
+    // nothing to do
+    return "";
   }
 
   /**
