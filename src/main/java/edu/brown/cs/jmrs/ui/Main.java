@@ -41,7 +41,7 @@ import spark.Spark;
 public final class Main {
   public static final int      DEFAULT_SPARK_PORT  = 4567;
   public static final int      DEFAULT_SOCKET_PORT = 4568;
-  public static final boolean  DEBUG               = true;
+  public static final boolean  DEBUG               = false;
   private static final boolean VERBOSE_LOG         = true;
 
   /**
@@ -70,7 +70,7 @@ public final class Main {
   /**
    * Cache for the internals of WikiPages.
    */
-  static final int MAX_WIKI_CACHE_SIZE       = 50;
+  static final int MAX_WIKI_CACHE_SIZE       = 40;
   static final int WIKIPAGE_EVICTION_TIMEOUT = 12; // hours
 
   public static final LoadingCache<String, Document> WIKI_PAGE_DOC_CACHE =

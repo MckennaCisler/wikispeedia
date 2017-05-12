@@ -15,6 +15,7 @@ import com.google.gson.JsonSerializer;
 
 import edu.brown.cs.jmrs.ui.Main;
 import edu.brown.cs.jmrs.web.wikipedia.WikiPage;
+import edu.brown.cs.jmrs.wikispeedia.comms.Command;
 
 /**
  * A player in a Wiki lobby, storing state information about their curPage page
@@ -37,9 +38,9 @@ public class WikiPlayer {
    * State variables (endTime is only set upon completion).
    */
   private final boolean     isLeader;
-  private transient Instant startTime;
-  private transient Instant endTime;
-  private boolean           ready;    // for match starting
+  private transient Instant startTime = null;
+  private transient Instant endTime   = null;
+  private boolean           ready;           // for match starting
   private boolean           connected;
 
   /**
@@ -59,12 +60,12 @@ public class WikiPlayer {
    *          Whether this player started their lobby.
    */
   public WikiPlayer(String id, WikiLobby lobby, boolean isLeader) {
-    super();
     this.isLeader = isLeader;
     ready = false;
     connected = true;
     this.id = id;
     this.name = "";
+    assert lobby != null;
     this.lobby = lobby;
     this.startPage = lobby.getStartPage();
     this.goalPage = lobby.getGoalPage();
@@ -122,8 +123,8 @@ public class WikiPlayer {
   }
 
   /**
-   * @return Whether the player has finished a game. Indicated internally by the
-   *         state of endTime.
+   * @return Whether the player has finished a game, whether they won or not.
+   *         Indicated internally by the state of endTime.
    */
   public boolean done() {
     return endTime != null;
@@ -137,12 +138,11 @@ public class WikiPlayer {
   }
 
   /**
-   * @return The time this player started.
+   * @return The time the lobby this player is in started, or null if not
+   *         started.
    */
   public final Instant getStartTime() {
-    Main.debugLog(String.format("Player start: %s | lobby start: %s", startTime,
-        lobby.getStartTime()));
-    assert lobby.getStartTime().equals(startTime);
+    assert startTime.equals(lobby.getStartTime());
     return startTime;
   }
 
@@ -163,8 +163,10 @@ public class WikiPlayer {
    * @throws IllegalStateException
    *           If the lobby has not been started.
    */
-  public final Duration getPlayTime() {
-    return Duration.between(startTime, done() ? endTime : Instant.now());
+  public synchronized Duration getPlayTime() {
+    // done() is equivalent to endTime != null
+    assert startTime.equals(lobby.getStartTime());
+    return Duration.between(startTime, done() ? getEndTime() : Instant.now());
   }
 
   /**
@@ -215,6 +217,9 @@ public class WikiPlayer {
    */
   public synchronized void setReady(boolean ready) {
     this.ready = ready;
+
+    // update other players in lobby and possibly start game
+    lobby.checkAllReady();
   }
 
   /**
@@ -229,14 +234,14 @@ public class WikiPlayer {
    */
   synchronized boolean checkIfDone(Instant endTimeIfSo) throws IOException {
     if (done()) {
-      throw new IllegalStateException(
-          String.format("Player %s has already reached the goal", name));
+      return true;
     }
     assert getCurPage() != null;
     assert goalPage != null;
 
     if (getCurPage().equalsAfterRedirect(goalPage)) {
       this.endTime = endTimeIfSo;
+      assert done();
       return true;
     }
     return false;
@@ -248,9 +253,10 @@ public class WikiPlayer {
    * @param startTime
    *          The startTime to set
    */
-  public void setStartTime(Instant startTime) {
+  void setStartTime(Instant startTime) {
     assert this.startTime == null;
     assert startTime != null;
+    assert startTime.equals(lobby.getStartTime());
     this.startTime = startTime;
     path.setStartTime(startTime);
   }
@@ -286,6 +292,10 @@ public class WikiPlayer {
         path.add(page);
       }
       checkIfDone(Instant.now());
+
+      // upon success, check for winner in lobby and notify people
+      lobby.checkForWinner();
+      Command.sendAllPlayers(lobby);
       return true;
     }
     return false;
@@ -306,9 +316,9 @@ public class WikiPlayer {
       if (goToPage(page)) {
         return;
       }
-      throw new NoSuchElementException(
-          String.format("Page %s not in player %s's history or available ahead",
-              page.getName(), name));
+      throw new NoSuchElementException(String.format(
+          "Page %s neither in player's history nor available ahead",
+          page.getName(), name));
     }
 
     WikiPage prevPage;
@@ -319,6 +329,12 @@ public class WikiPlayer {
 
     // add the found prevPage to the path
     path.add(prevPage);
+
+    // if by some magic we've become done, note it
+    checkIfDone(Instant.now());
+
+    // let people know
+    Command.sendAllPlayers(lobby);
   }
 
   private void checkLobbyState() {
@@ -328,7 +344,7 @@ public class WikiPlayer {
       throw new IllegalStateException("Lobby has ended");
     } else if (done()) {
       throw new IllegalStateException(
-          String.format("Player %s has already reached the goal", name));
+          "Cannot move; goal has already been reached");
     }
   }
 

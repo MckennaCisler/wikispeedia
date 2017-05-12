@@ -27,5 +27,6 @@ function my_alert_cb(alertText, callback) {
 }
 
 function clear_my_alert() {
+	// $(`.alert-msg`).modal('hide');
 	$(`.alert-msg .close`).click();
 }
