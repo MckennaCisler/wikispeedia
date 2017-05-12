@@ -25,7 +25,7 @@ public class AllLinkFinder<P extends Page> implements LinkFinder<P> {
   }
 
   @Override
-  public Set<String> links(Page page) throws IOException {
+  public Set<String> links(P page) throws IOException {
     return linkFinderMethod.links(page);
   }
 

@@ -18,6 +18,7 @@ import edu.brown.cs.jmrs.io.db.DbWriter;
 import edu.brown.cs.jmrs.io.db.Insert;
 import edu.brown.cs.jmrs.io.db.Query;
 import edu.brown.cs.jmrs.ui.Main;
+import edu.brown.cs.jmrs.web.ContentFormatter;
 import edu.brown.cs.jmrs.web.Link;
 import edu.brown.cs.jmrs.web.Page;
 import edu.brown.cs.jmrs.web.wikipedia.WikiPage;
@@ -58,14 +59,17 @@ public class CachingWikiLinkFinder extends WikiPageLinkFinder {
    *
    * @param conn
    *          The conn to use to query/update the WikiPage and Link database.
+   * @param formatter
+   *          The formatter to use before finding links.
    * @param filters
    *          A series of filters to ignore links by.
    * @throws SQLException
    *           If the required table could not be created.
    */
-  public CachingWikiLinkFinder(DbConn conn, Filter... filters)
+  public CachingWikiLinkFinder(DbConn conn,
+      ContentFormatter<WikiPage> formatter, Filter... filters)
       throws SQLException {
-    super(filters);
+    super(formatter, filters);
     lookup =
         conn.makeQuery("SELECT * FROM links WHERE start=?", LINK_READER, true);
     cacher =
@@ -86,15 +90,18 @@ public class CachingWikiLinkFinder extends WikiPageLinkFinder {
    * @param cacheWorkerExecutionPercentage
    *          The desired percentage of CPU time the DB caching worker threads
    *          use.
+   * @param formatter
+   *          The formatter to use before finding links.
    * @param filters
    *          A series of filters to ignore links by.
    * @throws SQLException
    *           If the required table could not be created.
    */
   public CachingWikiLinkFinder(DbConn conn,
-      double cacheWorkerExecutionPercentage, Filter... filters)
+      double cacheWorkerExecutionPercentage,
+      ContentFormatter<WikiPage> formatter, Filter... filters)
       throws SQLException {
-    super(filters);
+    super(formatter, filters);
     lookup =
         conn.makeQuery("SELECT * FROM links WHERE start=?", LINK_READER, true);
     cacher =

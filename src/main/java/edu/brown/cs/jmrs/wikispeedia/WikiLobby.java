@@ -126,8 +126,9 @@ public class WikiLobby implements Lobby {
       try {
         DEFAULT_LINK_FINDER =
             new CachingWikiLinkFinder(Main.getWikiDbConn(),
-                CACHING_THREAD_CPU_USAGE, Filter.DISAMBIGUATION,
-                Filter.NON_ENGLISH_WIKIPEDIA, Filter.NO_DATES);
+                CACHING_THREAD_CPU_USAGE, DEFAULT_CONTENT_FORMATTER,
+                Filter.DISAMBIGUATION, Filter.NON_ENGLISH_WIKIPEDIA,
+                Filter.NO_DATES);
       } catch (SQLException e) {
         throw new AssertionError("Could not initialize wikipedia database", e);
       }
