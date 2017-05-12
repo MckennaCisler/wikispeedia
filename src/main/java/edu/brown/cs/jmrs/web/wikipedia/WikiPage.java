@@ -28,8 +28,6 @@ import edu.brown.cs.jmrs.web.Page;
  */
 public class WikiPage extends Page {
 
-  // TODO Optimize with Pattern.compile() among others :
-  // http://www.javaworld.com/article/2077757/core-java/optimizing-regular-expressions-in-java.html?page=2
   public static final String WIKIPEDIA_ARTICLE_PREFIX =
       "https://en.wikipedia.org/wiki/";
 
@@ -164,14 +162,7 @@ public class WikiPage extends Page {
    *           If the page could not be reached or loaded.
    */
   public String getBlurb() throws IOException {
-    String para;
-    Elements paragraphs =
-        parsedContentOriginal().select("#mw-content-text > p");
-    int i = 0;
-    do {
-      para = paragraphs.get(i++).text();
-    } while (para.equals("") && i < paragraphs.size());
-    return para;
+    return getBlurbFrom(parsedContentOriginal());
   }
 
   /**
@@ -183,12 +174,18 @@ public class WikiPage extends Page {
    */
   public String getFormattedBlurb(ContentFormatter<WikiPage> formatter)
       throws IOException {
-    String para;
-    Elements paragraphs = formatter.format(this).select("#mw-content-text > p");
+    return getBlurbFrom(formatter.format(this));
+  }
+
+  private String getBlurbFrom(Element doc) {
+    String para = "";
+    Elements paragraphs = doc.select("#mw-content-text p");
+    // weird edge case
+    paragraphs.addAll(doc.select("#mw-parser-output > p"));
     int i = 0;
-    do {
+    while (i < paragraphs.size() && para.equals("")) {
       para = paragraphs.get(i++).text();
-    } while (para.equals("") && i < paragraphs.size());
+    }
     return para;
   }
 
@@ -283,49 +280,6 @@ public class WikiPage extends Page {
       root.addProperty("name", src.getName());
       // all we can do without actually getting it
       return root;
-    }
-  }
-
-  /**
-   * Main for general testing.
-   *
-   * @param args
-   *          The arguments of main, not used. (I'm really only doing this to
-   *          appease checkstyle. This comment has no point otherwise).
-   */
-  public static void main(String[] args) {
-    WikiPage start = new WikiPage(WIKIPEDIA_ARTICLE_PREFIX + "Cat");
-    try {
-      System.out.println(start.getTitle());
-      System.out.println(start.getBlurb());
-      start.parsedContent();
-      // System.out.println(start.getInnerContent());
-    } catch (IOException e) {
-      System.out.println(e.getMessage());
-    }
-
-    printLinks(start, 100);
-  }
-
-  private static void printLinks(WikiPage start, int depth) {
-    if (depth == 0) {
-      return;
-    }
-
-    try {
-      Set<WikiPage> links = new WikiPageLinkFinder().linkedPages(start);
-
-      for (WikiPage page : links) {
-        System.out.println(start.url() + " -> " + page.url());
-        // System.out.println(page.getTitle());
-        // System.out.println(page.getBlurb());
-        printLinks(page, depth - 1);
-      }
-      System.out.println(String.format("\t%d links found under %s",
-          links.size(), start.url()));
-    } catch (IOException e) {
-      e.printStackTrace();
-      return;
     }
   }
 }

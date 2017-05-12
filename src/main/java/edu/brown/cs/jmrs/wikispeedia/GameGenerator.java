@@ -2,9 +2,11 @@ package edu.brown.cs.jmrs.wikispeedia;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.Set;
 
 import com.google.common.base.Predicate;
+import com.google.common.collect.ImmutableSet;
 import com.google.common.primitives.Doubles;
 
 import edu.brown.cs.jmrs.ui.Main;
@@ -53,11 +55,11 @@ public final class GameGenerator {
   private static final double DEPTH_BREADTH_SEARCH_RATIO = 0.5;
 
   /**
-   * the distance (inclusive) between two obscurity value to be considered
-   * "equivalent". Increasing it may make generation slower and more
+   * The distance (inclusive) between two obscurity values to be considered
+   * "equivalent". Decreasing it may make generation slower and more
    * memory-intensive.
    */
-  private static final double OBSCURITY_EQUAL_RANGE = 0.1;
+  private static final double OBSCURITY_EQUAL_RANGE = 0.25;
 
   /**
    * The expected largest number of Wikipedia links on a page (under the
@@ -70,7 +72,7 @@ public final class GameGenerator {
    * where the link number has little to do with obscurity. Also these pages are
    * very rare and thus slow to find.
    */
-  private static final double MAX_NUM_OF_PAGE_LINKS = 2000;
+  private static final double MAX_NUM_OF_PAGE_LINKS = 1000;
 
   private GameGenerator() {
     // override default constructor
@@ -93,7 +95,7 @@ public final class GameGenerator {
       goal = pageWithObscurity(obscurity);
 
     } while (start.equalsAfterRedirectSafe(goal));
-    return new WikiGame(start, goal);
+    return new WikiGame(start, goal, ImmutableSet.of());
   }
 
   /**
@@ -122,20 +124,68 @@ public final class GameGenerator {
    * @return The WikiGame defined by both pages.
    */
   public static WikiGame ofDist(int pageDist) {
+    return ofDist(pageDist, false);
+  }
+
+  /**
+   * Generates a WikiGame (essentially pair of pages) the given distance apart.
+   *
+   * @param pageDist
+   *          The distance the pages should be apart.
+   * @param withSpace
+   *          Whether to include the space of pages found during generation.
+   * @return The WikiGame defined by both pages.
+   */
+  public static WikiGame ofDist(int pageDist, boolean withSpace) {
     WikiPage start = getRandomPage();
-    return new WikiGame(start, goDownFrom(start, pageDist));
+    if (withSpace) {
+      Set<WikiPage> space = new HashSet<>();
+      return new WikiGame(start, goDownFrom(start, pageDist, space), space);
+    } else {
+      return new WikiGame(start, goDownFrom(start, pageDist),
+          ImmutableSet.of());
+    }
   }
 
   /**************************************************************/
   /* Helpers for page traversal / basic generation */
   /**************************************************************/
 
-  private static WikiPage goDownFrom(WikiPage start, int depth) {
+  /**
+   * Goes down from start to a page at depth depth.
+   *
+   * @param start
+   *          The start page.
+   * @param depth
+   *          The depth to go down.
+   * @return The destination page.
+   */
+  public static WikiPage goDownFrom(WikiPage start, int depth) {
     if (depth == 0) {
       return start;
     }
 
     return goDownFrom(getRandomLink(start), depth - 1);
+  }
+
+  /**
+   * Goes down from start to a page at depth depth.
+   *
+   * @param start
+   *          The start page.
+   * @param depth
+   *          The depth to go down.
+   * @param space
+   *          The space list to populate on the way down.
+   * @return The destination page.
+   */
+  public static WikiPage goDownFrom(WikiPage start, int depth,
+      Set<WikiPage> space) {
+    if (depth == 0) {
+      return start;
+    }
+
+    return goDownFrom(getRandomLink(start, space), depth - 1, space);
   }
 
   /**
@@ -155,11 +205,17 @@ public final class GameGenerator {
     // don't check start because it will be later
     Set<WikiPage> pages = WIKI_LINK_FINDER.linkedPages(start);
 
+    if (pages.size() == 0) {
+      // defer upwards
+      throw new IOException("No valid pages found when cycling");
+    }
+
     for (WikiPage page : pages) {
       if (Math.random() > DEPTH_BREADTH_SEARCH_RATIO && stop.test(page)) {
         return page;
       }
     }
+
     return goDownFrom(
         new ArrayList<>(pages).get((int) (Math.random() * pages.size())), stop);
   }
@@ -196,7 +252,7 @@ public final class GameGenerator {
    *
    * @return A WikiPage off page that is guaranteed to be accessible.
    */
-  private static WikiPage getRandomLink(WikiPage page) {
+  static WikiPage getRandomLink(WikiPage page) {
     try {
       Set<String> links = WIKI_LINK_FINDER.links(page);
       int tries = 0;
@@ -216,10 +272,45 @@ public final class GameGenerator {
     return page;
   }
 
+  /**
+   * Gets a random link (WikiPage) outgoing from a page, adding to the given
+   * space.
+   *
+   * @param The
+   *          space to add to.
+   *
+   * @return A WikiPage off page that is guaranteed to be accessible.
+   */
+  static WikiPage getRandomLink(WikiPage page, Set<WikiPage> space) {
+    try {
+      Set<WikiPage> links = WIKI_LINK_FINDER.linkedPages(page);
+      space.addAll(links);
+
+      int tries = 0;
+      while (tries < links.size()) {
+        WikiPage newPage = getRandomLinkFromPages(links);
+        if (newPage.accessible(true)) {
+          return newPage;
+        } else {
+          Main.debugLog("Could not access page: " + newPage);
+        }
+        tries++;
+      }
+      // if we run out of tries
+    } catch (IOException e) {
+      // if root page error occurs
+    }
+    return page;
+  }
+
   private static WikiPage getRandomLinkFrom(Set<String> links) {
     return new WikiPage(
         new ArrayList<>(links).get((int) (Math.random() * links.size())),
         Main.WIKI_PAGE_DOC_CACHE);
+  }
+
+  private static WikiPage getRandomLinkFromPages(Set<WikiPage> links) {
+    return new ArrayList<>(links).get((int) (Math.random() * links.size()));
   }
 
   /**

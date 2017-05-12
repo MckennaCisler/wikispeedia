@@ -37,6 +37,7 @@ import edu.brown.cs.jmrs.web.wikipedia.WikiFooterRemover;
 import edu.brown.cs.jmrs.web.wikipedia.WikiPage;
 import edu.brown.cs.jmrs.web.wikipedia.WikiPageLinkFinder;
 import edu.brown.cs.jmrs.web.wikipedia.WikiPageLinkFinder.Filter;
+import edu.brown.cs.jmrs.wikispeedia.WikiGameMode.Mode;
 import edu.brown.cs.jmrs.wikispeedia.comms.Command;
 import edu.brown.cs.jmrs.wikispeedia.comms.WikiInterpreter;
 
@@ -97,16 +98,15 @@ public class WikiLobby implements Lobby {
         lobby.add("goalPage", Main.GSON.toJsonTree(src.getGoalPage()));
       }
       lobby.addProperty("started", src.started());
-      lobby.addProperty("ended", src.ended());
+      lobby.addProperty("ended", src.ended);
       if (src.started()) {
         lobby.addProperty("startTime", src.getStartTime().toEpochMilli());
         lobby.addProperty("playTime", src.getPlayTime().toMillis());
       }
-      if (src.ended()) {
+      if (src.ended) {
         lobby.addProperty("endTime",
             src.getEndTime() != null ? src.getEndTime().toEpochMilli() : null);
         lobby.add("winners", Main.GSON.toJsonTree(src.getWinners()));
-        // TODO: Shortest / known path
       }
 
       return lobby;
@@ -133,16 +133,16 @@ public class WikiLobby implements Lobby {
       }
     } else {
       DEFAULT_LINK_FINDER =
-          new WikiPageLinkFinder(Filter.DISAMBIGUATION,
-              Filter.NON_ENGLISH_WIKIPEDIA, Filter.NO_DATES);
+          new WikiPageLinkFinder(DEFAULT_CONTENT_FORMATTER,
+              Filter.DISAMBIGUATION, Filter.NON_ENGLISH_WIKIPEDIA,
+              Filter.NO_DATES);
     }
   }
   /**
    * Time to delay lobby creation by.
    */
-  private static final long START_DELAY = 5;
-
-  private static final int MAX_ID_LENGTH = 30;
+  private static final long START_DELAY   = 5;
+  private static final int  MAX_ID_LENGTH = 30;
 
   private transient Server server;
   private final String     id;
@@ -153,6 +153,7 @@ public class WikiLobby implements Lobby {
   private Instant                           startTime = null;
   private WikiGame                          game;
 
+  private boolean         ended;  // only allow ending once
   private Set<WikiPlayer> winners;
 
   /****************************************/
@@ -181,10 +182,11 @@ public class WikiLobby implements Lobby {
     players = new ConcurrentHashMap<>();
     messages = Collections.synchronizedList(new ArrayList<>());
     winners = ImmutableSet.of();
+    ended = false;
   }
 
   @Override
-  public void addClient(String playerId) {
+  public synchronized void addClient(String playerId) {
     if (started()) {
       Command.sendError(server, playerId,
           "Game has already started, cannot add player");
@@ -233,32 +235,34 @@ public class WikiLobby implements Lobby {
    *
    * @return Whether there was a winner.
    */
-  public boolean checkForWinner() {
-    Set<WikiPlayer> possibleWinners = gameMode.checkForWinners(this);
-    if (possibleWinners.size() > 0) {
-      winners = possibleWinners;
-      stop();
-      Command.sendEndGame(this);
-      Command.sendAllPlayers(this);
-      return true;
+  public synchronized boolean checkForWinner() {
+    if (!ended) {
+      Set<WikiPlayer> possibleWinners = gameMode.checkForWinners(this);
+      if (possibleWinners.size() > 0) {
+        winners = possibleWinners;
+        stop();
+        Command.sendEndGame(this);
+        return true;
+      }
     }
-    return false;
+    // there really should be a winner if the lobby has ended
+    assert winners != null;
+    return winners.size() > 0;
   }
 
   /**
-   * @return Whether the lobby has ended, based on its internal game mode.
-   */
-  public boolean ended() {
-    // winners = gameMode.checkForWinners(this);
-    return gameMode.ended(this);
-  }
-
-  /**
-   * @return The players in this map.
+   * @return All players still connected to this lobby.
    */
   public List<WikiPlayer> getConnectedPlayers() {
     return Functional.filter(new ArrayList<>(players.values()),
         WikiPlayer::connected);
+  }
+
+  /**
+   * @return All players in this lobby, including those disconnected.
+   */
+  public List<WikiPlayer> getAllPlayers() {
+    return new ArrayList<>(players.values());
   }
 
   /****************************************/
@@ -335,7 +339,7 @@ public class WikiLobby implements Lobby {
     if (!started()) {
       throw new IllegalStateException("Lobby has not started");
     }
-    return Duration.between(startTime, ended() ? getEndTime() : Instant.now());
+    return Duration.between(startTime, ended ? getEndTime() : Instant.now());
   }
 
   /**
@@ -427,7 +431,7 @@ public class WikiLobby implements Lobby {
       endPage = GameGenerator.pageWithObscurity(difficulty);
     }
 
-    game = new WikiGame(startPage, endPage);
+    game = new WikiGame(startPage, endPage, ImmutableSet.of());
 
     Main.debugLog(String.format("Generated %s game: %s -> %s",
         mode == WikiGameMode.Mode.TIME_TRIAL.ordinal() ? "time trial"
@@ -464,6 +468,12 @@ public class WikiLobby implements Lobby {
   @Override
   public void playerReconnected(String clientId) {
     if (players.containsKey(clientId)) {
+      WikiPlayer player = players.get(clientId);
+      // make sure reconnecting players are ended (they really should be)
+      if (ended) {
+        assert player.done();
+      }
+
       players.get(clientId).setConnected(true);
       Command.sendAllPlayers(this);
     } else {
@@ -484,13 +494,13 @@ public class WikiLobby implements Lobby {
   }
 
   @Override
-  public void removeClient(String playerId) {
+  public synchronized void removeClient(String playerId) {
     this.players.remove(playerId);
     Command.sendAllPlayers(this);
 
     boolean closeLobby = true;
 
-    for (WikiPlayer player : players.values().toArray(new WikiPlayer[] {})) {
+    for (WikiPlayer player : players.values()) {
       if (player.connected()) {
         closeLobby = false;
         break;
@@ -550,17 +560,17 @@ public class WikiLobby implements Lobby {
    */
   public void start(boolean force) {
     if (!force) {
-      for (Entry<String, WikiPlayer> entry : players.entrySet()) {
-        if (!entry.getValue().ready()) {
-          throw new IllegalStateException(String
-              .format("Player %s is not ready", entry.getValue().getName()));
+      // only connected players
+      for (WikiPlayer player : getConnectedPlayers()) {
+        if (!player.ready()) {
+          throw new IllegalStateException(
+              String.format("Player %s is not ready", player.getName()));
         }
       }
     }
     // this is how we determine whether started
     startTime = Instant.now().plusSeconds(START_DELAY);
 
-    // notify players
     for (Entry<String, WikiPlayer> entry : players.entrySet()) {
       entry.getValue().setStartTime(startTime);
     }
@@ -574,14 +584,28 @@ public class WikiLobby implements Lobby {
   }
 
   /**
+   * @return Whether the lobby has ended.
+   */
+  public boolean ended() {
+    return ended;
+  }
+
+  /**
    * Stops the game by setting an end time and configuring all players.
    */
   public void stop() {
-    assert gameMode.ended(this);
+    // make sure to only set to ended once
+    assert !ended;
+    ended = gameMode.ended(this);
+
+    // all players
     for (Entry<String, WikiPlayer> entry : players.entrySet()) {
+      // !done() equivalent to endTime == null
       if (!entry.getValue().done()) {
         entry.getValue().setEndTime(getEndTime());
       }
+      // everybody should be done
+      assert entry.getValue().done();
     }
 
     Main.debugLog(String.format(
@@ -597,7 +621,14 @@ public class WikiLobby implements Lobby {
   @Override
   public String toString() {
     return String.format("%s (%s)", id,
-        started() ? (ended() ? "ended" : "started") : "not started");
+        started() ? (ended ? "ended" : "started") : "not started");
+  }
+
+  /**
+   * @return The game mode of this lobby.
+   */
+  public Mode getGameMode() {
+    return gameMode.getGameMode();
   }
 
 }

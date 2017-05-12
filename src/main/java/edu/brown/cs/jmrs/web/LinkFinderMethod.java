@@ -20,11 +20,19 @@ import com.google.common.base.Predicate;
  *          The page implementation to create for links in linkedPages().
  */
 public class LinkFinderMethod<P extends Page> implements LinkFinder<P> {
+
   // optional
-  private String selector = "a[href]";
-  private Predicate<String> pred = u -> true;
+  private String            selector = "a[href]";
+  private Predicate<String> pred     = u -> true;
 
   private Function<String, P> factory = url -> (P) new Page(url);
+
+  private ContentFormatter<P> formatter = new ContentFormatter<P>() {
+    @Override
+    public Element format(Element input) {
+      return input;
+    }
+  };
 
   /**
    * @param s
@@ -57,9 +65,19 @@ public class LinkFinderMethod<P extends Page> implements LinkFinder<P> {
     return this;
   }
 
+  /**
+   * @param fm
+   *          A ContentFormater to apply on the page before finding the links.
+   * @return A LinkFinderMethod using this formatter.
+   */
+  public LinkFinderMethod<P> formatter(ContentFormatter<P> fm) {
+    this.formatter = fm;
+    return this;
+  }
+
   @Override
-  public Set<String> links(Page page) throws IOException {
-    Elements links = page.parsedContent().select(selector);
+  public Set<String> links(P page) throws IOException {
+    Elements links = formatter.format(page).select(selector);
 
     Set<String> urls = new HashSet<>(links.size());
     for (Element el : links) {
@@ -85,7 +103,7 @@ public class LinkFinderMethod<P extends Page> implements LinkFinder<P> {
    *           If the page could not be reached.
    */
   @Override
-  public Set<P> linkedPages(Page page) throws IOException {
+  public Set<P> linkedPages(P page) throws IOException {
     Set<String> urls = links(page);
     Set<P> output = new HashSet<>(urls.size());
     urls.forEach(url -> output.add(factory.apply(url)));

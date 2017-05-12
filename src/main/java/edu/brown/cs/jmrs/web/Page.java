@@ -139,7 +139,7 @@ public class Page implements Node<Page, Link> {
    * @throws IOException
    *           If the page could not be reached.
    */
-  protected Document parsedContentOriginal() throws IOException {
+  protected synchronized Document parsedContentOriginal() throws IOException {
     if (docCache != null) {
       // parsed should not be set if docCache is set
       assert parsed == null;
@@ -241,7 +241,7 @@ public class Page implements Node<Page, Link> {
    */
   public static class Loader extends CacheLoader<String, Document> {
     @Override
-    public Document load(String url) throws IOException {
+    public synchronized Document load(String url) throws IOException {
       return loadStatic(url);
     }
 
