@@ -116,6 +116,13 @@ class ServerWorker {
 
     // checkDisconnectedClients(); TODO: Removed for safety
 
+    conn.setIdleTimeout(CLIENT_IDLE_TIMEOUT); // Allows client to be AFK for an
+                                              // hour before the websocket
+                                              // automatically closes. Default
+                                              // is 5 minutes.
+
+    checkDisconnectedClients();
+
     String clientId = "";
     List<HttpCookie> cookies = conn.getUpgradeRequest().getCookies();
     for (HttpCookie cookie : cookies) {
@@ -155,7 +162,7 @@ class ServerWorker {
       synchronized (client) {
         if (client.getLobby() == null) {
           notInLobbies.remove(client.getId());
-          // clients.remove(conn);
+          // clients.remove(conn); for safety
         }
 
         assert client.isConnected();
