@@ -121,7 +121,7 @@ class ServerWorker {
                                               // automatically closes. Default
                                               // is 5 minutes.
 
-    checkDisconnectedClients();
+    // checkDisconnectedClients();
 
     String clientId = "";
     List<HttpCookie> cookies = conn.getUpgradeRequest().getCookies();
