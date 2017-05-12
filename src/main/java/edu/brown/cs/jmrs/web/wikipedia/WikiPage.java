@@ -171,14 +171,7 @@ public class WikiPage extends Page {
    *           If the page could not be reached or loaded.
    */
   public String getBlurb() throws IOException {
-    String para;
-    Elements paragraphs =
-        parsedContentOriginal().select("#mw-content-text > p");
-    int i = 0;
-    do {
-      para = paragraphs.get(i++).text();
-    } while (para.equals("") && i < paragraphs.size());
-    return para;
+    return getBlurbFrom(parsedContentOriginal());
   }
 
   /**
@@ -190,12 +183,18 @@ public class WikiPage extends Page {
    */
   public String getFormattedBlurb(ContentFormatter<WikiPage> formatter)
       throws IOException {
-    String para;
-    Elements paragraphs = formatter.format(this).select("#mw-content-text > p");
+    return getBlurbFrom(formatter.format(this));
+  }
+
+  private String getBlurbFrom(Element doc) {
+    String para = "";
+    Elements paragraphs = doc.select("#mw-content-text p");
+    // weird edge case
+    paragraphs.addAll(doc.select("#mw-parser-output > p"));
     int i = 0;
-    do {
+    while (i < paragraphs.size() && para.equals("")) {
       para = paragraphs.get(i++).text();
-    } while (para.equals("") && i < paragraphs.size());
+    }
     return para;
   }
 

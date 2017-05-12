@@ -70,7 +70,7 @@ public final class Main {
   /**
    * Cache for the internals of WikiPages.
    */
-  static final int MAX_WIKI_CACHE_SIZE       = 50;
+  static final int MAX_WIKI_CACHE_SIZE       = 40;
   static final int WIKIPAGE_EVICTION_TIMEOUT = 12; // hours
 
   public static final LoadingCache<String, Document> WIKI_PAGE_DOC_CACHE =

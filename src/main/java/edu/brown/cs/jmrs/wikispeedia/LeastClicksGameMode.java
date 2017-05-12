@@ -43,13 +43,13 @@ public class LeastClicksGameMode implements WikiGameMode {
       // sort by path length
       Queue<WikiPlayer> done = getDoneSorted(lobby);
 
-      // this should be true when lobby is ended in this mode
-      assert lobby.getConnectedPlayers().size() == done.size();
+      // note not all may be done yet
 
       // remove all those that are not equal (in case this was called
       // after others are done)
       WikiPlayer first = done.poll();
       Set<WikiPlayer> winners = new HashSet<>();
+      winners.add(first);
 
       WikiPlayer next = first;
       while (next != null && next.getPathLength() == first.getPathLength()) {
@@ -63,27 +63,34 @@ public class LeastClicksGameMode implements WikiGameMode {
   }
 
   /**
-   * @return Players that are done in this lobby, sorted by ascending path
-   *         length.
+   * @return Players that are done in this lobby (both have an end time and are
+   *         at the goal page), sorted by ascending path length.
    */
   private Queue<WikiPlayer> getDoneSorted(WikiLobby lobby) {
     Queue<WikiPlayer> done =
         new PriorityQueue<>((p1, p2) -> Integer.compare(p1.getPathLength(),
             p2.getPathLength()));
 
-    done.addAll(
-        Functional.filter(lobby.getConnectedPlayers(), WikiPlayer::done));
+    // in time trial game mode, those who are done are only those who have
+    // reached the end.
+    done.addAll(Functional.filter(lobby.getConnectedPlayers(), (player) -> {
+      return player.done()
+          && player.getCurPage().equalsAfterRedirectSafe(lobby.getGoalPage());
+    }));
     return done;
   }
 
   @Override
   public boolean ended(WikiLobby wikiLobby) {
-    // all players must be done, OR one player must have a shorter path than all
-    // others
+    // if there are NO players, we're NOT done
     Queue<WikiPlayer> done = getDoneSorted(wikiLobby);
-    if (done.size() == wikiLobby.getConnectedPlayers().size()) {
-      return true;
-    } else if (done.size() > 0) {
+    if (done.size() > 0) {
+      // all players must be done, OR one player must have a shorter path than
+      // all others
+      if (done.size() == wikiLobby.getConnectedPlayers().size()) {
+        return true;
+      }
+
       int shortestDone = done.peek().getPathLength();
 
       // if all players have longer (or the same) path lengths that the
@@ -104,23 +111,22 @@ public class LeastClicksGameMode implements WikiGameMode {
   @Override
   public Instant getEndTime(WikiLobby wikiLobby) {
     if (!ended(wikiLobby)) {
-      throw new IllegalStateException("Lobby has not ended.");
+      throw new IllegalStateException("Lobby has not ended");
     }
 
     if (wikiLobby.getConnectedPlayers().size() > 0) {
       // get last player's end time
-      assert wikiLobby.getConnectedPlayers().get(0).done();
-      Instant laggardTime = wikiLobby.getConnectedPlayers().get(0).getEndTime();
+      Instant laggardTime = Instant.MIN;
       for (WikiPlayer player : wikiLobby.getConnectedPlayers()) {
-        assert player.done();
-        // note that lobby being ended implies all players are done.
-        if (player.getEndTime().isAfter(laggardTime)) {
+        // if some players are still not done (null end time), keep looking for
+        // one that is
+        if (player.done() && player.getEndTime().isAfter(laggardTime)) {
           laggardTime = player.getEndTime();
         }
       }
+      assert laggardTime != null;
       return laggardTime;
     }
-    // if there are no players (a completely expired lobby), just send null
-    return null;
+    throw new AssertionError("Lobby as ended but there were no players");
   }
 }

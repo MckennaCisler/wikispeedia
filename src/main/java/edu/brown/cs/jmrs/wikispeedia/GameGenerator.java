@@ -58,11 +58,11 @@ public final class GameGenerator {
   private static final double DEPTH_BREADTH_SEARCH_RATIO = 0.5;
 
   /**
-   * the distance (inclusive) between two obscurity value to be considered
-   * "equivalent". Increasing it may make generation slower and more
+   * The distance (inclusive) between two obscurity values to be considered
+   * "equivalent". Decreasing it may make generation slower and more
    * memory-intensive.
    */
-  private static final double OBSCURITY_EQUAL_RANGE = 0.1;
+  private static final double OBSCURITY_EQUAL_RANGE = 0.25;
 
   /**
    * The expected largest number of Wikipedia links on a page (under the
@@ -75,7 +75,7 @@ public final class GameGenerator {
    * where the link number has little to do with obscurity. Also these pages are
    * very rare and thus slow to find.
    */
-  private static final double MAX_NUM_OF_PAGE_LINKS = 2000;
+  private static final double MAX_NUM_OF_PAGE_LINKS = 1000;
 
   private GameGenerator() {
     // override default constructor
@@ -154,7 +154,16 @@ public final class GameGenerator {
   /* Helpers for page traversal / basic generation */
   /**************************************************************/
 
-  private static WikiPage goDownFrom(WikiPage start, int depth) {
+  /**
+   * Goes down from start to a page at depth depth.
+   *
+   * @param start
+   *          The start page.
+   * @param depth
+   *          The depth to go down.
+   * @return The destination page.
+   */
+  public static WikiPage goDownFrom(WikiPage start, int depth) {
     if (depth == 0) {
       return start;
     }
@@ -162,7 +171,18 @@ public final class GameGenerator {
     return goDownFrom(getRandomLink(start), depth - 1);
   }
 
-  private static WikiPage goDownFrom(WikiPage start, int depth,
+  /**
+   * Goes down from start to a page at depth depth.
+   *
+   * @param start
+   *          The start page.
+   * @param depth
+   *          The depth to go down.
+   * @param space
+   *          The space list to populate on the way down.
+   * @return The destination page.
+   */
+  public static WikiPage goDownFrom(WikiPage start, int depth,
       Set<WikiPage> space) {
     if (depth == 0) {
       return start;
@@ -188,11 +208,17 @@ public final class GameGenerator {
     // don't check start because it will be later
     Set<WikiPage> pages = WIKI_LINK_FINDER.linkedPages(start);
 
+    if (pages.size() == 0) {
+      // defer upwards
+      throw new IOException("No valid pages found when cycling");
+    }
+
     for (WikiPage page : pages) {
       if (Math.random() > DEPTH_BREADTH_SEARCH_RATIO && stop.test(page)) {
         return page;
       }
     }
+
     return goDownFrom(
         new ArrayList<>(pages).get((int) (Math.random() * pages.size())), stop);
   }

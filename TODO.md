@@ -9,7 +9,8 @@
 - Stuff in docs folder
 ##### NECESSITIES
 - <b>Fix bugs</b>
-  - When player disconnects before lobby is done, what happens?
+  - Add player timeout on disconnect so the game won't end (in shortest path for ex. ) as soon as the one who may still win disconnects
+- Should a lobby really end when all players
 ##### NICETIES`
 - Shortest path
   - Add intelligent switcher if DB busy?

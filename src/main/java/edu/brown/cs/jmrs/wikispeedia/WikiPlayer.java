@@ -123,8 +123,8 @@ public class WikiPlayer {
   }
 
   /**
-   * @return Whether the player has finished a game. Indicated internally by the
-   *         state of endTime.
+   * @return Whether the player has finished a game, whether they won or not.
+   *         Indicated internally by the state of endTime.
    */
   public boolean done() {
     return endTime != null;
@@ -234,14 +234,14 @@ public class WikiPlayer {
    */
   synchronized boolean checkIfDone(Instant endTimeIfSo) throws IOException {
     if (done()) {
-      throw new IllegalStateException(
-          String.format("Player %s has already reached the goal", name));
+      return true;
     }
     assert getCurPage() != null;
     assert goalPage != null;
 
     if (getCurPage().equalsAfterRedirect(goalPage)) {
       this.endTime = endTimeIfSo;
+      assert done();
       return true;
     }
     return false;
@@ -316,9 +316,9 @@ public class WikiPlayer {
       if (goToPage(page)) {
         return;
       }
-      throw new NoSuchElementException(
-          String.format("Page %s not in player %s's history or available ahead",
-              page.getName(), name));
+      throw new NoSuchElementException(String.format(
+          "Page %s neither in player's history nor available ahead",
+          page.getName(), name));
     }
 
     WikiPage prevPage;
@@ -329,6 +329,9 @@ public class WikiPlayer {
 
     // add the found prevPage to the path
     path.add(prevPage);
+
+    // if by some magic we've become done, note it
+    checkIfDone(Instant.now());
 
     // let people know
     Command.sendAllPlayers(lobby);
@@ -341,7 +344,7 @@ public class WikiPlayer {
       throw new IllegalStateException("Lobby has ended");
     } else if (done()) {
       throw new IllegalStateException(
-          String.format("Player %s has already reached the goal", name));
+          "Cannot move; goal has already been reached");
     }
   }
 

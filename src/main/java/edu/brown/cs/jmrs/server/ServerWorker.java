@@ -84,6 +84,7 @@ class ServerWorker {
    * Iterates through disconnected clients and deletes those not in active
    * lobbies.
    */
+  @Deprecated
   public void checkDisconnectedClients() {
     synchronized (disconnectedClients) {
       for (Client client : disconnectedClients.toArray(new Client[] {})) {
@@ -108,14 +109,12 @@ class ServerWorker {
    *          The client connection that just connected
    */
   public void clientConnected(Session conn) {
-    Main.debugLog("Player connected");
-
     conn.setIdleTimeout(CLIENT_IDLE_TIMEOUT); // Allows client to be AFK for an
                                               // hour before the websocket
                                               // automatically closes. Default
                                               // is 5 minutes.
 
-    checkDisconnectedClients();
+    // checkDisconnectedClients(); TODO: Removed for safety
 
     String clientId = "";
     List<HttpCookie> cookies = conn.getUpgradeRequest().getCookies();
@@ -138,7 +137,7 @@ class ServerWorker {
       // if we haven't seen them, we can proceed
       setupConnectedClient(conn, clientId);
     }
-    Main.debugLog("Known clients: " + clients.values());
+    Main.debugLog("Known clients (player connected): " + clients.values());
   }
 
   /**
@@ -156,7 +155,7 @@ class ServerWorker {
       synchronized (client) {
         if (client.getLobby() == null) {
           notInLobbies.remove(client.getId());
-          clients.remove(conn);
+          // clients.remove(conn);
         }
 
         assert client.isConnected();
@@ -171,7 +170,7 @@ class ServerWorker {
     } else {
       Main.debugLog("Connection had no associated client");
     }
-    Main.debugLog("Known clients: " + clients.values());
+    Main.debugLog("Known clients (player disconnected): " + clients.values());
   }
 
   /**
