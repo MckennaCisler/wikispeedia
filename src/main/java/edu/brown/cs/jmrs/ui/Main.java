@@ -41,7 +41,7 @@ import spark.Spark;
 public final class Main {
   public static final int      DEFAULT_SPARK_PORT  = 4567;
   public static final int      DEFAULT_SOCKET_PORT = 4568;
-  public static final boolean  DEBUG               = true;
+  public static final boolean  DEBUG               = false;
   private static final boolean VERBOSE_LOG         = true;
 
   /**
