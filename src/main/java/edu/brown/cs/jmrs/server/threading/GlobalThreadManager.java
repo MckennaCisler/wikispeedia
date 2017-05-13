@@ -14,7 +14,7 @@ import java.util.concurrent.Future;
 public class GlobalThreadManager {
 
   private static ExecutorService threadManager = Executors
-      .newFixedThreadPool(1);// Runtime.getRuntime().availableProcessors());
+      .newFixedThreadPool(Runtime.getRuntime().availableProcessors());
 
   /**
    * Submits given task to the ExecutorService

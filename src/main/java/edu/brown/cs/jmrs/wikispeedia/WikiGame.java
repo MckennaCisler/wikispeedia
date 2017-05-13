@@ -1,5 +1,7 @@
 package edu.brown.cs.jmrs.wikispeedia;
 
+import java.util.Set;
+
 import edu.brown.cs.jmrs.web.wikipedia.WikiPage;
 
 /**
@@ -9,31 +11,23 @@ import edu.brown.cs.jmrs.web.wikipedia.WikiPage;
  *
  */
 public class WikiGame {
-  private final WikiPage start;
-  private final WikiPage goal;
-  // private final List<WikiPage> knownPath;
-  // private final Future<List<WikiPage>> shortestPath;
+  private final WikiPage      start;
+  private final WikiPage      goal;
+  private final Set<WikiPage> space;
 
   /**
    * @param start
    *          The starting page of this game.
    * @param goal
    *          The goal page of this game.
-   *
+   * @param space
+   *          The space of pages surrounding the start and goal in this game.
+   *          Presumed to be found during generation, but with no guarantees.
    */
-
-  /*
-   * @param knownPath A known path from start to goal.
-   *
-   * @param shortestPath A value which may eventually represent the shortest
-   * path between start and goal.
-   */
-  public WikiGame(WikiPage start, WikiPage goal) {
-    // List<WikiPage> knownPath, Future<List<WikiPage>> shortestPath
-    super();
+  public WikiGame(WikiPage start, WikiPage goal, Set<WikiPage> space) {
     this.start = start;
     this.goal = goal;
-    // this.shortestPath = shortestPath;
+    this.space = space;
   }
 
   /**
@@ -51,10 +45,10 @@ public class WikiGame {
   }
 
   /**
-   * @return A Future which may eventually represent the shortest path between
-   *         start and goal.
+   * @return The space of pages surrounding the start and goal in this game.
+   *         Presumed to be found during generation, but with no guarantees.
    */
-  // public final Future<List<WikiPage>> getShortestPath() {
-  // return shortestPath;
-  // }
+  public final Set<WikiPage> getSpace() {
+    return space;
+  }
 }

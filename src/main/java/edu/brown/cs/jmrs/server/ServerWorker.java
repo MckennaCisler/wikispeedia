@@ -1,11 +1,11 @@
 package edu.brown.cs.jmrs.server;
 
 import java.net.HttpCookie;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.Queue;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.PriorityBlockingQueue;
 import java.util.function.BiFunction;
 
 import org.eclipse.jetty.websocket.api.Session;
@@ -27,12 +27,13 @@ import edu.brown.cs.jmrs.ui.Main;
  *
  */
 class ServerWorker {
+  private static final long CLIENT_IDLE_TIMEOUT = 1000 * 60 * 60;
 
   private Server                           server;
   private LobbyManager                     lobbies;
   private ConcurrentBiMap<Session, Client> clients;
   private Map<String, Client>              notInLobbies;
-  private Queue<Client>                    disconnectedClients;
+  private List<Client>                     disconnectedClients;
   private Gson                             gson;
   private MessageQueue                     messageQueue;
 
@@ -54,7 +55,7 @@ class ServerWorker {
     lobbies = new LobbyManager(lobbyFactory);
     clients = new ConcurrentBiMap<>();
     notInLobbies = new ConcurrentHashMap<>();
-    disconnectedClients = new PriorityBlockingQueue<>();
+    disconnectedClients = Collections.synchronizedList(new ArrayList<>());
     this.gson = gson;
     messageQueue = new MessageQueue();
   }
@@ -80,6 +81,27 @@ class ServerWorker {
   }
 
   /**
+   * Iterates through disconnected clients and deletes those not in active
+   * lobbies.
+   */
+  @Deprecated
+  public void checkDisconnectedClients() {
+    synchronized (disconnectedClients) {
+      for (Client client : disconnectedClients.toArray(new Client[] {})) {
+        Lobby lobby = client.getLobby();
+        if (lobby == null) {
+          Exception e = new Exception();
+          int line = e.getStackTrace()[0].getLineNumber();
+          Main.debugLog(
+              "ServerWorker line " + line + ": This should be impossible");
+        } else if (lobby.isClosed()) {
+          clients.remove(client);
+        }
+      }
+    }
+  }
+
+  /**
    * Connects given client and sets their id, sends that id to the client, and
    * sends a list of all lobbies to the client.
    *
@@ -87,7 +109,19 @@ class ServerWorker {
    *          The client connection that just connected
    */
   public void clientConnected(Session conn) {
-    Main.debugLog("Player connected");
+    conn.setIdleTimeout(CLIENT_IDLE_TIMEOUT); // Allows client to be AFK for an
+                                              // hour before the websocket
+                                              // automatically closes. Default
+                                              // is 5 minutes.
+
+    // checkDisconnectedClients(); TODO: Removed for safety
+
+    conn.setIdleTimeout(CLIENT_IDLE_TIMEOUT); // Allows client to be AFK for an
+                                              // hour before the websocket
+                                              // automatically closes. Default
+                                              // is 5 minutes.
+
+    // checkDisconnectedClients();
 
     String clientId = "";
     List<HttpCookie> cookies = conn.getUpgradeRequest().getCookies();
@@ -110,7 +144,7 @@ class ServerWorker {
       // if we haven't seen them, we can proceed
       setupConnectedClient(conn, clientId);
     }
-    Main.debugLog("Known clients: " + clients.values());
+    Main.debugLog("Known clients (player connected): " + clients.values());
   }
 
   /**
@@ -128,6 +162,7 @@ class ServerWorker {
       synchronized (client) {
         if (client.getLobby() == null) {
           notInLobbies.remove(client.getId());
+          // clients.remove(conn); for safety
         }
 
         assert client.isConnected();
@@ -142,7 +177,7 @@ class ServerWorker {
     } else {
       Main.debugLog("Connection had no associated client");
     }
-    Main.debugLog("Known clients: " + clients.values());
+    Main.debugLog("Known clients (player disconnected): " + clients.values());
   }
 
   /**
@@ -164,11 +199,14 @@ class ServerWorker {
    * @throws InputError
    *           If the given id is already in use by another lobby
    */
-  public Lobby createLobby(String lobbyId) throws InputError {
-    Lobby lobby = lobbies.create(lobbyId, server);
+  public Lobby createLobby(String lobbyId, Client client, JsonObject args)
+      throws InputError {
+    Lobby lobby = lobbies.create(lobbyId, server, client, args);
     if (lobby == null) {
       throw new InputError("Lobby ID in use");
     } else {
+      lobbylessMap().remove(client.getId());
+      updateLobbylessClients();
       return lobby;
     }
   }

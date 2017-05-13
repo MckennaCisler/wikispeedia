@@ -52,7 +52,7 @@ public class DbConn implements AutoCloseable {
    * @throws FileNotFoundException
    *           If database could not be found.
    */
-  public DbConn(String path, String setup)
+  public DbConn(String path, final String setup)
       throws ClassNotFoundException, FileNotFoundException {
     Class.forName("org.sqlite.JDBC");
 

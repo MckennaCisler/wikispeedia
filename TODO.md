@@ -9,8 +9,9 @@
 - Stuff in docs folder
 ##### NECESSITIES
 - <b>Fix bugs</b>
-  - When player disconnects before lobby is done, what happens?
-##### NICETIES
+  - Add player timeout on disconnect so the game won't end (in shortest path for ex. ) as soon as the one who may still win disconnects
+- Should a lobby really end when all players
+##### NICETIES`
 - Shortest path
   - Add intelligent switcher if DB busy?
   - Fix insane caching sizes (7000???)
@@ -18,7 +19,6 @@
   - Add the shortest-path future to WikiGame
   - Make a two-sided Dijkstra?
 ##### STUFF THAT WOULD GIVE US THAT WARM FUZZY FEELING
-- Make an intermittent (or parallel... maybe do it while shortest-path finding?) DB-compare method that randomly double-checks a link list and changes it if needed
 - Hide user's IDs from obvious places (i.e. ALL_PLAYERS) using isCurrentPlayer, etc.
 
 #### Deadlines:

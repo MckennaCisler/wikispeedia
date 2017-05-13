@@ -106,9 +106,6 @@ public class WikiInterpreter implements CommandInterpreter {
     boolean state =
         command.get("payload").getAsJsonObject().get("state").getAsBoolean();
     lobby.getPlayer(clientId).setReady(state);
-
-    // update other players and possibly start game
-    lobby.checkAllReady();
   }
 
   private void getPageHandler(WikiLobby lobby, String clientId,
@@ -156,14 +153,6 @@ public class WikiInterpreter implements CommandInterpreter {
           Command.RETURN_GOTO_PAGE.send(lobby.getServer(), clientId,
               getPlayerPageInfo(reqWikiPage, lobby));
 
-          // on success, check for winner, in which case we'll send an
-          // additional mass message
-          if (!lobby.checkForWinner()) {
-            // if there wasn't a winner, update all player's on eachother's
-            // status (i.e. when one moves)
-            Command.sendAllPlayers(lobby);
-          }
-
         } else {
           // if we can't go to the page, revert to the previous current
           Command.RETURN_GOTO_PAGE.send(lobby.getServer(), clientId,
@@ -208,13 +197,11 @@ public class WikiInterpreter implements CommandInterpreter {
           WikiPage.fromAny(reqPage, Main.WIKI_PAGE_DOC_CACHE);
 
       // try to go back; it'll throw a NoSuchElementException on failure
+      // and will set player.getCurPage() to the right value
       player.goBackPage(reqPrevPage);
 
-      // let people know
-      Command.sendAllPlayers(lobby);
-
       Command.RETURN_GOTO_PAGE.send(lobby.getServer(), clientId,
-          getPlayerPageInfo(reqPrevPage, lobby));
+          getPlayerPageInfo(player.getCurPage(), lobby));
 
     } catch (NoSuchElementException e) {
       Command.RETURN_GOTO_PAGE.send(lobby.getServer(), clientId, curPageInfo,

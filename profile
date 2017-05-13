@@ -1,5 +1,6 @@
 #!/bin/sh
 
+
 # To run our code, we must have it in our classpath.
 # We use $(ls target/*.jar) instead of target/stars-1.0.jar so that
 # this script can be reused in other projects more easily.
@@ -46,4 +47,4 @@ fi
 
 # The symbol "$@" passes the command-line arguments from
 # this script to your Java program.
-java -agentpath:/home/mckenna/cs032/visualvm/profiler/lib/deployed/jdk16/linux-amd64/libprofilerinterface.so=/home/mckenna/cs032/visualvm/profiler/lib,5140 -Xverify:none -ea -cp "$TARGET$PATHSEP$CP" edu.brown.cs.$STUDENT.$MAINPKG.Main "$@"
+java -agentpath:/home/mcisler/cs032/visualvm/profiler/lib/deployed/jdk16/linux-amd64/libprofilerinterface.so=/home/mcisler/cs032/visualvm/profiler/lib,5140 -Xverify:none -ea -cp "$TARGET$PATHSEP$CP" edu.brown.cs.$STUDENT.$MAINPKG.Main "$@"

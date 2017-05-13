@@ -201,18 +201,21 @@ const Command = {
 class ServerConn {
     constructor(source) {
         // constants
-        this.COMMAND_TIMEOUT = 10000; // some can take a while
+        this.COMMAND_TIMEOUT = 35000; // some can take a while
         this.CLIENT_ID_COOKIE_EXPIRATION = 1440; // 24 hours
         this.STOP_LOGGING_RECIEVED_MESSAGES_TIMEOUT = 5000;
 
+        this.INITIAL_RECONNECT_TRY_INTERVAL = 100; // ms
+        this.MSG_DISPLAY_RECONNECT_TRY_INTERVAL = 1000; // ms
+        this.MAX_RECONNECT_TRY_INTERVAL = 5000; // ms
+        this.RECONNECT_INTERVAL_MULT = 2;
+
+        this.source = source;
         this.clientId = "";
         this.readyToSend = false;
         this.logRecievedMessages = true;
-        this.ws = new WebSocket("ws://" + source);
-        this.ws.onopen = this.ws_onopen.bind(this);
-        this.ws.onmessage = this.ws_onmessage.bind(this);
-        this.ws.onclose = this.ws_onclose.bind(this);
         this.stopLoggingRecievedMessagesTimer;
+        this._setupWs();
 
         /**
          * Map from Command name to an object of
@@ -236,7 +239,8 @@ class ServerConn {
             },
             "errCallback" : () => {}, // no reason
             "timeout" : window.setTimeout(() => {
-                displayError("Could not connect to server... please reload the page");
+                displayError(`Could not connect to server... trying again`);
+                this._reconnect();
             }, this.COMMAND_TIMEOUT)
         }
 
@@ -251,11 +255,61 @@ class ServerConn {
          */
         this.recievedMessages = [];
 
+        // slowly increase reconnect interval
+        this.displayReconnectMessage = false;
+        this.curReconnectInterval = this.INITIAL_RECONNECT_TRY_INTERVAL;
+    }
 
-        /**
-         * Called on close.
-         */
-        this.closeCallback;
+
+    _setupWs() {
+      this.ws = new WebSocket("ws://" + this.source);
+      this.ws.onopen = this.ws_onopen.bind(this);
+      this.ws.onmessage = this.ws_onmessage.bind(this);
+      this.ws.onclose = this.ws_onclose.bind(this);
+    }
+
+    _reconnect() {
+      this._setupWs();
+
+      this.pendingResponses["notify_id"] =  {
+          "command": { type: COMMAND_TYPE.SERVER }, // all we need
+          "callback": (message) => {
+              console.log("INFO: Reconnected");
+              this._setId(message.client_id);
+              clearError();
+              // say we're not reconnecting
+              this.displayReconnectMessage = false;
+              this.curReconnectInterval = this.INITIAL_RECONNECT_TRY_INTERVAL;
+          },
+          "errCallback" : () => {}, // no reason
+          "timeout" : null // it will re-connect on websocket close, this may simply be an error with id
+          // window.setTimeout(() => {
+          //     // loop here on full connection loss
+          //     // don't loop if it was a normal error
+          //     // if (this.curReconnectInterval > this.INITIAL_RECONNECT_TRY_INTERVAL) { this._reconnect(); }
+          // }, this.curReconnectInterval) // NOTE: this is where it mainly differs from inital CB
+      }
+      console.log("INFO: tried to reconnect");
+    }
+
+    // the websocket handler
+    ws_onclose() {
+      // loops this message if websocket is not connected
+      // ONLY display once
+      if (this.curReconnectInterval >= this.MSG_DISPLAY_RECONNECT_TRY_INTERVAL && !this.displayReconnectMessage) {
+        this.displayReconnectMessage = true;
+        // round up for user sanity
+        displayError(`Connection to server lost... trying to reconnect in ${this.MAX_RECONNECT_TRY_INTERVAL/1000.0} seconds`);
+      }
+      // increase reconnect inverval in next one
+      this.curReconnectInterval = this.curReconnectInterval * this.RECONNECT_INTERVAL_MULT;
+
+      // cap
+      if (this.curReconnectInterval >= this.MAX_RECONNECT_TRY_INTERVAL) {
+        this.curReconnectInterval = this.MAX_RECONNECT_TRY_INTERVAL;
+      }
+      console.log(`INFO: Connection was closed - reconnecting in ${this.curReconnectInterval/1000.0} seconds`);
+      window.setTimeout(this._reconnect.bind(this), this.curReconnectInterval);
     }
 
     _setId(id) {
@@ -360,10 +414,6 @@ class ServerConn {
 
     registerError(callback) {
         this._registerOutgoing(Command.ERROR, callback);
-    }
-
-    registerClose(callback) {
-      this.closeCallback = callback;
     }
 
     _registerOutgoing(command, callback) {
@@ -473,11 +523,6 @@ class ServerConn {
     _handle_error_command(parsedMsg) {
       const errCallback = this.pendingResponses[Command.ERROR.name].callback;
       if (errCallback !== undefined) { errCallback(parsedMsg); }
-    }
-
-    ws_onclose() {
-      console.log("INFO: Connection was closed");
-      this.closeCallback();
     }
 
     _send(command, callback, errCallback, args) {

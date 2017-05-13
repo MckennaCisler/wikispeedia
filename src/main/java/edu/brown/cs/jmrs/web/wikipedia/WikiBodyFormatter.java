@@ -1,6 +1,7 @@
 package edu.brown.cs.jmrs.web.wikipedia;
 
 import org.jsoup.nodes.Element;
+import org.jsoup.select.Elements;
 
 import edu.brown.cs.jmrs.web.ContentFormatter;
 
@@ -15,7 +16,14 @@ public class WikiBodyFormatter implements ContentFormatter<WikiPage> {
 
   @Override
   public Element format(Element input) {
-    Element root = input.select("#mw-content-text").first().clone();
+    Elements possibleRoot = input.select("#mw-content-text");
+
+    // edge case
+    if (possibleRoot.size() == 0) {
+      possibleRoot = input.select(".mw-parser-output");
+    }
+
+    Element root = possibleRoot.first().clone();
 
     // remove geography tags
     root.select(".geography").remove();

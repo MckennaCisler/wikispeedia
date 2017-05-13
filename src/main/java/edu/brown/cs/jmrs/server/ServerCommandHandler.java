@@ -23,11 +23,7 @@ class ServerCommandHandler implements Runnable {
    *
    */
   private enum Commands {
-    SET_CLIENT_ID,
-    START_LOBBY,
-    LEAVE_LOBBY,
-    JOIN_LOBBY,
-    GET_LOBBIES,
+    SET_CLIENT_ID, START_LOBBY, LEAVE_LOBBY, JOIN_LOBBY, GET_LOBBIES,
     // Value to signify not in enum (when using switch statement)
     NULL;
 
@@ -49,7 +45,7 @@ class ServerCommandHandler implements Runnable {
   private final String             unformattedCommand;
   private final CommandInterpreter interpreter;
 
-  private final Gson               gson;
+  private final Gson gson;
 
   /**
    * Constructor, stores all necessary objects for analyzing and acting on
@@ -67,12 +63,8 @@ class ServerCommandHandler implements Runnable {
    * @param gson
    *          The Gson instance used for JSONification of lobbies
    */
-  ServerCommandHandler(
-      ServerWorker server,
-      Session conn,
-      String command,
-      CommandInterpreter interpreter,
-      Gson gson) {
+  ServerCommandHandler(ServerWorker server, Session conn, String command,
+      CommandInterpreter interpreter, Gson gson) {
     this.server = server;
     this.conn = conn;
     this.unformattedCommand = command;
@@ -119,19 +111,11 @@ class ServerCommandHandler implements Runnable {
                     throw new InputError("No lobby ID provided");
                   }
                   String lobbyId = commandPayload.get("lobby_id").getAsString();
-                  Lobby lobby = server.createLobby(lobbyId);
-
-                  // note lobby will not be null
-                  synchronized (lobby) {
-                    if (commandPayload.has("arguments")) {
-                      lobby.init(
-                          commandPayload.get("arguments").getAsJsonObject());
-                    }
-                    lobby.addClient(player.getId());
-                    player.setLobby(lobby);
-                    server.lobbylessMap().remove(player.getId());
-                    server.updateLobbylessClients();
+                  JsonObject args = null;
+                  if (commandPayload.has("arguments")) {
+                    args = commandPayload.get("arguments").getAsJsonObject();
                   }
+                  server.createLobby(lobbyId, player, args);
                   jsonObject.addProperty("error_message", "");
                   toClient = gson.toJson(jsonObject);
                   server.sendToClient(conn, toClient);
@@ -159,8 +143,8 @@ class ServerCommandHandler implements Runnable {
                   if (!commandPayload.has("lobby_id")) {
                     throw new InputError("No lobby ID provided");
                   }
-                  String lobbyId2 = commandPayload.get("lobby_id")
-                      .getAsString();
+                  String lobbyId2 =
+                      commandPayload.get("lobby_id").getAsString();
                   Lobby lobby2 = server.getLobby(lobbyId2);
                   if (lobby2 == null) {
                     throw new InputError("No lobby with specified ID exists");
@@ -184,13 +168,10 @@ class ServerCommandHandler implements Runnable {
 
                   if (player.getLobby() != null) {
                     // if not a server command pass it to the lobby
-                    interpreter.interpret(
-                        player.getLobby(),
-                        player.getId(),
+                    interpreter.interpret(player.getLobby(), player.getId(),
                         commandMap);
                   } else {
-                    jsonObject.addProperty(
-                        "error_message",
+                    jsonObject.addProperty("error_message",
                         "Player must join a lobby first");
                     toClient = gson.toJson(jsonObject);
                     server.sendToClient(conn, toClient);
@@ -204,16 +185,14 @@ class ServerCommandHandler implements Runnable {
             }
           }
         } else {
-          jsonObject.addProperty(
-              "error_message",
+          jsonObject.addProperty("error_message",
               "Cannot continue without unique ID");
           toClient = gson.toJson(jsonObject);
           server.sendToClient(conn, toClient);
         }
       } else {
         jsonObject.addProperty("command", "command_error");
-        jsonObject.addProperty(
-            "error_message",
+        jsonObject.addProperty("error_message",
             "Client-to-Server commands must be JSON with 'command' field");
         toClient = gson.toJson(jsonObject);
         server.sendToClient(conn, toClient);
@@ -223,6 +202,7 @@ class ServerCommandHandler implements Runnable {
       // except when calling the value of an associated future:
       // http://stackoverflow.com/questions/2248131/
       // handling-exceptions-from-java-executorservice-tasks
+      e.printStackTrace();
       JsonObject jsonObject = new JsonObject();
       jsonObject.addProperty("error_message", e.getMessage());
       String toClient = gson.toJson(jsonObject);

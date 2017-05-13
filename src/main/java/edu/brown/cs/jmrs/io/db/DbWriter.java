@@ -15,7 +15,7 @@ import java.sql.SQLException;
  */
 public class DbWriter<T> {
   private final ThrowingBiConsumer<PreparedStatement, T> filler;
-  private final String setupStatement;
+  private final String                                   setupStatement;
 
   /**
    * @param filler
@@ -37,7 +37,7 @@ public class DbWriter<T> {
    */
 
   public DbWriter(ThrowingBiConsumer<PreparedStatement, T> filler,
-      String setupStatement) {
+      final String setupStatement) {
     this.filler = filler;
     this.setupStatement = setupStatement;
 
@@ -54,7 +54,9 @@ public class DbWriter<T> {
    */
   public void setup(Connection conn) throws SQLException {
     if (setupStatement != null) {
-      conn.prepareStatement(setupStatement).executeUpdate();
+      try (PreparedStatement ps = conn.prepareStatement(setupStatement)) {
+        ps.executeUpdate();
+      }
     }
   }
 
