@@ -86,6 +86,10 @@ public class DirectedDijkstraPathFinder<N extends Node<N, E>, E extends Edge<N, 
       }
 
       E nextShortest = nonFounds.poll();
+
+      // just for wikispeedia's shortest path function
+      // Main.debugLog(nextShortest);
+
       if (nextShortest == null) {
         // no path to end was found if we've tried everything
         return ImmutableList.of();

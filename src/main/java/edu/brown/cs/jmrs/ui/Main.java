@@ -14,8 +14,12 @@ import com.google.common.cache.LoadingCache;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
+import edu.brown.cs.jmrs.collect.graph.DirectedDijkstraPathFinder;
+import edu.brown.cs.jmrs.collect.graph.Graph.PathFinder;
 import edu.brown.cs.jmrs.io.db.DbConn;
 import edu.brown.cs.jmrs.server.Server;
+import edu.brown.cs.jmrs.web.FailSafeLinkFInder;
+import edu.brown.cs.jmrs.web.Link;
 import edu.brown.cs.jmrs.web.Page;
 import edu.brown.cs.jmrs.web.wikipedia.WikiPage;
 import edu.brown.cs.jmrs.web.wikipedia.WikiPageLinkFinder.Filter;
@@ -39,10 +43,10 @@ import spark.Spark;
  *
  */
 public final class Main {
-  public static final int      DEFAULT_SPARK_PORT  = 4567;
-  public static final int      DEFAULT_SOCKET_PORT = 4568;
-  public static final boolean  DEBUG               = false;
-  private static final boolean VERBOSE_LOG         = true;
+  public static final int     DEFAULT_SPARK_PORT  = 4567;
+  public static final int     DEFAULT_SOCKET_PORT = 4568;
+  public static final boolean DEBUG               = false;
+  public static final boolean VERBOSE_LOG         = true;
 
   /**
    * Global GSON for defining custom JSON serializers on.
@@ -107,11 +111,15 @@ public final class Main {
     parser.accepts("scrape-start").withRequiredArg().ofType(String.class)
         .defaultsTo("Main_Page");
     parser.accepts("scrape-method").withRequiredArg().ofType(String.class)
-        .defaultsTo("breadth")
-        .describedAs("Either 'breadth' or 'random-descent'");
+        .defaultsTo("breadth").describedAs("breadth|random-descent");
     parser.accepts("scrape-depth").withRequiredArg().ofType(Integer.class)
         .defaultsTo(-1);
     parser.accepts("scrape-only-english");
+    parser.accepts("shortest-path");
+    parser.accepts("start").requiredIf("shortest-path").withRequiredArg()
+        .ofType(String.class);
+    parser.accepts("end").requiredIf("shortest-path").withRequiredArg()
+        .ofType(String.class);
 
     OptionSet options;
     try {
@@ -198,6 +206,25 @@ public final class Main {
           wikiDbConn.close();
         }
       }
+    } else if (options.has("shortest-path")) {
+
+      PathFinder<Page, Link> edgeFinder =
+          new DirectedDijkstraPathFinder<>(
+              new FailSafeLinkFInder<WikiPage>(WikiLobby.DEFAULT_LINK_FINDER));
+
+      // must have these two under shortest-path
+      WikiPage start = WikiPage.fromAny((String) options.valueOf("start"));
+      WikiPage end = WikiPage.fromAny((String) options.valueOf("end"));
+      System.out.printf("Finding path between '%s' and '%s'%n", start, end);
+
+      long startTime = System.currentTimeMillis();
+      List<Link> links = edgeFinder.shortestPath(start, end);
+
+      System.out.printf("Founds path in %d seconds: %n",
+          (System.currentTimeMillis() - startTime) / 1000);
+      for (Link link : links) {
+        System.out.println(link);
+      }
     }
   }
 
@@ -221,7 +248,9 @@ public final class Main {
    *          The object to log.
    */
   public static void debugLog(Object obj) {
-    debugLog(obj.toString());
+    if (obj != null) {
+      debugLog(obj.toString());
+    }
   }
 
   /**
