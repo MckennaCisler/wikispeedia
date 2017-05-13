@@ -41,7 +41,7 @@ import spark.Spark;
 public final class Main {
   public static final int      DEFAULT_SPARK_PORT  = 4567;
   public static final int      DEFAULT_SOCKET_PORT = 4568;
-  public static final boolean  DEBUG               = false;
+  public static final boolean  DEBUG               = true;
   private static final boolean VERBOSE_LOG         = true;
 
   /**
@@ -130,7 +130,7 @@ public final class Main {
 
         // Setup websocket lobby server (which will use Spark)
         Server server = new Server((serv, str) -> {
-          return new WikiLobby(serv, str, wikiDbConn);
+          return new WikiLobby(serv, str);
         }, new WikiInterpreter(), GSON);
         Spark.webSocket("/websocket", server);
         System.out.println("[ Started Websocket ]");

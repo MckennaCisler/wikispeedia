@@ -23,7 +23,6 @@ import com.google.gson.JsonSerializationContext;
 import com.google.gson.JsonSerializer;
 
 import edu.brown.cs.jmrs.collect.Functional;
-import edu.brown.cs.jmrs.io.db.DbConn;
 import edu.brown.cs.jmrs.server.InputError;
 import edu.brown.cs.jmrs.server.Server;
 import edu.brown.cs.jmrs.server.customizable.Lobby;
@@ -48,13 +47,24 @@ import edu.brown.cs.jmrs.wikispeedia.comms.WikiInterpreter;
  *
  */
 public class WikiLobby implements Lobby {
+  /**
+   * A class representing a message to a user.
+   *
+   * @author mcisler
+   */
   private class Message {
 
     private Instant timestamp;
     private String  content;
     private String  senderId;
 
-    public Message(String content, String senderId) {
+    /**
+     * @param content
+     *          The message content
+     * @param senderId
+     *          The id of the sender
+     */
+    Message(String content, String senderId) {
       this.content = content;
       this.senderId = senderId;
       timestamp = Instant.now();
@@ -117,7 +127,10 @@ public class WikiLobby implements Lobby {
       new ContentFormatterChain<WikiPage>(
           ImmutableList.of(new WikiBodyFormatter(), new WikiFooterRemover(),
               new WikiAnnotationRemover()));
-  public static final LinkFinder<WikiPage>       DEFAULT_LINK_FINDER;
+  // NOTE: this should be configured to provide MORE or AT LEAST as many links
+  // as the game generation link finder, so that players can definitely go down
+  // a path
+  public static final LinkFinder<WikiPage> DEFAULT_LINK_FINDER;
 
   static final boolean USE_CACHING_WIKI_LINK_FINDER = false;
   static final double  CACHING_THREAD_CPU_USAGE     = 0.75;
@@ -127,16 +140,14 @@ public class WikiLobby implements Lobby {
         DEFAULT_LINK_FINDER =
             new CachingWikiLinkFinder(Main.getWikiDbConn(),
                 CACHING_THREAD_CPU_USAGE, DEFAULT_CONTENT_FORMATTER,
-                Filter.DISAMBIGUATION, Filter.NON_ENGLISH_WIKIPEDIA,
-                Filter.NO_DATES);
+                Filter.DISAMBIGUATION, Filter.NON_ENGLISH_WIKIPEDIA);
       } catch (SQLException e) {
         throw new AssertionError("Could not initialize wikipedia database", e);
       }
     } else {
       DEFAULT_LINK_FINDER =
           new WikiPageLinkFinder(DEFAULT_CONTENT_FORMATTER,
-              Filter.DISAMBIGUATION, Filter.NON_ENGLISH_WIKIPEDIA,
-              Filter.NO_DATES);
+              Filter.DISAMBIGUATION, Filter.NON_ENGLISH_WIKIPEDIA);
     }
   }
   /**
@@ -171,10 +182,8 @@ public class WikiLobby implements Lobby {
    *          The server it was called from.
    * @param id
    *          The id of this lobby. Cut off at a certain number of characters.
-   * @param wikiDbConn
-   *          The database connection to the wikipedia database.
    */
-  public WikiLobby(Server server, String id, DbConn wikiDbConn) {
+  public WikiLobby(Server server, String id) {
     this.server = server;
     assert id.length() > 0;
     this.id =

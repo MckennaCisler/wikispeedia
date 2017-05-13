@@ -139,7 +139,7 @@ public class Page implements Node<Page, Link> {
    * @throws IOException
    *           If the page could not be reached.
    */
-  protected synchronized Document parsedContentOriginal() throws IOException {
+  protected Document parsedContentOriginal() throws IOException {
     if (docCache != null) {
       // parsed should not be set if docCache is set
       assert parsed == null;

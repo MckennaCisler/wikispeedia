@@ -34,7 +34,7 @@ import edu.brown.cs.jmrs.web.wikipedia.WikiPage;
  *
  * @author mcisler
  */
-public class WikiGameOracle {
+public class WikiGameOracleTest {
   private static final boolean ENABLED = false;
 
   private static final int NUM_TIME_TRIAL_LOBBIES_TO_TEST = 2;
@@ -340,7 +340,7 @@ public class WikiGameOracle {
   private WikiLobby getLobby(WikiGameMode.Mode mode, int numPlayers,
       WikiGame game) {
     // not necessary
-    WikiLobby lobby = new WikiLobby(new FakeServer(), "testing-lobby", null);
+    WikiLobby lobby = new WikiLobby(new FakeServer(), "testing-lobby");
 
     try {
       // difficulty doesn't matter

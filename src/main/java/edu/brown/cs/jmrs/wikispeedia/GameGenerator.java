@@ -12,6 +12,8 @@ import com.google.common.primitives.Doubles;
 import edu.brown.cs.jmrs.ui.Main;
 import edu.brown.cs.jmrs.web.LinkFinder;
 import edu.brown.cs.jmrs.web.wikipedia.WikiPage;
+import edu.brown.cs.jmrs.web.wikipedia.WikiPageLinkFinder;
+import edu.brown.cs.jmrs.web.wikipedia.WikiPageLinkFinder.Filter;
 
 /**
  * A class to generate the start and end pages of a Wikipedia game given a
@@ -21,8 +23,11 @@ import edu.brown.cs.jmrs.web.wikipedia.WikiPage;
  *
  */
 public final class GameGenerator {
+  // ignore MORE pages than the game one
   private static final LinkFinder<WikiPage> WIKI_LINK_FINDER =
-      WikiLobby.DEFAULT_LINK_FINDER;
+      new WikiPageLinkFinder(WikiLobby.DEFAULT_CONTENT_FORMATTER,
+          Filter.DISAMBIGUATION, Filter.NON_ENGLISH_WIKIPEDIA, Filter.DATES,
+          Filter.INTEGERS);
 
   private static final WikiPage START_PAGE = WikiPage.fromName("Main_Page");
 

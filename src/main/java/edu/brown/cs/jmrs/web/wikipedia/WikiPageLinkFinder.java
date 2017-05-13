@@ -34,7 +34,8 @@ public class WikiPageLinkFinder implements LinkFinder<WikiPage> {
   public enum Filter {
     DISAMBIGUATION((url) -> url.contains("(disambiguation)")), //
     NON_ENGLISH_WIKIPEDIA((url) -> !url.contains("en.wikipedia.org")), //
-    NO_DATES(WikiPageLinkFinder::isDate);
+    DATES(WikiPageLinkFinder::isDate), //
+    INTEGERS(WikiPageLinkFinder::isInt);
 
     // a method to IGNORE links by (if it's true, the link is filtered out)
     private Predicate<String> method;
@@ -67,6 +68,15 @@ public class WikiPageLinkFinder implements LinkFinder<WikiPage> {
       }
     }
     return false;
+  }
+
+  static boolean isInt(String url) {
+    try {
+      Integer.parseInt(url);
+      return true;
+    } catch (NumberFormatException e) {
+      return false;
+    }
   }
 
   /**

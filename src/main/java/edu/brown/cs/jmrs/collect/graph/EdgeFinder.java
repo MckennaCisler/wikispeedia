@@ -64,10 +64,10 @@ public interface EdgeFinder<N extends Node<N, E>, E extends Edge<N, E>> {
     for (E edge : edges) {
       // only add this node to the neighbors list if it's a loop, i.e. if both
       // first and second are this node.
-      boolean firstNodeThis = edge.getFirst().equals(this);
-      boolean secondNodeThis = edge.getSecond().equals(this);
+      boolean firstNodeThis = edge.getFirst().equals(node);
+      boolean secondNodeThis = edge.getSecond().equals(node);
       if (firstNodeThis && secondNodeThis) {
-        neighbors.add((N) this);
+        neighbors.add(node);
       } else if (!secondNodeThis) {
         neighbors.add(edge.getSecond());
       } else if (!firstNodeThis) {

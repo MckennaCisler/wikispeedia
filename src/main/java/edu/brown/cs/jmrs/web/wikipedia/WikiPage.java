@@ -180,8 +180,10 @@ public class WikiPage extends Page {
   private String getBlurbFrom(Element doc) {
     String para = "";
     Elements paragraphs = doc.select("#mw-content-text > p");
-    // weird edge case
-    paragraphs.addAll(doc.select("#mw-parser-output > p"));
+    if (paragraphs.size() == 0) {
+      // weird edge case
+      paragraphs = doc.select(".mw-parser-output > p");
+    }
 
     if (paragraphs.size() > 0) {
       int i = 0;

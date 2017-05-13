@@ -318,7 +318,7 @@ public class WikiPlayer {
       }
       throw new NoSuchElementException(String.format(
           "Page %s neither in player's history nor available ahead",
-          page.getName(), name));
+          page.getName()));
     }
 
     WikiPage prevPage;
