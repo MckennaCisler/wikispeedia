@@ -25,6 +25,7 @@ $(document).ready(function () {
 		}
 	});
 	$("#open_games").html("<b>Loading...</b>");
+  $("#open_games").addClass("none-found");
 
 	$("#open_games").on('click', (event) => {
 		isMaking = false;

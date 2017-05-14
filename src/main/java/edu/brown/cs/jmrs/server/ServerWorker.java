@@ -151,7 +151,7 @@ class ServerWorker {
       synchronized (client) {
         if (client.getLobby() == null) {
           notInLobbies.remove(client.getId());
-          // clients.remove(conn); for safety
+          clients.remove(conn);
         }
 
         assert client.isConnected();
@@ -307,7 +307,7 @@ class ServerWorker {
         clients.put(conn, client);
       }
     } else {
-      throw new ServerError("Don't steal identities.");
+      throw new ServerError("You are already connected.");
     }
     return client.getId();
   }
