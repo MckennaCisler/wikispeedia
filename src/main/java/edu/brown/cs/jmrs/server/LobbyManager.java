@@ -4,13 +4,13 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.function.BiFunction;
 
 import com.google.gson.JsonObject;
 
 import edu.brown.cs.jmrs.server.customizable.Lobby;
+import edu.brown.cs.jmrs.server.errorhandling.ServerError;
+import edu.brown.cs.jmrs.server.threading.ClosableReadWriteLock;
 
 /**
  * Manager for lobbies of a server. Deals with instantiating, keeping track of,
@@ -21,9 +21,7 @@ import edu.brown.cs.jmrs.server.customizable.Lobby;
  */
 public class LobbyManager {
 
-  private final ReentrantReadWriteLock                rwl = new ReentrantReadWriteLock();
-  private final Lock                                  r   = rwl.readLock();
-  private final Lock                                  w   = rwl.writeLock();
+  private final ClosableReadWriteLock                 lock = new ClosableReadWriteLock();
 
   private ConcurrentHashMap<String, Lobby>            lobbies;
   private BiFunction<Server, String, ? extends Lobby> lobbyFactory;
@@ -49,37 +47,36 @@ public class LobbyManager {
    * @param server
    *          The server instance to pass to the lobby
    * @return A new lobby with the given id, or null if said id is taken
-   * @throws InputError
+   * @throws ServerError
    *           If the given id is already in use by another lobby
    */
   public Lobby create(
       String lobbyId,
       Server server,
       Client client,
-      JsonObject args) throws InputError {
-    r.lock();
-    if (lobbies.containsKey(lobbyId)) {
-      Lobby lobby = lobbies.get(lobbyId);
-      if (lobby.isClosed()) {
-        r.unlock();
-        w.lock();
-        lobbies.remove(lobbyId);
-        w.unlock();
-        r.lock();
-      } else {
-        return null;
+      JsonObject args) throws ServerError {
+    Lobby lobby = null;
+    try (ClosableReadWriteLock temp = lock.lockRead()) {
+      if (lobbies.containsKey(lobbyId)) {
+        lobby = lobbies.get(lobbyId);
+        if (lobby.isClosed()) {
+          try (ClosableReadWriteLock temp2 = lock.lockWrite()) {
+            lobbies.remove(lobbyId);
+          }
+        } else {
+          return null;
+        }
+      }
+      lobby = lobbyFactory.apply(server, lobbyId);
+      try (ClosableReadWriteLock temp2 = lock.lockWrite()) {
+        if (args != null) {
+          lobby.init(args);
+        }
+        lobby.addClient(client.getId());
+        client.setLobby(lobby);
+        lobbies.put(lobbyId, lobby);
       }
     }
-    r.unlock();
-    Lobby lobby = lobbyFactory.apply(server, lobbyId);
-    w.lock();
-    if (args != null) {
-      lobby.init(args);
-    }
-    lobby.addClient(client.getId());
-    client.setLobby(lobby);
-    lobbies.put(lobbyId, lobby);
-    w.unlock();
     return lobby;
   }
 
@@ -92,14 +89,15 @@ public class LobbyManager {
    * @return The lobby associated with the given id
    */
   public Lobby get(String lobbyId) {
-    r.lock();
-    Lobby lobby = lobbies.get(lobbyId);
-    r.unlock();
-    if (lobby != null && lobby.isClosed()) {
-      w.lock();
-      lobbies.remove(lobbyId);
-      w.unlock();
-      lobby = null;
+    Lobby lobby = null;
+    try (ClosableReadWriteLock temp = lock.lockRead()) {
+      lobby = lobbies.get(lobbyId);
+      if (lobby != null && lobby.isClosed()) {
+        try (ClosableReadWriteLock temp2 = lock.lockWrite()) {
+          lobbies.remove(lobbyId);
+        }
+        lobby = null;
+      }
     }
     return lobby;
   }
@@ -112,20 +110,21 @@ public class LobbyManager {
   public List<String> getOpenLobbies() {
     List<String> lobbyIds = new ArrayList<>();
     List<String> removeIds = new ArrayList<>();
-    r.lock();
-    for (Entry<String, Lobby> lobby : lobbies.entrySet()) {
-      if (lobby.getValue().isClosed()) {
-        removeIds.add(lobby.getKey());
-      } else {
-        lobbyIds.add(lobby.getKey());
+
+    try (ClosableReadWriteLock temp = lock.lockRead()) {
+      for (Entry<String, Lobby> lobby : lobbies.entrySet()) {
+        if (lobby.getValue().isClosed()) {
+          removeIds.add(lobby.getKey());
+        } else {
+          lobbyIds.add(lobby.getKey());
+        }
+      }
+      try (ClosableReadWriteLock temp2 = lock.lockWrite()) {
+        for (String id : removeIds) {
+          lobbies.remove(id);
+        }
       }
     }
-    r.unlock();
-    w.lock();
-    for (String id : removeIds) {
-      lobbies.remove(id);
-    }
-    w.unlock();
 
     return lobbyIds;
   }
@@ -137,11 +136,8 @@ public class LobbyManager {
    *          The id of the lobby to remove
    */
   public void remove(String lobbyId) {
-    try {
-      w.lock();
+    try (ClosableReadWriteLock temp = lock.lockWrite()) {
       lobbies.remove(lobbyId);
-    } finally {
-      w.unlock();
     }
   }
 }

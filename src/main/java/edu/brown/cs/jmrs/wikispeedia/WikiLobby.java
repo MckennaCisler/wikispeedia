@@ -23,9 +23,9 @@ import com.google.gson.JsonSerializationContext;
 import com.google.gson.JsonSerializer;
 
 import edu.brown.cs.jmrs.collect.Functional;
-import edu.brown.cs.jmrs.server.InputError;
 import edu.brown.cs.jmrs.server.Server;
 import edu.brown.cs.jmrs.server.customizable.Lobby;
+import edu.brown.cs.jmrs.server.errorhandling.ServerError;
 import edu.brown.cs.jmrs.ui.Main;
 import edu.brown.cs.jmrs.web.ContentFormatter;
 import edu.brown.cs.jmrs.web.ContentFormatterChain;
@@ -389,11 +389,11 @@ public class WikiLobby implements Lobby {
    * Called on lobby creation; structures this lobby to follow a certain game
    * mode.
    *
-   * @throws InputError
+   * @throws ServerError
    *           If a bad page is specified for start/end.
    */
   @Override
-  public void init(JsonObject arguments) throws InputError {
+  public void init(JsonObject arguments) throws ServerError {
     Main.debugLog("Generating game...");
 
     int mode = arguments.get("gameMode").getAsInt();
@@ -419,7 +419,7 @@ public class WikiLobby implements Lobby {
               Main.WIKI_PAGE_DOC_CACHE);
 
       if (!startPage.accessible()) {
-        throw new InputError(String.format(
+        throw new ServerError(String.format(
             "Page %s is not a valid Wikipedia page!", startPage.getName()));
       }
     } else {
@@ -434,7 +434,7 @@ public class WikiLobby implements Lobby {
               Main.WIKI_PAGE_DOC_CACHE);
 
       if (!endPage.accessible()) {
-        throw new InputError(String.format(
+        throw new ServerError(String.format(
             "Page %s is not a valid Wikipedia page!", endPage.getName()));
       }
     } else {

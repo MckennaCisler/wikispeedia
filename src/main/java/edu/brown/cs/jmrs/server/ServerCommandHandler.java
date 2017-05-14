@@ -7,6 +7,8 @@ import com.google.gson.JsonObject;
 
 import edu.brown.cs.jmrs.server.customizable.CommandInterpreter;
 import edu.brown.cs.jmrs.server.customizable.Lobby;
+import edu.brown.cs.jmrs.server.errorhandling.ServerError;
+import edu.brown.cs.jmrs.server.errorhandling.StaticErrorHandler;
 
 /**
  * Command handler for the built-in commands the server architecture requires.
@@ -23,7 +25,11 @@ class ServerCommandHandler implements Runnable {
    *
    */
   private enum Commands {
-    SET_CLIENT_ID, START_LOBBY, LEAVE_LOBBY, JOIN_LOBBY, GET_LOBBIES,
+    SET_CLIENT_ID,
+    START_LOBBY,
+    LEAVE_LOBBY,
+    JOIN_LOBBY,
+    GET_LOBBIES,
     // Value to signify not in enum (when using switch statement)
     NULL;
 
@@ -45,7 +51,7 @@ class ServerCommandHandler implements Runnable {
   private final String             unformattedCommand;
   private final CommandInterpreter interpreter;
 
-  private final Gson gson;
+  private final Gson               gson;
 
   /**
    * Constructor, stores all necessary objects for analyzing and acting on
@@ -63,8 +69,12 @@ class ServerCommandHandler implements Runnable {
    * @param gson
    *          The Gson instance used for JSONification of lobbies
    */
-  ServerCommandHandler(ServerWorker server, Session conn, String command,
-      CommandInterpreter interpreter, Gson gson) {
+  ServerCommandHandler(
+      ServerWorker server,
+      Session conn,
+      String command,
+      CommandInterpreter interpreter,
+      Gson gson) {
     this.server = server;
     this.conn = conn;
     this.unformattedCommand = command;
@@ -83,130 +93,130 @@ class ServerCommandHandler implements Runnable {
     return commandMap.has("command") && commandMap.has("payload");
   }
 
+  private void joinLobby(
+      JsonObject jsonObject,
+      JsonObject commandPayload,
+      Client client) throws ServerError {
+    jsonObject.addProperty("command", "join_lobby_response");
+    StaticErrorHandler
+        ._assert(commandPayload.has("lobby_id"), "No lobby ID provided.");
+
+    String lobbyId2 = commandPayload.get("lobby_id").getAsString();
+    Lobby lobby2 = server.getLobby(lobbyId2);
+    StaticErrorHandler
+        ._assert(lobby2 != null, "No lobby with specified ID exists.");
+
+    synchronized (lobby2) {
+      Lobby playerLobby = client.getLobby();
+      if (playerLobby != null) {
+        playerLobby.removeClient(client.getId());
+      }
+      lobby2.addClient(client.getId());
+      client.setLobby(lobby2);
+      server.lobbylessMap().remove(client.getId());
+      server.updateLobbylessClients();
+    }
+    jsonObject.addProperty("error_message", "");
+    server.sendToClient(conn, gson.toJson(jsonObject));
+  }
+
+  private void leaveLobby(JsonObject jsonObject, Client client)
+      throws ServerError {
+    jsonObject.addProperty("command", "leave_lobby_response");
+    StaticErrorHandler._assert(
+        client.getLobby() != null,
+        "This client is not registered with any lobby.");
+
+    synchronized (client.getLobby()) {
+      client.getLobby().removeClient(client.getId());
+      client.setLobby(null);
+      server.lobbylessMap().put(client.getId(), client);
+      server.updateLobbylessClients();
+    }
+    jsonObject.addProperty("error_message", "");
+    server.sendToClient(conn, gson.toJson(jsonObject));
+  }
+
+  private void passToLobby(JsonObject commandMap, Client client)
+      throws ServerError {
+    StaticErrorHandler
+        ._assert(client.getLobby() != null, "Player must join a lobby first.");
+
+    // if not a server command pass it to the lobby
+    interpreter.interpret(client.getLobby(), client.getId(), commandMap);
+  }
+
   @Override
   public void run() {
     try {
       Gson g = new Gson();
       JsonObject commandMap = g.fromJson(unformattedCommand, JsonObject.class);
-      assert commandMapStructure(commandMap);
+
+      StaticErrorHandler._assert(
+          commandMapStructure(commandMap),
+          "Commands must be JSON with 'command' and 'payload' fields.");
+      StaticErrorHandler._assert(
+          server.getClient(conn) != null,
+          "No client object is registered for this Websocket connection.");
+
       String commandString = commandMap.get("command").getAsString();
       JsonObject commandPayload = commandMap.get("payload").getAsJsonObject();
 
       // objects for return message
       JsonObject jsonObject = new JsonObject();
-      String toClient;
 
-      if (commandMap.has("command")) {
-        assert server.getClient(conn) != null;
+      StaticErrorHandler._assert(
+          server.getClient(conn).getId().length() > 0,
+          "Client has no registered ID.");
 
-        if (server.getClient(conn).getId().length() > 0) {
-          Client player = server.getClient(conn);
-          synchronized (player) {
-            // do server commands here
-            try {
-              switch (Commands.safeValueOf(commandString.toUpperCase())) {
-                case START_LOBBY:
-                  jsonObject.addProperty("command", "start_lobby_response");
-                  if (!commandPayload.has("lobby_id")) {
-                    throw new InputError("No lobby ID provided");
-                  }
-                  String lobbyId = commandPayload.get("lobby_id").getAsString();
-                  JsonObject args = null;
-                  if (commandPayload.has("arguments")) {
-                    args = commandPayload.get("arguments").getAsJsonObject();
-                  }
-                  server.createLobby(lobbyId, player, args);
-                  jsonObject.addProperty("error_message", "");
-                  toClient = gson.toJson(jsonObject);
-                  server.sendToClient(conn, toClient);
-                  return;
+      Client client = server.getClient(conn);
+      synchronized (client) {
+        // do server commands here
+        try {
+          switch (Commands.safeValueOf(commandString.toUpperCase())) {
+            case START_LOBBY:
+              startLobby(jsonObject, commandPayload, client);
+              return;
 
-                case LEAVE_LOBBY:
-                  jsonObject.addProperty("command", "leave_lobby_response");
-                  if (player.getLobby() == null) {
-                    throw new InputError(
-                        "This client is not registered with any lobby");
-                  }
-                  synchronized (player.getLobby()) {
-                    player.getLobby().removeClient(player.getId());
-                    player.setLobby(null);
-                    server.lobbylessMap().put(player.getId(), player);
-                    server.updateLobbylessClients();
-                  }
-                  jsonObject.addProperty("error_message", "");
-                  toClient = gson.toJson(jsonObject);
-                  server.sendToClient(conn, toClient);
-                  return;
+            case LEAVE_LOBBY:
+              leaveLobby(jsonObject, client);
+              return;
 
-                case JOIN_LOBBY:
-                  jsonObject.addProperty("command", "join_lobby_response");
-                  if (!commandPayload.has("lobby_id")) {
-                    throw new InputError("No lobby ID provided");
-                  }
-                  String lobbyId2 =
-                      commandPayload.get("lobby_id").getAsString();
-                  Lobby lobby2 = server.getLobby(lobbyId2);
-                  if (lobby2 == null) {
-                    throw new InputError("No lobby with specified ID exists");
-                  }
-                  synchronized (lobby2) {
-                    Lobby playerLobby = player.getLobby();
-                    if (playerLobby != null) {
-                      playerLobby.removeClient(player.getId());
-                    }
-                    lobby2.addClient(player.getId());
-                    player.setLobby(lobby2);
-                    server.lobbylessMap().remove(player.getId());
-                    server.updateLobbylessClients();
-                  }
-                  jsonObject.addProperty("error_message", "");
-                  toClient = gson.toJson(jsonObject);
-                  server.sendToClient(conn, toClient);
-                  return;
-                default: // equivalent to NULL, i.e. that the command type was
-                         // not in the Commands enum
-
-                  if (player.getLobby() != null) {
-                    // if not a server command pass it to the lobby
-                    interpreter.interpret(player.getLobby(), player.getId(),
-                        commandMap);
-                  } else {
-                    jsonObject.addProperty("error_message",
-                        "Player must join a lobby first");
-                    toClient = gson.toJson(jsonObject);
-                    server.sendToClient(conn, toClient);
-                  }
-                  return;
-              }
-            } catch (InputError e) {
-              jsonObject.addProperty("error_message", e.getMessage());
-              toClient = gson.toJson(jsonObject);
-              server.sendToClient(conn, toClient);
-            }
+            case JOIN_LOBBY:
+              joinLobby(jsonObject, commandPayload, client);
+              return;
+            default: // equivalent to NULL, i.e. that the command type was
+                     // not in the Commands enum
+              passToLobby(commandMap, client);
+              return;
           }
-        } else {
-          jsonObject.addProperty("error_message",
-              "Cannot continue without unique ID");
-          toClient = gson.toJson(jsonObject);
-          server.sendToClient(conn, toClient);
+        } catch (ServerError e) {
+          jsonObject.addProperty("error_message", e.getMessage());
+          server.sendToClient(conn, gson.toJson(jsonObject));
         }
-      } else {
-        jsonObject.addProperty("command", "command_error");
-        jsonObject.addProperty("error_message",
-            "Client-to-Server commands must be JSON with 'command' field");
-        toClient = gson.toJson(jsonObject);
-        server.sendToClient(conn, toClient);
       }
     } catch (Throwable e) {
-      // solely for debugging purposes, as threads do not display exceptions
-      // except when calling the value of an associated future:
-      // http://stackoverflow.com/questions/2248131/
-      // handling-exceptions-from-java-executorservice-tasks
-      e.printStackTrace();
       JsonObject jsonObject = new JsonObject();
       jsonObject.addProperty("error_message", e.getMessage());
-      String toClient = gson.toJson(jsonObject);
-      server.sendToClient(conn, toClient);
+      server.sendToClient(conn, gson.toJson(jsonObject));
     }
+  }
+
+  private void startLobby(
+      JsonObject jsonObject,
+      JsonObject commandPayload,
+      Client client) throws ServerError {
+    jsonObject.addProperty("command", "start_lobby_response");
+    StaticErrorHandler
+        ._assert(commandPayload.has("lobby_id"), "No lobby ID provided");
+
+    String lobbyId = commandPayload.get("lobby_id").getAsString();
+    JsonObject args = null;
+    if (commandPayload.has("arguments")) {
+      args = commandPayload.get("arguments").getAsJsonObject();
+    }
+    server.createLobby(lobbyId, client, args);
+    jsonObject.addProperty("error_message", "");
+    server.sendToClient(conn, gson.toJson(jsonObject));
   }
 }

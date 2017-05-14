@@ -1,4 +1,4 @@
-package edu.brown.cs.jmrs.server;
+package edu.brown.cs.jmrs.server.errorhandling;
 
 /**
  * An error allowing specification of the error message to be sent to the
@@ -7,7 +7,7 @@ package edu.brown.cs.jmrs.server;
  * @author shastin1
  *
  */
-public class InputError extends Exception {
+public class ServerError extends Exception {
 
   private String message;
 
@@ -17,7 +17,7 @@ public class InputError extends Exception {
    * @param message
    *          The message for the client
    */
-  public InputError(String message) {
+  public ServerError(String message) {
     this.message = message;
   }
 

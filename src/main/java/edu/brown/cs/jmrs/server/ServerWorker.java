@@ -16,6 +16,7 @@ import com.google.gson.JsonObject;
 
 import edu.brown.cs.jmrs.collect.ConcurrentBiMap;
 import edu.brown.cs.jmrs.server.customizable.Lobby;
+import edu.brown.cs.jmrs.server.errorhandling.ServerError;
 import edu.brown.cs.jmrs.server.threading.MessageQueue;
 import edu.brown.cs.jmrs.ui.Main;
 
@@ -27,8 +28,6 @@ import edu.brown.cs.jmrs.ui.Main;
  *
  */
 class ServerWorker {
-  private static final long CLIENT_IDLE_TIMEOUT = 1000 * 60 * 60;
-
   private Server                           server;
   private LobbyManager                     lobbies;
   private ConcurrentBiMap<Session, Client> clients;
@@ -49,8 +48,10 @@ class ServerWorker {
    * @param gson
    *          Gson instance for JSONification of lobbies
    */
-  ServerWorker(Server server,
-      BiFunction<Server, String, ? extends Lobby> lobbyFactory, Gson gson) {
+  ServerWorker(
+      Server server,
+      BiFunction<Server, String, ? extends Lobby> lobbyFactory,
+      Gson gson) {
     this.server = server;
     lobbies = new LobbyManager(lobbyFactory);
     clients = new ConcurrentBiMap<>();
@@ -84,7 +85,7 @@ class ServerWorker {
    * Iterates through disconnected clients and deletes those not in active
    * lobbies.
    */
-  @Deprecated
+  // @Deprecated
   public void checkDisconnectedClients() {
     synchronized (disconnectedClients) {
       for (Client client : disconnectedClients.toArray(new Client[] {})) {
@@ -109,19 +110,7 @@ class ServerWorker {
    *          The client connection that just connected
    */
   public void clientConnected(Session conn) {
-    conn.setIdleTimeout(CLIENT_IDLE_TIMEOUT); // Allows client to be AFK for an
-                                              // hour before the websocket
-                                              // automatically closes. Default
-                                              // is 5 minutes.
-
-    // checkDisconnectedClients(); TODO: Removed for safety
-
-    conn.setIdleTimeout(CLIENT_IDLE_TIMEOUT); // Allows client to be AFK for an
-                                              // hour before the websocket
-                                              // automatically closes. Default
-                                              // is 5 minutes.
-
-    // checkDisconnectedClients();
+    checkDisconnectedClients();
 
     String clientId = "";
     List<HttpCookie> cookies = conn.getUpgradeRequest().getCookies();
@@ -175,7 +164,7 @@ class ServerWorker {
         }
       }
     } else {
-      Main.debugLog("Connection had no associated client");
+      Main.debugLog("Connection had no associated client.");
     }
     Main.debugLog("Known clients (player disconnected): " + clients.values());
   }
@@ -196,14 +185,14 @@ class ServerWorker {
    * @param lobbyId
    *          The id to create a lobby associated with
    * @return The lobby created
-   * @throws InputError
+   * @throws ServerError
    *           If the given id is already in use by another lobby
    */
   public Lobby createLobby(String lobbyId, Client client, JsonObject args)
-      throws InputError {
+      throws ServerError {
     Lobby lobby = lobbies.create(lobbyId, server, client, args);
     if (lobby == null) {
-      throw new InputError("Lobby ID in use");
+      throw new ServerError("Lobby ID in use");
     } else {
       lobbylessMap().remove(client.getId());
       updateLobbylessClients();
@@ -298,10 +287,10 @@ class ServerWorker {
    *          The id to attach to the given client connection
    * @return The id that, in the end, is truly associated with the given client
    *         connection
-   * @throws InputError
+   * @throws ServerError
    *           If a client claims to have an id that is already in use
    */
-  private String setClientId(Session conn, String clientId) throws InputError {
+  private String setClientId(Session conn, String clientId) throws ServerError {
     Client client = clients.getBack(new Client(clientId));
 
     if (client == null) {
@@ -318,7 +307,7 @@ class ServerWorker {
         clients.put(conn, client);
       }
     } else {
-      throw new InputError("Don't steal identities");
+      throw new ServerError("Don't steal identities.");
     }
     return client.getId();
   }
@@ -339,7 +328,7 @@ class ServerWorker {
       toClient = gson.toJson(jsonObject);
       sendToClient(conn, toClient);
 
-    } catch (InputError e) {
+    } catch (ServerError e) {
       jsonObject.addProperty("client_id", "");
       jsonObject.addProperty("error_message", e.getMessage());
       toClient = gson.toJson(jsonObject);
@@ -361,6 +350,8 @@ class ServerWorker {
           newClient.getLobby().playerReconnected(newClient.getId());
         }
       }
+    } else {
+      Main.debugLog("Client failed to create.");
     }
   }
 

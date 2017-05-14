@@ -4,7 +4,7 @@ import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 
-import edu.brown.cs.jmrs.server.InputError;
+import edu.brown.cs.jmrs.server.errorhandling.ServerError;
 
 /**
  * Lobby interface for creating different types of lobbies to run on the server
@@ -28,10 +28,10 @@ public interface Lobby {
    *
    * @param jsonElement
    *          Json of the parameters to initialize the lobby with
-   * @throws InputError
+   * @throws ServerError
    *           If the lobby fails to initialize
    */
-  void init(JsonObject jsonElement) throws InputError;
+  void init(JsonObject jsonElement) throws ServerError;
 
   /**
    * Returns whether the lobby has been closed.

@@ -50,3 +50,4 @@ local.properties
 ########
 
 .DS_Store
+/bin/

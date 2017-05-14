@@ -22,7 +22,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.gson.JsonObject;
 
-import edu.brown.cs.jmrs.server.InputError;
+import edu.brown.cs.jmrs.server.errorhandling.ServerError;
 import edu.brown.cs.jmrs.ui.Main;
 import edu.brown.cs.jmrs.web.wikipedia.WikiPage;
 
@@ -347,7 +347,7 @@ public class WikiGameOracleTest {
       lobby.init(buildObj(ImmutableMap.of("gameMode", mode.ordinal(),
           "difficulty", 0, "startPage", game.getStart().getName(), "goalPage",
           game.getGoal().getName())));
-    } catch (InputError e) {
+    } catch (ServerError e) {
       throw new AssertionError("init failed");
     }
     generatePlayers(lobby, numPlayers);
