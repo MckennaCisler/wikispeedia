@@ -1,13 +1,33 @@
-# cs0320 Term Project
+# Wikispeedia
+### A beautiful Wikipedia game
+_A multiplayer web app for the Wikipedia Game complete with a multiuser lobby system, game generation and database backend_
+
+Check it out at [http://wikispeedia.herokuapp.com](http://wikispeedia.herokuapp.com)
 
 **Team Members:**
 Rohan Jha, Jacob Leiken, Sean Hastings, McKenna Cisler
 
-**Project Idea:**
+This project began as a term project for Brown University's _CSCI 0320 Introduction to Software Engineering_.
+
+## How to Build and Run
+1. Make sure some version of `wikipedia.sqlite3` is in `data/`. A blank sqlite3 database will be initialized correctly and populated by the program. (_A database is included in the repository_)
+2. Run `mvn package`
+3. Run `./run` with any of the following options:
+  - `--gui` To run the main WebSocket for the GUI
+  - `--chat-test` To run the chat-test WebSocket for testing purposes. Do not run along with `--gui`
+  - `--spark-port <port>` To set the port of the `--spark` server.
+  - `--scrape` To simply scrape Wikipedia and populate database caches
+  - `--scrape-depth <depth>` The depth at which to stop scraping. Defaults to infinity.
+  - `--scrape-start <wiki page title>` The page to start from when scraping. Defaults to "Main_Page"
+  - `--scrape-method <breadth | random_descent>` The method to use while scraping; breadth will try every page at every depth starting from start, while random descent will go depth-first, choosing a random link at each level.
+  - `--scrape-only-english` Limits links to those in the English Wikipedia
+  - `--shortest-path --start <wiki page title> --end <wiki page title>` Finds the shortest path between `start` and `end` using Dijkstra. WARNING: This will be very slow and will very aggressively scrape Wikipedia.
+4. For debugging/HTML editing with instant refresh or verbose logging, ensure `DEBUG` or `VERBOSE_LOG` in `src/main/java/edu/brown/cs/jrms/ui/Main.java` is set to the appropriate value.
+
+# Project Details
+**Original Project Idea:**
 A multiplayer, graphical implementation of the _Wikipedia game_ where the players
 click on links to navigate from a _starting page_ to an _ending page_ on Wikipedia.
-
-**Mentor TA:** Erica Oh (erica_oh@brown.edu)
 
 ## Project Requirements
 ### Pre-game:
@@ -69,12 +89,6 @@ The users can navigate to a page where new games can be joined or created.
 - A statistical analysis of a player's saved games to analyze their decision-making and word/concept associations.
 - A change in the graphical representation of a webpage based on the subject and/or length and/or distance of the page.
 
-### Still left to define:
-
-- What's the lobby system?
-- When does the game end?
-- How are winners determined?
-
 ## Project Specs and Mockup
 
 ### Basic functionality:
@@ -90,30 +104,10 @@ The users can navigate to a page where new games can be joined or created.
  - Lobby with option to join random game
  - Lobby chatting?
 
-## Project Design Presentation
+## Project Design Details
 The following files are relevant (all in the docs subfolder):
 - roles-and-deadlines.md
 - routes.md
 - flow.md
 - testing.md
 - expected-problems.md
-
-The package design is in a drawing on the team's Google drive linked here: https://docs.google.com/drawings/d/1z9rP_5euEiqxGldkpnQ0sRbn0dzi2mkps-PjZqj-7xM/edit.
-
-All of this information is put together on a presentation linked here: https://docs.google.com/presentation/d/1TLTGCigOeg-Qjv6DaxHQvf6MLPCUOMU5wO36yg87u4s/edit#slide=id.g21f33bc2a0_0_32.
-
-## How to Build and Run
-1. Make sure some version of wikipedia.sqlite3 is in data/. A blank sqlite3 database will be initialized correctly and populated by the program.
-2. Run `mvn package`
-3. Run `./run` with any of the following options:
-  - `--gui` To run the main WebSocket for the GUI
-  - `--chat-test` To run the chat-test WebSocket for testing purposes. DO NOT run along with `--gui`
-  - `--spark` To run a Spark server with basic Wikipedia handlers (`/wiki/<page_name>` and `/wiki/links/<page_name>`) for testing
-  - `--spark-port <port>` To set the port of the `--spark` server.
-  - `--socket-port <port>` To set the port of either the `--gui` socket or the `--chat-test` socket.
-  - `--scrape` To simply scrape Wikipedia and populate database caches
-  - `--scrape-depth <depth>` The depth at which to stop scraping. Defaults to infinity.
-  - `--scrape-start <wiki page title>` The page to start from when scraping. Defaults to "Main_Page"
-  - `--scrape-method <breadth | random_descent>` The method to use while scraping; breadth will try every page at every depth starting from start, while random descent will go depth-first, choosing a random link at each level.
-  - `--scrape-only-english` Limits links to those in the English Wikipedia
-  - `--shortest-path --start <wiki page title> --end <wiki page title>` Finds the shortest path between `start` and `end` using Dijkstra. WARNING: This will be very slow and will very aggressively scrape Wikipedia.
